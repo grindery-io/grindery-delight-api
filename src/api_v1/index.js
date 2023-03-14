@@ -1,8 +1,9 @@
-const express = require('express'),
-  foo = require('./foo');
+import { Router } from 'express';
+import foo from './foo.js';
 
-const api = express.Router();
+const api = Router();
+
 
 api.use('/foo', foo);
 
-module.exports = api;
+export default api;

@@ -1,9 +1,18 @@
-const express = require('express'),
-  bodyParser = require('body-parser'),
-  //sslRedirect = require("heroku-ssl-redirect"),
-  api_v1 = require('./api_v1/index');
-const expressJSDocSwagger = require('express-jsdoc-swagger');
-require('dotenv').config();
+import express from 'express';
+import pkg from 'body-parser';
+import api from './api_v1/index.js';
+import expressJSDocSwagger from 'express-jsdoc-swagger';
+import * as dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import "./loadEnvironment.js";
+import offers from "./routes/offers.js";
+
+dotenv.config()
+
+const { json, urlencoded } = pkg;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const options = {
   info: {
@@ -87,18 +96,18 @@ const bodyParserAddRawBody = (req, res, buf, encoding) => {
   req.rawBody = buf.toString();
 };
 app.use(
-  bodyParser.json({
+  json({
     verify: bodyParserAddRawBody,
   })
 );
 app.use(
-  bodyParser.urlencoded({
+  urlencoded({
     extended: false,
     verify: bodyParserAddRawBody,
   })
 );
 
-app.use('/api/v1', api_v1);
+app.use('/api/v1', api);
 
 app.get('/', (req, res) => {
   // res.redirect("/docs");
@@ -113,3 +122,5 @@ const port = process.env.PORT || 3000;
 app.listen(port, function () {
   console.log(`Delight API listening on port ${port}`);
 });
+
+app.use("/offers", offers);

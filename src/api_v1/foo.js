@@ -1,7 +1,7 @@
-const express = require('express'),
-  auth = require('../utils/auth-utils');
+import { Router } from 'express';
+import isRequired from '../utils/auth-utils.js';
 
-const foo = express.Router();
+const foo = Router();
 
 /**
  * GET /api/v1/foo
@@ -27,8 +27,8 @@ const foo = express.Router();
  *   "message": "No credentials sent"
  * }
  */
-foo.get('/', auth.isRequired, async (req, res) => {
-  return res.json({ result: 'sucess' });
+foo.get('/', isRequired, async (req, res) => {
+  return res.json({ result: 'success' });
 });
 
-module.exports = foo;
+export default foo;

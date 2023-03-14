@@ -1,5 +1,5 @@
-const axios = require('axios');
-const jwt_decode = require('jwt-decode');
+import axios from 'axios';
+import jwt_decode from 'jwt-decode';
 
 const checkToken = async (token, workspaceKey) => {
   let res;
@@ -57,6 +57,4 @@ const isRequired = async (req, res, next) => {
   next();
 };
 
-module.exports = {
-  isRequired,
-};
+export default isRequired;
