@@ -1,28 +1,29 @@
-import express from "express";
-import db from "../db/conn.js";
-import { ObjectId } from "mongodb";
+import express from 'express';
+import db from '../db/conn.js';
+import { ObjectId } from 'mongodb';
+import isRequired from '../utils/auth-utils.js';
 
 const router = express.Router();
 
 /* Getting the offers from the database. */
-router.get("/", async (req, res) => {
-  let collection = db.collection("offers");
-  let results = await collection.find({})
-    .toArray();
+router.get('/', isRequired, async (req, res) => {
+  let collection = db.collection('offers');
+  let results = await collection.find({}).toArray();
   res.send(results).status(200);
 });
 
 /* This is a get request that is looking for a specific offer. */
-router.get("/idOffer=:idOffer", async (req, res) => {
-  let collection = db.collection("offers");
-  let results = await collection.find({idOffer: req.params.idOffer})
+router.get('/idOffer=:idOffer', isRequired, async (req, res) => {
+  let collection = db.collection('offers');
+  let results = await collection
+    .find({ idOffer: req.params.idOffer })
     .toArray();
   res.send(results).status(200);
 });
 
 /* Creating a new document in the database. */
-router.post("/", async (req, res) => {
-  let collection = db.collection("offers");
+router.post('/', isRequired, async (req, res) => {
+  let collection = db.collection('offers');
   let newDocument = req.body;
   newDocument.date = new Date();
   let result = await collection.insertOne(newDocument);
@@ -30,9 +31,9 @@ router.post("/", async (req, res) => {
 });
 
 /* Deleting an entry from the database. */
-router.delete("/idOffer=:idOffer", async (req, res) => {
+router.delete('/idOffer=:idOffer', isRequired, async (req, res) => {
   const query = { idOffer: req.params.idOffer };
-  const collection = db.collection("offers");
+  const collection = db.collection('offers');
   let result = await collection.deleteOne(query);
 
   res.send(result).status(200);
