@@ -1,14 +1,11 @@
 import express from 'express';
 import pkg from 'body-parser';
-import api from './api_v1/index.js';
 import expressJSDocSwagger from 'express-jsdoc-swagger';
 import * as dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import "./loadEnvironment.js";
-import offers from "./routes/offers.js";
-
-dotenv.config()
+import './loadEnvironment.js';
+import offers from './routes/offers.js';
 
 const { json, urlencoded } = pkg;
 const __filename = fileURLToPath(import.meta.url);
@@ -107,8 +104,6 @@ app.use(
   })
 );
 
-app.use('/api/v1', api);
-
 app.get('/', (req, res) => {
   // res.redirect("/docs");
   // GCP expects 200 response for root url
@@ -123,4 +118,4 @@ app.listen(port, function () {
   console.log(`Delight API listening on port ${port}`);
 });
 
-app.use("/offers", offers);
+app.use('/offers', offers);
