@@ -13,7 +13,7 @@ router.get('/', isRequired, async (req, res) => {
 });
 
 /* This is a get request that is looking for a specific offer. */
-router.get('/:idOffer', isRequired, async (req, res) => {
+router.get('/idOffer/:idOffer', isRequired, async (req, res) => {
   let collection = db.collection('offers');
   let result = await collection.findOne({
     _id: new ObjectId(req.params.idOffer),
@@ -43,7 +43,7 @@ router.post('/', isRequired, async (req, res) => {
 });
 
 /* Deleting an entry from the database. */
-router.delete('/:idOffer', isRequired, async (req, res) => {
+router.delete('/idOffer/:idOffer', isRequired, async (req, res) => {
   const query = { _id: req.params.idOffer };
   const collection = db.collection('offers');
   const offer = await collection.findOne({ _id: new ObjectId(query._id) });
