@@ -1,6 +1,7 @@
 import express from 'express';
 import db from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
+import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
@@ -20,6 +21,13 @@ router.get('/idOffer=:idOffer', isRequired, async (req, res) => {
   res.send(results).status(200);
 });
 
+/* This is a get request that is looking user offers. */
+router.get('/user', isRequired, async (req, res) => {
+  let collection = db.collection('offers');
+  let results = await collection.find({ userId: res.locals.userId }).toArray();
+  res.send(results).status(200);
+});
+
 /* Creating a new document in the database. */
 router.post('/', isRequired, async (req, res) => {
   let collection = db.collection('offers');
@@ -32,10 +40,11 @@ router.post('/', isRequired, async (req, res) => {
 
 /* Deleting an entry from the database. */
 router.delete('/idOffer=:idOffer', isRequired, async (req, res) => {
-  const query = { idOffer: req.params.idOffer };
+  const query = { _id: req.params.idOffer };
   const collection = db.collection('offers');
-  let result = await collection.deleteOne(query);
-
+  let result = await collection.deleteOne({
+    _id: new ObjectId(query._id),
+  });
   res.send(result).status(200);
 });
 
