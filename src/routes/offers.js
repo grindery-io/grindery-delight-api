@@ -27,7 +27,7 @@ router.post('/', isRequired, async (req, res) => {
   newDocument.date = new Date();
   newDocument.userId = res.locals.userId;
   let result = await collection.insertOne(newDocument);
-  res.send(result).status(204);
+  res.send(result).status(201);
 });
 
 /* Deleting an entry from the database. */
