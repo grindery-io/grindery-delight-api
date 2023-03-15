@@ -5,7 +5,18 @@ import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
-/* Getting the offers from the database. */
+/**
+ * GET /offers
+ *
+ * @summary Get offers
+ * @description Getting the offers from the database.
+ * @tags Offers
+ * @return {object} 200 - Success response
+ * @example response - 200 - Success response example
+ * {
+ *   "result": "[]"
+ * }
+ */
 router.get('/', isRequired, async (req, res) => {
   let collection = db.collection('offers');
   let results = await collection.find({}).toArray();
