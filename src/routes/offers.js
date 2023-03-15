@@ -13,11 +13,11 @@ router.get('/', isRequired, async (req, res) => {
 });
 
 /* This is a get request that is looking for a specific offer. */
-router.get('/idOffer=:idOffer', isRequired, async (req, res) => {
+router.get('/:idOffer', isRequired, async (req, res) => {
   let collection = db.collection('offers');
-  let results = await collection
-    .find({ idOffer: req.params.idOffer })
-    .toArray();
+  let results = await collection.findOne({
+    _id: new ObjectId(req.params.idOffer),
+  });
   res.send(results).status(200);
 });
 
@@ -39,7 +39,7 @@ router.post('/', isRequired, async (req, res) => {
 });
 
 /* Deleting an entry from the database. */
-router.delete('/idOffer=:idOffer', isRequired, async (req, res) => {
+router.delete('/:idOffer', isRequired, async (req, res) => {
   const query = { _id: req.params.idOffer };
   const collection = db.collection('offers');
   let result = await collection.deleteOne({
