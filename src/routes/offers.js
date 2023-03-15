@@ -15,10 +15,14 @@ router.get('/', isRequired, async (req, res) => {
 /* This is a get request that is looking for a specific offer. */
 router.get('/:idOffer', isRequired, async (req, res) => {
   let collection = db.collection('offers');
-  let results = await collection.findOne({
+  let result = await collection.findOne({
     _id: new ObjectId(req.params.idOffer),
   });
-  res.send(results).status(200);
+  if (result?.userId === res.locals.userId) {
+    res.send(result).status(200);
+  } else {
+    res.sendStatus(404);
+  }
 });
 
 /* This is a get request that is looking user offers. */
@@ -42,10 +46,15 @@ router.post('/', isRequired, async (req, res) => {
 router.delete('/:idOffer', isRequired, async (req, res) => {
   const query = { _id: req.params.idOffer };
   const collection = db.collection('offers');
-  let result = await collection.deleteOne({
-    _id: new ObjectId(query._id),
-  });
-  res.send(result).status(200);
+  const offer = await collection.findOne({ _id: new ObjectId(query._id) });
+  if (offer?.userId !== res.locals.userId) {
+    res.sendStatus(404);
+  } else {
+    let result = await collection.deleteOne({
+      _id: new ObjectId(query._id),
+    });
+    res.send(result).status(200);
+  }
 });
 
 export default router;
