@@ -15,9 +15,9 @@ const __dirname = path.dirname(__filename);
 const options = {
   info: {
     version: '1.0.1',
-    title: 'Grindery CDS Editor API',
+    title: 'Grindery Delight API',
     description:
-      'API for Grindery CDS editor app: https://network.grindery.org',
+      'API for Grindery Delight App: https://delight.grindery.io',
     license: {
       name: 'MIT',
     },
@@ -31,7 +31,7 @@ const options = {
   },
   servers: [
     {
-      url: 'https://cds-editor.grindery.org',
+      url: 'https://delight-api.grindery.org',
       description: 'Production server',
     },
   ],
