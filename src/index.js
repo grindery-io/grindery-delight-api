@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import './loadEnvironment.js';
 import offers from './routes/offers.js';
+import staking from './routes/staking.js';
 
 const { json, urlencoded } = pkg;
 const __filename = fileURLToPath(import.meta.url);
@@ -119,3 +120,4 @@ app.listen(port, function () {
 });
 
 app.use('/offers', offers);
+app.use('/staking', staking);
