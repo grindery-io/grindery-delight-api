@@ -1,6 +1,5 @@
 import express from 'express';
 import db from '../db/conn.js';
-import { ObjectId } from 'mongodb';
 import isRequired from '../utils/auth-utils.js';
 
 const router = express.Router();
@@ -20,9 +19,6 @@ router.get('/idOffer=:idOffer', isRequired, async (req, res) => {
     .toArray();
   res.send(results).status(200);
 });
-
-
-
 
 /* Creating a new document in the database. */
 router.post('/', isRequired, async (req, res) => {
