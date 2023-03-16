@@ -5,6 +5,44 @@ import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
+/**
+ * GET /staking
+ *
+ * @summary Get stakes
+ * @description Getting stakes from the database.
+ * @tags Offers
+ * @return {object} 200 - Success response
+ * @example response - 200 - Success response example
+ * {
+ *   "result": "[]"
+ * }
+ */
+router.get('/', isRequired, async (req, res) => {
+  let collection = db.collection('staking');
+  let results = await collection.find({}).toArray();
+  res.send(results).status(200);
+});
+
+/* This is a get request that is looking for a specific stake. */
+router.get('/:stakeId', isRequired, async (req, res) => {
+  let collection = db.collection('staking');
+  let result = await collection.findOne({
+    _id: new ObjectId(req.params.stakeId),
+  });
+  if (result?.userId === res.locals.userId) {
+    res.send(result).status(200);
+  } else {
+    res.sendStatus(404);
+  }
+});
+
+/* This is a get request that is looking user stakes. */
+router.get('/user', isRequired, async (req, res) => {
+  let collection = db.collection('staking');
+  let results = await collection.find({ userId: res.locals.userId }).toArray();
+  res.send(results).status(200);
+});
+
 /* This is a post request to the staking collection. */
 router.post('/', isRequired, async (req, res) => {
   let collection = db.collection('staking');
