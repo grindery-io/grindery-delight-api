@@ -58,6 +58,51 @@ router.get('/', isRequired, async (req, res) => {
 });
 
 /**
+ * GET /offers/user
+ *
+ * @summary Get Offers by user
+ * @description This is a get request that is looking user offers
+ * @tags Offers
+ * @return {object} 200 - Success response
+ * @return {object} 401 - Authentication error response
+ * @security BearerAuth
+ * @example response - 200 - Success response example
+ * [{
+ *  "_id": "6413280d273bbc2ed3c9c98b",
+ *  "chain": 55,
+ *  "min": "1",
+ *  "max": "100",
+ *  "tokenId": "1",
+ *  "token": "GRT",
+ *  "tokenAddress": "123",
+ *  "isActive": false,
+ *  "date": "2023-03-16T14:30:37.727Z",
+ *  "userId": "eip155:1:0xCbDf3d0C2C255d4582171Fc652E8BdCF043b13fE"
+ * },
+ * {
+ *  "_id": "6413280d273bbc2ed3c9c98b",
+ *  "chain": 55,
+ *  "min": "1",
+ *  "max": "100",
+ *  "tokenId": "1",
+ *  "token": "GRT",
+ *  "tokenAddress": "123",
+ *  "isActive": false,
+ *  "date": "2023-03-16T14:30:37.727Z",
+ *  "userId": "eip155:1:0xCbDf3d0C2C255d4582171Fc652E8BdCF043b13fE"
+ * }]
+ * @example response - 401 - Authentication error response example
+ * {
+ *   "message": "Request failed with status code 400"
+ * }
+ */
+router.get('/user', isRequired, async (req, res) => {
+  let collection = db.collection('offers');
+  let results = await collection.find({ userId: res.locals.userId }).toArray();
+  res.send(results).status(200);
+});
+
+/**
  * GET /offers/:idOffers
  *
  * @summary Get Offers by id
@@ -105,51 +150,6 @@ router.get('/:idOffer', getOfferByIdValidator, isRequired, async (req, res) => {
       message: 'Not Found',
     });
   }
-});
-
-/**
- * GET /offers/user
- *
- * @summary Get Offers by user
- * @description This is a get request that is looking user offers
- * @tags Offers
- * @return {object} 200 - Success response
- * @return {object} 401 - Authentication error response
- * @security BearerAuth
- * @example response - 200 - Success response example
- * [{
- *  "_id": "6413280d273bbc2ed3c9c98b",
- *  "chain": 55,
- *  "min": "1",
- *  "max": "100",
- *  "tokenId": "1",
- *  "token": "GRT",
- *  "tokenAddress": "123",
- *  "isActive": false,
- *  "date": "2023-03-16T14:30:37.727Z",
- *  "userId": "eip155:1:0xCbDf3d0C2C255d4582171Fc652E8BdCF043b13fE"
- * },
- * {
- *  "_id": "6413280d273bbc2ed3c9c98b",
- *  "chain": 55,
- *  "min": "1",
- *  "max": "100",
- *  "tokenId": "1",
- *  "token": "GRT",
- *  "tokenAddress": "123",
- *  "isActive": false,
- *  "date": "2023-03-16T14:30:37.727Z",
- *  "userId": "eip155:1:0xCbDf3d0C2C255d4582171Fc652E8BdCF043b13fE"
- * }]
- * @example response - 401 - Authentication error response example
- * {
- *   "message": "Request failed with status code 400"
- * }
- */
-router.get('/user', isRequired, async (req, res) => {
-  let collection = db.collection('offers');
-  let results = await collection.find({ userId: res.locals.userId }).toArray();
-  res.send(results).status(200);
 });
 
 /**
