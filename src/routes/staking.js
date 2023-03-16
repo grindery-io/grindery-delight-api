@@ -23,6 +23,13 @@ router.get('/', isRequired, async (req, res) => {
   res.send(results).status(200);
 });
 
+/* This is a get request that is looking user stakes. */
+router.get('/user', isRequired, async (req, res) => {
+  let collection = db.collection('staking');
+  let results = await collection.find({ userId: res.locals.userId }).toArray();
+  res.send(results).status(200);
+});
+
 /* This is a get request that is looking for a specific stake. */
 router.get('/:stakeId', isRequired, async (req, res) => {
   let collection = db.collection('staking');
@@ -34,13 +41,6 @@ router.get('/:stakeId', isRequired, async (req, res) => {
   } else {
     res.sendStatus(404);
   }
-});
-
-/* This is a get request that is looking user stakes. */
-router.get('/user', isRequired, async (req, res) => {
-  let collection = db.collection('staking');
-  let results = await collection.find({ userId: res.locals.userId }).toArray();
-  res.send(results).status(200);
 });
 
 /* This is a post request to the staking collection. */
