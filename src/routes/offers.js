@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { query } from 'express';
 import db from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
@@ -58,13 +58,32 @@ router.delete('/idOffer/:idOffer', isRequired, async (req, res) => {
   const query = { _id: req.params.idOffer };
   const collection = db.collection('offers');
   const offer = await collection.findOne({ _id: new ObjectId(query._id) });
-  if (offer?.userId !== res.locals.userId) {
-    res.sendStatus(404);
-  } else {
+  if (offer?.userId === res.locals.userId) {
     let result = await collection.deleteOne({
       _id: new ObjectId(query._id),
     });
     res.send(result).status(200);
+  } else {
+    res.sendStatus(404);
+  }
+});
+
+/* Updating an offer document from the database */
+router.put('/idOffer/:idOffer', isRequired, async (req, res) => {
+  const filter = { _id: new ObjectId(req.params.idOffer) };
+  const collection = db.collection('offers');
+  const offer = await collection.findOne(filter);
+  if (offer?.userId === res.locals.userId) {
+    const updateDoc = {
+      $set: {
+        isActive: !offer.isActive,
+      },
+    };
+    const options = { upsert: false };
+    const result = await collection.updateOne(filter, updateDoc, options);
+    res.send(result).status(200);
+  } else {
+    res.sendStatus(404);
   }
 });
 
