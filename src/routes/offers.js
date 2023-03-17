@@ -47,7 +47,7 @@ router.get('/:idOffer', getOfferByIdValidator, isRequired, async (req, res) => {
   }
   let collection = db.collection('offers');
   let result = await collection.findOne({
-    tokenId: req.params.idOffer,
+    _id: new ObjectId(req.params.idOffer),
   });
   if (result?.userId === res.locals.userId) {
     res.send(result).status(200);
