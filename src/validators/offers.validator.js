@@ -1,4 +1,4 @@
-import { body, validationResult, query, param } from 'express-validator';
+import { body, param } from 'express-validator';
 
 export const createOfferValidator = [
   body('chain')
@@ -39,25 +39,13 @@ export const createOfferValidator = [
 ];
 
 export const getOfferByIdValidator = [
-  param('idOffer')
-    .isMongoId()
-    .withMessage('must be a valid mongodb id')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  param('idOffer').notEmpty().withMessage('must not be empty'),
 ];
 
 export const deleteOfferValidator = [
-  param('idOffer')
-    .isMongoId()
-    .withMessage('must be a valid mongodb id')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  param('idOffer').notEmpty().withMessage('must not be empty'),
 ];
 
 export const updateOfferValidator = [
-  param('idOffer')
-    .isMongoId()
-    .withMessage('must be a valid mongodb id')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  param('idOffer').notEmpty().withMessage('must not be empty'),
 ];
