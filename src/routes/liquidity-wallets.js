@@ -75,21 +75,44 @@ router.put(
   }
 );
 
+/* This is a route that is used to get the wallet. */
 router.get('/', getLiquidityWalletValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.send(validator).status(400);
   }
-  const result = (
+  const wallets = (
     await db.collection('liquidity-wallets').find(req.body).toArray()
   ).filter((e) => e.userId === res.locals.userId);
-  if (result.length !== 0) {
-    res.send(result).status(200);
+  if (wallets.length !== 0) {
+    res.send(wallets).status(200);
   } else {
     res.status(404).send({
       message: 'Not Found',
     });
   }
 });
+
+router.delete(
+  '/wallet-address/:walletAddress/chainId/:chainId',
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.send(validator).status(400);
+    }
+    const collection = db.collection('liquidity-wallets');
+    const wallet = await collection.findOne({
+      walletAddress: req.params.walletAddress,
+      chainId: req.params.chainId,
+      userId: res.locals.userId,
+    });
+    if (wallet) {
+      res.send(await collection.deleteOne(wallet)).status(200);
+    } else {
+      res.sendStatus(404);
+    }
+  }
+);
 
 export default router;
