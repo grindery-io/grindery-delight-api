@@ -3,12 +3,12 @@ import db from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
 import {
-  validateResult,
   createOfferValidator,
   getOfferByIdValidator,
   deleteOfferValidator,
   updateOfferValidator,
 } from '../validators/offers.validator.js';
+import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
 

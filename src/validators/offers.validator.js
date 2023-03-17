@@ -61,11 +61,3 @@ export const updateOfferValidator = [
     .notEmpty()
     .withMessage('must not be empty'),
 ];
-
-export const validateResult = (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return errors.array();
-  }
-  return [];
-};
