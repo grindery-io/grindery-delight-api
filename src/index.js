@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import './loadEnvironment.js';
 import offers from './routes/offers.js';
 import staking from './routes/staking.js';
+import liquidity_wallets from './routes/liquidity-wallets.js';
 
 const { json, urlencoded } = pkg;
 const __filename = fileURLToPath(import.meta.url);
@@ -16,8 +17,7 @@ const options = {
   info: {
     version: '1.0.1',
     title: 'Grindery Delight API',
-    description:
-      'API for Grindery Delight App: https://delight.grindery.io',
+    description: 'API for Grindery Delight App: https://delight.grindery.io',
     license: {
       name: 'MIT',
     },
@@ -121,3 +121,4 @@ app.listen(port, function () {
 
 app.use('/offers', offers);
 app.use('/staking', staking);
+app.use('/liquidity-wallets', liquidity_wallets);
