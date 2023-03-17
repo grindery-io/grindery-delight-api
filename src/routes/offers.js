@@ -88,7 +88,7 @@ router.put('/:idOffer', updateOfferValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.send(validator).status(400);
   }
-  const query = { tokenId: req.params.idOffer };
+  const query = { _id: new ObjectId(req.params.idOffer) };
   const collection = db.collection('offers');
   const offer = await collection.findOne(query);
   if (offer?.userId === res.locals.userId) {
