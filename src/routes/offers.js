@@ -11,7 +11,7 @@ import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
 
-/* POST */
+// POST
 
 router.post('/', createOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
@@ -26,7 +26,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   res.send(result).status(201);
 });
 
-/* GET */
+// GET
 
 router.get('/', isRequired, async (req, res) => {
   let collection = db.collection('offers');
@@ -58,7 +58,7 @@ router.get('/:idOffer', getOfferByIdValidator, isRequired, async (req, res) => {
   }
 });
 
-/* DELETE */
+// DELETE
 
 router.delete(
   '/:idOffer',
@@ -81,7 +81,7 @@ router.delete(
   }
 );
 
-/* PUT */
+// PUT
 
 router.put('/:idOffer', updateOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
