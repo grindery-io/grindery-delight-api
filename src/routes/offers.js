@@ -8,6 +8,7 @@ import {
   updateOfferValidator,
 } from '../validators/offers.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
+import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
