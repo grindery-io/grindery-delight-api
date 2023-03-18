@@ -17,7 +17,7 @@ const router = express.Router();
 router.post('/', createOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
-    return res.send(validator).status(400);
+    return res.status(400).send(validator);
   }
   let collection = db.collection('offers');
   let newDocument = req.body;
@@ -44,14 +44,14 @@ router.get('/user', isRequired, async (req, res) => {
 router.get('/:idOffer', getOfferByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
-    return res.send(validator).status(400);
+    return res.status(400).send(validator);
   }
   let collection = db.collection('offers');
   let result = await collection.findOne({
     _id: new ObjectId(req.params.idOffer),
   });
   if (result?.userId === res.locals.userId) {
-    res.send(result).status(200);
+    res.status(200).send(result);
   } else {
     res.status(404).send({
       message: 'Not Found',
@@ -68,14 +68,14 @@ router.delete(
   async (req, res) => {
     const validator = validateResult(req, res);
     if (validator.length) {
-      return res.send(validator).status(400);
+      return res.status(400).send(validator);
     }
     const query = { tokenId: req.params.idOffer };
     const collection = db.collection('offers');
     const offer = await collection.findOne(query);
     if (offer?.userId === res.locals.userId) {
       let result = await collection.deleteOne(query);
-      res.send(result).status(200);
+      res.status(200).send(result);
     } else {
       res.sendStatus(404);
     }
@@ -87,7 +87,7 @@ router.delete(
 router.put('/:idOffer', updateOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
-    return res.send(validator).status(400);
+    return res.status(400).send(validator);
   }
   const query = { _id: new ObjectId(req.params.idOffer) };
   const collection = db.collection('offers');
@@ -100,7 +100,7 @@ router.put('/:idOffer', updateOfferValidator, isRequired, async (req, res) => {
     };
     const options = { upsert: false };
     const result = await collection.updateOne(query, updateDoc, options);
-    res.send(result).status(200);
+    res.status(200).send(result);
   } else {
     res.sendStatus(404);
   }

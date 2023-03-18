@@ -21,12 +21,12 @@ router.post(
     let newDocument = req.body;
     newDocument.userId = res.locals.userId;
     if (validator.length || (await collection.findOne(newDocument))) {
-      return res.send(validator).status(400);
+      return res.status(400).send(validator);
     }
     newDocument.date = new Date();
     newDocument.tokens = [];
     let result = await collection.insertOne(newDocument);
-    res.send(result).status(201);
+    res.status(201).send(result);
   }
 );
 
@@ -61,7 +61,7 @@ router.put(
           : { $set: { [`tokens.${token}.amount`]: req.params.amount } },
         { upsert: false }
       );
-      res.send(result).status(200);
+      res.status(200).send(result);
     } else {
       filter.date = new Date();
       filter.tokens = [];
@@ -70,7 +70,7 @@ router.put(
         amount: req.params.amount,
       });
       let result = await collection.insertOne(filter);
-      res.send(result).status(201);
+      res.status(201).send(result);
     }
   }
 );
@@ -79,13 +79,13 @@ router.put(
 router.get('/', getLiquidityWalletValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
-    return res.send(validator).status(400);
+    return res.status(400).send(validator);
   }
   const wallets = (
     await db.collection('liquidity-wallets').find(req.body).toArray()
   ).filter((e) => e.userId === res.locals.userId);
   if (wallets.length !== 0) {
-    res.send(wallets).status(200);
+    res.status(200).send(wallets);
   } else {
     res.status(404).send({
       message: 'Not Found',
@@ -99,7 +99,7 @@ router.delete(
   async (req, res) => {
     const validator = validateResult(req, res);
     if (validator.length) {
-      return res.send(validator).status(400);
+      return res.status(400).send(validator);
     }
     const collection = db.collection('liquidity-wallets');
     const wallet = await collection.findOne({

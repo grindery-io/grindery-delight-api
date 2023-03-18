@@ -15,14 +15,14 @@ const router = express.Router();
 router.post('/', createStakingValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
-    return res.send(validator).status(400);
+    return res.status(400).send(validator);
   }
   let collection = db.collection('staking');
   let newDocument = req.body;
   newDocument.date = new Date();
   newDocument.userId = res.locals.userId;
   let result = await collection.insertOne(newDocument);
-  res.send(result).status(201);
+  res.status(201).send(result);
 });
 
 router.post(
@@ -39,7 +39,7 @@ router.post(
         $set: { amount: req.params.amount },
       }
     );
-    res.send(result).status(201);
+    res.status(201).send(result);
   }
 );
 
@@ -48,26 +48,26 @@ router.post(
 router.get('/', isRequired, async (req, res) => {
   let collection = db.collection('staking');
   let results = await collection.find({}).toArray();
-  res.send(results).status(200);
+  res.status(200).send(results);
 });
 
 router.get('/user', isRequired, async (req, res) => {
   let collection = db.collection('staking');
   let results = await collection.find({ userId: res.locals.userId }).toArray();
-  res.send(results).status(200);
+  res.status(200).send(results);
 });
 
 router.get('/:stakeId', getStakeByIdvalidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
-    return res.send(validator).status(400);
+    return res.status(400).send(validator);
   }
   let collection = db.collection('staking');
   let result = await collection.findOne({
     _id: new ObjectId(req.params.stakeId),
   });
   if (result?.userId === res.locals.userId) {
-    res.send(result).status(200);
+    res.status(200).send(result);
   } else {
     res.sendStatus(404);
   }
@@ -82,7 +82,7 @@ router.delete('/chainId/:chainId', isRequired, async (req, res) => {
   };
   const collection = db.collection('staking');
   let result = await collection.deleteOne(query);
-  res.send(result).status(200);
+  res.status(200).send(result);
 });
 
 export default router;
