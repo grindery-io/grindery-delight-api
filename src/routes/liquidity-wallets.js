@@ -4,7 +4,9 @@ import isRequired from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
 import {
   createLiquidityWalletValidator,
+  deleteLiquidityWalletValidator,
   getLiquidityWalletValidator,
+  updateLiquidityWalletValidator,
 } from '../validators/liquidity-wallets.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 
@@ -12,11 +14,11 @@ const router = express.Router();
 
 /* Creating a new wallet for the user. */
 router.post(
-  '/create-wallet',
+  '/',
   createLiquidityWalletValidator,
   isRequired,
   async (req, res) => {
-    let collection = db.collection('liquidity-wallets');
+    const collection = db.collection('liquidity-wallets');
     const validator = validateResult(req, res);
     let newDocument = req.body;
     newDocument.userId = res.locals.userId;
@@ -24,53 +26,42 @@ router.post(
       return res.status(400).send(validator);
     }
     newDocument.date = new Date();
-    newDocument.tokens = [];
-    let result = await collection.insertOne(newDocument);
+    newDocument.tokens = new Map();
+    const result = await collection.insertOne(newDocument);
     res.status(201).send(result);
   }
 );
 
 /* This is a route that is used to update the wallet. */
 router.put(
-  '/wallet-address/:walletAddress/chainId/:chainId/tokenId/:tokenId/amount/:amount',
+  '/',
+  updateLiquidityWalletValidator,
   isRequired,
   async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+    const tokenId = req.query.tokenId;
+    const amount = req.query.amount;
     const filter = {
-      chainId: req.params.chainId,
-      walletAddress: req.params.walletAddress,
+      chainId: req.query.chainId,
+      walletAddress: req.query.walletAddress,
       userId: res.locals.userId,
     };
     const collection = db.collection('liquidity-wallets');
     const wallet = await collection.findOne(filter);
-
     if (wallet) {
-      const token = wallet.tokens.findIndex(
-        (e) => e.tokenId === req.params.tokenId
-      );
-      const result = await collection.updateOne(
-        wallet,
-        token === -1
-          ? {
-              $push: {
-                tokens: {
-                  tokenId: req.params.tokenId,
-                  amount: req.params.amount,
-                },
-              },
-            }
-          : { $set: { [`tokens.${token}.amount`]: req.params.amount } },
-        { upsert: false }
-      );
-      res.status(200).send(result);
-    } else {
-      filter.date = new Date();
-      filter.tokens = [];
-      filter.tokens.push({
-        tokenId: req.params.tokenId,
-        amount: req.params.amount,
+      const tokensEntry = new Map(Object.entries(wallet.tokens));
+      tokensEntry.set(tokenId, amount);
+      const result = await collection.updateOne(wallet, {
+        $set: { tokens: tokensEntry },
       });
-      let result = await collection.insertOne(filter);
       res.status(201).send(result);
+    } else {
+      res.status(404).send({
+        msg: 'Not Found',
+      });
     }
   }
 );
@@ -81,20 +72,22 @@ router.get('/', getLiquidityWalletValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
+  const chainId = req.query.chainId;
   const wallets = (
-    await db.collection('liquidity-wallets').find(req.body).toArray()
+    await db.collection('liquidity-wallets').find({ chainId }).toArray()
   ).filter((e) => e.userId === res.locals.userId);
   if (wallets.length !== 0) {
     res.status(200).send(wallets);
   } else {
     res.status(404).send({
-      message: 'Not Found',
+      msg: 'Not Found',
     });
   }
 });
 
 router.delete(
-  '/wallet-address/:walletAddress/chainId/:chainId',
+  '/',
+  deleteLiquidityWalletValidator,
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
@@ -103,14 +96,17 @@ router.delete(
     }
     const collection = db.collection('liquidity-wallets');
     const wallet = await collection.findOne({
-      walletAddress: req.params.walletAddress,
-      chainId: req.params.chainId,
+      walletAddress: req.query.walletAddress,
+      chainId: req.query.chainId,
       userId: res.locals.userId,
     });
+
     if (wallet) {
-      res.send(await collection.deleteOne(wallet)).status(200);
+      res.status(200).send(await collection.deleteOne(wallet));
     } else {
-      res.sendStatus(404);
+      res.status(404).send({
+        msg: 'Not Found',
+      });
     }
   }
 );
