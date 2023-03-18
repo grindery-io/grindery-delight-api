@@ -16,6 +16,14 @@ export const getLiquidityWalletValidator = [
   query('chainId').notEmpty().withMessage('should not be empty'),
 ];
 
+export const getSingleLiquidityWalletValidator = [
+  param('walletId')
+    .isMongoId()
+    .withMessage('should be mongodb id')
+    .notEmpty()
+    .withMessage('should not be empty'),
+];
+
 export const deleteLiquidityWalletValidator = [
   query('walletAddress').notEmpty().withMessage('should not be empty'),
   query('chainId').notEmpty().withMessage('should not be empty'),

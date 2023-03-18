@@ -6,6 +6,7 @@ import {
   createLiquidityWalletValidator,
   deleteLiquidityWalletValidator,
   getLiquidityWalletValidator,
+  getSingleLiquidityWalletValidator,
   updateLiquidityWalletValidator,
 } from '../validators/liquidity-wallets.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
@@ -84,6 +85,49 @@ router.get('/', getLiquidityWalletValidator, isRequired, async (req, res) => {
     });
   }
 });
+
+router.get('/all', isRequired, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+  const wallets = await db
+    .collection('liquidity-wallets')
+    .find({ userId: res.locals.userId })
+    .toArray();
+  if (wallets.length !== 0) {
+    res.status(200).send(wallets);
+  } else {
+    res.status(404).send({
+      msg: 'Not Found',
+    });
+  }
+});
+
+router.get(
+  '/single/:walletId',
+  getSingleLiquidityWalletValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+    const wallet = await db
+      .collection('liquidity-wallets')
+      .findOne({
+        _id: new ObjectId(req.params.walletId),
+        userId: res.locals.userId,
+      });
+    if (wallet) {
+      res.status(200).send(wallet);
+    } else {
+      res.status(404).send({
+        msg: 'Not Found',
+      });
+    }
+  }
+);
 
 router.delete(
   '/',
