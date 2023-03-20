@@ -3,7 +3,7 @@ import db from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {
   createOfferValidator,
-  getOfferByIdValidator,
+  getOfferByOfferIdValidator,
   deleteOfferValidator,
   updateOfferValidator,
   addTradeOfferValidator,
@@ -12,6 +12,7 @@ import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
 
 const router = express.Router();
+const collection = db.collection('offers');
 
 /* This is a POST request that creates a new offer. */
 router.post('/', createOfferValidator, isRequired, async (req, res) => {
@@ -19,7 +20,6 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const collection = db.collection('offers');
   if (
     !(await collection.findOne({
       idOffer: req.body.idOffer,
@@ -40,7 +40,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all offers. */
 router.get('/', isRequired, async (req, res) => {
-  let results = await db.collection('offers').find({}).toArray();
+  let results = await collection.find({}).toArray();
   if (results.length !== 0) {
     res.send(results).status(200);
   } else {
@@ -52,10 +52,7 @@ router.get('/', isRequired, async (req, res) => {
 
 /* This is a GET request that returns all offers for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
-  let results = await db
-    .collection('offers')
-    .find({ userId: res.locals.userId })
-    .toArray();
+  let results = await collection.find({ userId: res.locals.userId }).toArray();
   if (results.length !== 0) {
     res.send(results).status(200);
   } else {
@@ -66,13 +63,37 @@ router.get('/user', isRequired, async (req, res) => {
 });
 
 /* This is a GET request that returns an offer by id. */
-router.get('/:idOffer', getOfferByIdValidator, isRequired, async (req, res) => {
+router.get(
+  '/idOffer',
+  getOfferByOfferIdValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+    const result = await collection.findOne({
+      idOffer: req.query.idOffer,
+      userId: res.locals.userId,
+    });
+    if (result) {
+      res.status(200).send(result);
+    } else {
+      res.status(404).send({
+        msg: 'Not Found',
+      });
+    }
+  }
+);
+
+/* This is a GET request that returns an offer by id. */
+router.get('/id', getOfferByOfferIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const result = await db.collection('offers').findOne({
-    idOffer: req.params.idOffer,
+  const result = await collection.findOne({
+    _id: new ObjectId(req.query.id),
     userId: res.locals.userId,
   });
   if (result) {
@@ -94,7 +115,6 @@ router.delete(
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const collection = db.collection('offers');
     const offer = await collection.findOne({
       idOffer: req.params.idOffer,
       userId: res.locals.userId,
@@ -115,7 +135,6 @@ router.put('/:idOffer', updateOfferValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const collection = db.collection('offers');
   const offer = await collection.findOne({
     idOffer: req.params.idOffer,
     userId: res.locals.userId,

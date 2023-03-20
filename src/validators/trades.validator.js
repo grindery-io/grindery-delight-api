@@ -37,7 +37,7 @@ export const getTradeByTradeIdValidator = [
 ];
 
 export const getTradeByIdValidator = [
-  param('id')
+  query('id')
     .isMongoId()
     .withMessage('must not be mongodb id')
     .notEmpty()
