@@ -12,26 +12,47 @@ import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
 
+/* This is a POST request to the /staking endpoint. It is using the createStakingValidator middleware
+to validate the request body. It is also using the isRequired middleware to check if the user is
+logged in. If the user is not logged in, it will return a 401 error. If the user is logged in, it
+will check if the user has already staked for the chain. If the user has not staked for the chain,
+it will create a new staking document in the database. If the user has already staked for the chain,
+it will return a 404 error. */
 router.post('/', createStakingValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  let collection = db.collection('staking');
-  let newDocument = req.body;
-  newDocument.date = new Date();
-  newDocument.userId = res.locals.userId;
-  let result = await collection.insertOne(newDocument);
-  res.status(201).send(result);
+  const collection = db.collection('staking');
+  if (
+    !(await collection.findOne({
+      chainId: req.body.chainId,
+      userId: res.locals.userId,
+    }))
+  ) {
+    let newDocument = req.body;
+    newDocument.date = new Date();
+    newDocument.userId = res.locals.userId;
+    res.status(201).send(await collection.insertOne(newDocument));
+  } else {
+    res.status(404).send({
+      msg: 'Staking for this chain and this user already exists.',
+    });
+  }
 });
 
+/* This is a PUT request to the /staking endpoint. It is using the updateStakingValidator middleware to
+validate the request body. It is also using the isRequired middleware to check if the user is logged
+in. If the user is not logged in, it will return a 401 error. If the user is logged in, it will
+check if the user has already staked for the chain. If the user has not staked for the chain, it
+will return a 404 error. If the user has already staked for the chain, it will update the staking
+document in the database. */
 router.put('/', updateStakingValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  let collection = db.collection('staking');
-  let result = await collection.updateOne(
+  let result = await db.collection('staking').updateOne(
     {
       userId: res.locals.userId,
       chainId: req.body.chainId,
@@ -49,28 +70,64 @@ router.put('/', updateStakingValidator, isRequired, async (req, res) => {
   }
 });
 
+/* This is a GET request to the /staking endpoint. It is using the isRequired middleware to check
+if the user is logged in. If the user is not logged in, it will return a 401 error. If the user is
+logged in, it will check if the user has staked for any chains. If the user has not staked for any
+chains, it will return a 404 error. If the user has staked for any chains, it will return all of the
+staking documents for the user. */
 router.get('/', isRequired, async (req, res) => {
-  let collection = db.collection('staking');
-  let results = await collection.find({}).toArray();
-  res.status(200).send(results);
+  if (await db.collection('staking').findOne({})) {
+    res.status(200).send(await db.collection('staking').find({}).toArray());
+  } else {
+    res.status(404).send({
+      msg: 'No staking found.',
+    });
+  }
 });
 
+/* This is a GET request to the /staking/user endpoint. It is using the isRequired middleware to check
+if the user is logged in. If the user is not logged in, it will return a 401 error. If the user is
+logged in, it will check if the user has staked for any chains. If the user has not staked for any
+chains, it will return a 404 error. If the user has staked for any chains, it will return all of the
+staking documents for the user. */
 router.get('/user', isRequired, async (req, res) => {
-  let collection = db.collection('staking');
-  let results = await collection.find({ userId: res.locals.userId }).toArray();
-  res.status(200).send(results);
+  if (
+    await db.collection('staking').findOne({
+      userId: res.locals.userId,
+    })
+  ) {
+    res
+      .status(200)
+      .send(
+        await db
+          .collection('staking')
+          .find({ userId: res.locals.userId })
+          .toArray()
+      );
+  } else {
+    res.status(404).send({
+      msg: 'No staking found for this user.',
+    });
+  }
 });
 
+/* This is a GET request to the /staking/:stakeId endpoint. It is using the getStakeByIdValidator
+middleware to validate the request params. It is also using the isRequired middleware to check if
+the
+user is logged in. If the user is not logged in, it will return a 401 error. If the user is logged
+in, it will check if the user has staked for the chain. If the user has not staked for the chain, it
+will return a 404 error. If the user has staked for the chain, it will return the staking document
+for the user. */
 router.get('/:stakeId', getStakeByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  let collection = db.collection('staking');
-  let result = await collection.findOne({
+  const result = await db.collection('staking').findOne({
     _id: new ObjectId(req.params.stakeId),
+    userId: res.locals.userId,
   });
-  if (result?.userId === res.locals.userId) {
+  if (result) {
     res.status(200).send(result);
   } else {
     res.status(404).send({
@@ -84,15 +141,13 @@ router.delete('/', deleteStakeValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const query = {
+  const collection = db.collection('staking');
+  const stake = await collection.findOne({
     chainId: req.query.chainId,
     userId: res.locals.userId,
-  };
-  const collection = db.collection('staking');
-  const stake = await collection.findOne(query);
-  if (stake?.userId === query.userId) {
-    let result = await collection.deleteOne(query);
-    res.status(200).send(result);
+  });
+  if (stake) {
+    res.status(200).send(await collection.deleteOne(stake));
   } else {
     res.status(404).send({
       msg: 'Not Found',
