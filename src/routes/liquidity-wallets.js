@@ -13,27 +13,37 @@ import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
 
-/* Creating a new wallet for the user. */
+/* This is a route that is used to create a wallet. */
 router.post(
   '/',
   createLiquidityWalletValidator,
   isRequired,
   async (req, res) => {
-    const collection = db.collection('liquidity-wallets');
     const validator = validateResult(req, res);
-    let newDocument = req.body;
-    newDocument.userId = res.locals.userId;
-    if (validator.length || (await collection.findOne(newDocument))) {
+    if (validator.length) {
       return res.status(400).send(validator);
     }
-    newDocument.date = new Date();
-    newDocument.tokens = new Map();
-    const result = await collection.insertOne(newDocument);
-    res.status(201).send(result);
+    const collection = db.collection('liquidity-wallets');
+    if (
+      !(await collection.findOne({
+        walletAddress: req.body.walletAddress,
+        chainId: req.body.chainId,
+      }))
+    ) {
+      let newDocument = req.body;
+      newDocument.userId = res.locals.userId;
+      newDocument.date = new Date();
+      newDocument.tokens = new Map();
+      res.status(201).send(await collection.insertOne(newDocument));
+    } else {
+      res.status(404).send({
+        msg: 'This wallet already exists on this chain.',
+      });
+    }
   }
 );
 
-/* This is a route that is used to update the wallet. */
+/* Updating the wallet. */
 router.put(
   '/',
   updateLiquidityWalletValidator,
@@ -43,49 +53,47 @@ router.put(
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const tokenId = req.body.tokenId;
-    const amount = req.body.amount;
-    const filter = {
+    const collection = db.collection('liquidity-wallets');
+    const wallet = await collection.findOne({
       chainId: req.body.chainId,
       walletAddress: req.body.walletAddress,
       userId: res.locals.userId,
-    };
-    const collection = db.collection('liquidity-wallets');
-    const wallet = await collection.findOne(filter);
+    });
     if (wallet) {
-      const tokensEntry = new Map(Object.entries(wallet.tokens));
-      tokensEntry.set(tokenId, amount);
-      const result = await collection.updateOne(wallet, {
-        $set: { tokens: tokensEntry },
-      });
-      res.status(201).send(result);
+      res.status(201).send(
+        await collection.updateOne(wallet, {
+          $set: { [`tokens.${req.body.tokenId}`]: req.body.amount },
+        })
+      );
     } else {
       res.status(404).send({
-        msg: 'Not Found',
+        msg: 'This liquidity wallet does not exist.',
       });
     }
   }
 );
 
-/* This is a route that is used to get the wallet. */
+/* This is a route that is used to get all the wallets for a specific chain. */
 router.get('/', getLiquidityWalletValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const chainId = req.query.chainId;
-  const wallets = (
-    await db.collection('liquidity-wallets').find({ chainId }).toArray()
-  ).filter((e) => e.userId === res.locals.userId);
+  const wallets = await db
+    .collection('liquidity-wallets')
+    .find({ chainId: req.query.chainId, userId: res.locals.userId })
+    .toArray();
+  console.log(wallets);
   if (wallets.length !== 0) {
     res.status(200).send(wallets);
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'No wallet found.',
     });
   }
 });
 
+/* This is a route that is used to get all the wallets for a specific chain. */
 router.get('/all', isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
@@ -99,13 +107,14 @@ router.get('/all', isRequired, async (req, res) => {
     res.status(200).send(wallets);
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'No wallet found.',
     });
   }
 });
 
+/* This is a route that is used to get a single wallet. */
 router.get(
-  '/single/:walletId',
+  '/single',
   getSingleLiquidityWalletValidator,
   isRequired,
   async (req, res) => {
@@ -114,19 +123,21 @@ router.get(
       return res.status(400).send(validator);
     }
     const wallet = await db.collection('liquidity-wallets').findOne({
-      _id: new ObjectId(req.params.walletId),
+      walletAddress: req.query.walletAddress,
+      chainId: req.query.chainId,
       userId: res.locals.userId,
     });
     if (wallet) {
       res.status(200).send(wallet);
     } else {
       res.status(404).send({
-        msg: 'Not Found',
+        msg: 'No wallet found.',
       });
     }
   }
 );
 
+/* This is a route that is used to delete a wallet. */
 router.delete(
   '/',
   deleteLiquidityWalletValidator,
@@ -142,7 +153,6 @@ router.delete(
       chainId: req.query.chainId,
       userId: res.locals.userId,
     });
-
     if (wallet) {
       res.status(200).send(await collection.deleteOne(wallet));
     } else {

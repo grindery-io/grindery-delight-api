@@ -33,9 +33,14 @@ export const getLiquidityWalletValidator = [
 ];
 
 export const getSingleLiquidityWalletValidator = [
-  param('walletId')
-    .isMongoId()
-    .withMessage('should be mongodb id')
+  query('walletAddress')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
+  query('chainId')
+    .isString()
+    .withMessage('must be string value')
     .notEmpty()
     .withMessage('should not be empty'),
 ];

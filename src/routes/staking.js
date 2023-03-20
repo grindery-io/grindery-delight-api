@@ -136,6 +136,12 @@ router.get('/:stakeId', getStakeByIdValidator, isRequired, async (req, res) => {
   }
 });
 
+/* This is a DELETE request to the /staking endpoint. It is using the deleteStakeValidator middleware
+to validate the request query. It is also using the isRequired middleware to check if the user is
+logged in. If the user is not logged in, it will return a 401 error. If the user is logged in, it
+will check if the user has staked for the chain. If the user has not staked for the chain, it will
+return a 404 error. If the user has staked for the chain, it will delete the staking document for
+the user. */
 router.delete('/', deleteStakeValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
