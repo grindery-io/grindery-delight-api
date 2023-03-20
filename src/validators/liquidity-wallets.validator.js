@@ -1,4 +1,4 @@
-import { body, validationResult, query, param, check } from 'express-validator';
+import { body, query, param } from 'express-validator';
 
 export const createLiquidityWalletValidator = [
   body('walletAddress').isString().withMessage('must be string value'),
@@ -6,10 +6,26 @@ export const createLiquidityWalletValidator = [
 ];
 
 export const updateLiquidityWalletValidator = [
-  query('walletAddress').notEmpty().withMessage('should not be empty'),
-  query('chainId').notEmpty().withMessage('should not be empty'),
-  query('tokenId').notEmpty().withMessage('should not be empty'),
-  query('amount').notEmpty().withMessage('should not be empty'),
+  body('walletAddress')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
+  body('chainId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
+  body('tokenId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
+  body('amount')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
 ];
 
 export const getLiquidityWalletValidator = [

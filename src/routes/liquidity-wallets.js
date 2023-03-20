@@ -43,11 +43,11 @@ router.put(
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const tokenId = req.query.tokenId;
-    const amount = req.query.amount;
+    const tokenId = req.body.tokenId;
+    const amount = req.body.amount;
     const filter = {
-      chainId: req.query.chainId,
-      walletAddress: req.query.walletAddress,
+      chainId: req.body.chainId,
+      walletAddress: req.body.walletAddress,
       userId: res.locals.userId,
     };
     const collection = db.collection('liquidity-wallets');
@@ -113,12 +113,10 @@ router.get(
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const wallet = await db
-      .collection('liquidity-wallets')
-      .findOne({
-        _id: new ObjectId(req.params.walletId),
-        userId: res.locals.userId,
-      });
+    const wallet = await db.collection('liquidity-wallets').findOne({
+      _id: new ObjectId(req.params.walletId),
+      userId: res.locals.userId,
+    });
     if (wallet) {
       res.status(200).send(wallet);
     } else {
