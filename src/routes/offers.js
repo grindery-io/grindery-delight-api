@@ -32,13 +32,25 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 router.get('/', isRequired, async (req, res) => {
   let collection = db.collection('offers');
   let results = await collection.find({}).toArray();
-  res.send(results).status(200);
+  if (results.length !== 0) {
+    res.send(results).status(200);
+  } else {
+    res.status(404).send({
+      msg: 'Not Found',
+    });
+  }
 });
 
 router.get('/user', isRequired, async (req, res) => {
   let collection = db.collection('offers');
   let results = await collection.find({ userId: res.locals.userId }).toArray();
-  res.send(results).status(200);
+  if (results.length !== 0) {
+    res.send(results).status(200);
+  } else {
+    res.status(404).send({
+      msg: 'Not Found',
+    });
+  }
 });
 
 router.get('/:idOffer', getOfferByIdValidator, isRequired, async (req, res) => {
@@ -54,7 +66,7 @@ router.get('/:idOffer', getOfferByIdValidator, isRequired, async (req, res) => {
     res.status(200).send(result);
   } else {
     res.status(404).send({
-      message: 'Not Found',
+      msg: 'Not Found',
     });
   }
 });
@@ -77,7 +89,9 @@ router.delete(
       let result = await collection.deleteOne(query);
       res.status(200).send(result);
     } else {
-      res.sendStatus(404);
+      res.status(404).send({
+        msg: 'Not Found',
+      });
     }
   }
 );
@@ -102,7 +116,9 @@ router.put('/:idOffer', updateOfferValidator, isRequired, async (req, res) => {
     const result = await collection.updateOne(query, updateDoc, options);
     res.status(200).send(result);
   } else {
-    res.sendStatus(404);
+    res.status(404).send({
+      msg: 'Not Found',
+    });
   }
 });
 
