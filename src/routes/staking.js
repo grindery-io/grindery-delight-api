@@ -4,13 +4,13 @@ import isRequired from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
 import {
   createStakingValidator,
-  getStakeByIdvalidator,
+  deleteStakeValidator,
+  getStakeByIdValidator,
+  updateStakingValidator,
 } from '../validators/staking.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
-
-// POST
 
 router.post('/', createStakingValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
@@ -25,25 +25,29 @@ router.post('/', createStakingValidator, isRequired, async (req, res) => {
   res.status(201).send(result);
 });
 
-router.post(
-  '/modify/chainId/:chainId/amount/:amount',
-  isRequired,
-  async (req, res) => {
-    let collection = db.collection('staking');
-    let result = await collection.updateOne(
-      {
-        userId: res.locals.userId,
-        chainId: req.params.chainId,
-      },
-      {
-        $set: { amount: req.params.amount },
-      }
-    );
-    res.status(201).send(result);
+router.put('/', updateStakingValidator, isRequired, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
   }
-);
-
-// GET
+  let collection = db.collection('staking');
+  let result = await collection.updateOne(
+    {
+      userId: res.locals.userId,
+      chainId: req.body.chainId,
+    },
+    {
+      $set: { amount: req.body.amount },
+    }
+  );
+  if (result.matchedCount >= 1) {
+    res.status(201).send(result);
+  } else {
+    res.status(404).send({
+      msg: 'Not Found',
+    });
+  }
+});
 
 router.get('/', isRequired, async (req, res) => {
   let collection = db.collection('staking');
@@ -57,7 +61,7 @@ router.get('/user', isRequired, async (req, res) => {
   res.status(200).send(results);
 });
 
-router.get('/:stakeId', getStakeByIdvalidator, isRequired, async (req, res) => {
+router.get('/:stakeId', getStakeByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
@@ -69,20 +73,31 @@ router.get('/:stakeId', getStakeByIdvalidator, isRequired, async (req, res) => {
   if (result?.userId === res.locals.userId) {
     res.status(200).send(result);
   } else {
-    res.sendStatus(404);
+    res.status(404).send({
+      msg: 'Not Found',
+    });
   }
 });
 
-// DELETE
-
-router.delete('/chainId/:chainId', isRequired, async (req, res) => {
+router.delete('/', deleteStakeValidator, isRequired, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
   const query = {
-    chainId: req.params.chainId,
+    chainId: req.query.chainId,
     userId: res.locals.userId,
   };
   const collection = db.collection('staking');
-  let result = await collection.deleteOne(query);
-  res.status(200).send(result);
+  const stake = await collection.findOne(query);
+  if (stake?.userId === query.userId) {
+    let result = await collection.deleteOne(query);
+    res.status(200).send(result);
+  } else {
+    res.status(404).send({
+      msg: 'Not Found',
+    });
+  }
 });
 
 export default router;
