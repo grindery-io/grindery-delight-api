@@ -1,8 +1,8 @@
 import { body, param, query } from 'express-validator';
 
 export const createOfferValidator = [
-  body('chain')
-    .isNumeric()
+  body('chainId')
+    .isString()
     .withMessage('must be numeric value')
     .notEmpty()
     .withMessage('must not be empty'),

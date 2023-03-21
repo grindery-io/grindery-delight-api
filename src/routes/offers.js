@@ -1,4 +1,4 @@
-import express, { query } from 'express';
+import express from 'express';
 import db from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {
@@ -6,7 +6,7 @@ import {
   getOfferByOfferIdValidator,
   deleteOfferValidator,
   updateOfferValidator,
-  addTradeOfferValidator,
+  getOfferByIdValidator,
 } from '../validators/offers.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -32,7 +32,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
     res.send(await collection.insertOne(newDocument)).status(201);
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'This offer already exists.',
     });
   }
 });
@@ -44,7 +44,7 @@ router.get('/', isRequired, async (req, res) => {
     res.send(results).status(200);
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'No offer found.',
     });
   }
 });
@@ -56,7 +56,7 @@ router.get('/user', isRequired, async (req, res) => {
     res.send(results).status(200);
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'No offer found',
     });
   }
 });
@@ -79,14 +79,14 @@ router.get(
       res.status(200).send(result);
     } else {
       res.status(404).send({
-        msg: 'Not Found',
+        msg: 'No offer found',
       });
     }
   }
 );
 
 /* This is a GET request that returns an offer by id. */
-router.get('/id', getOfferByOfferIdValidator, isRequired, async (req, res) => {
+router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
@@ -99,7 +99,7 @@ router.get('/id', getOfferByOfferIdValidator, isRequired, async (req, res) => {
     res.status(200).send(result);
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'No offer found',
     });
   }
 });
@@ -122,7 +122,7 @@ router.delete(
       res.status(200).send(await collection.deleteOne(offer));
     } else {
       res.status(404).send({
-        msg: 'Not Found',
+        msg: 'No offer found',
       });
     }
   }
@@ -142,7 +142,7 @@ router.put('/:idOffer', updateOfferValidator, isRequired, async (req, res) => {
     res.status(200).send(
       await collection.updateOne(offer, {
         $set: {
-          chain: req.body.chain ? req.body.chain : offer.chain,
+          chainId: req.body.chainId ? req.body.chainId : offer.chainId,
           min: req.body.min ? req.body.min : offer.min,
           max: req.body.max ? req.body.max : offer.max,
           tokenId: req.body.tokenId ? req.body.tokenId : offer.tokenId,
@@ -156,7 +156,7 @@ router.put('/:idOffer', updateOfferValidator, isRequired, async (req, res) => {
     );
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'No offer found',
     });
   }
 });
