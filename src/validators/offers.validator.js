@@ -17,8 +17,8 @@ export const createOfferValidator = [
     .notEmpty()
     .withMessage('must not be empty'),
   body('tokenId')
-    .isNumeric()
-    .withMessage('must be numeric value')
+    .isString()
+    .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
   body('token')
