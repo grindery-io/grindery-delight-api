@@ -11,6 +11,7 @@ import {
 import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
+const collection = db.collection('staking');
 
 /* This is a POST request to the /staking endpoint. It is using the createStakingValidator middleware
 to validate the request body. It is also using the isRequired middleware to check if the user is
@@ -23,7 +24,6 @@ router.post('/', createStakingValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const collection = db.collection('staking');
   if (
     !(await collection.findOne({
       chainId: req.body.chainId,
@@ -52,7 +52,7 @@ router.put('/', updateStakingValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  let result = await db.collection('staking').updateOne(
+  let result = await collection.updateOne(
     {
       userId: res.locals.userId,
       chainId: req.body.chainId,
@@ -76,8 +76,8 @@ logged in, it will check if the user has staked for any chains. If the user has 
 chains, it will return a 404 error. If the user has staked for any chains, it will return all of the
 staking documents for the user. */
 router.get('/', isRequired, async (req, res) => {
-  if (await db.collection('staking').findOne({})) {
-    res.status(200).send(await db.collection('staking').find({}).toArray());
+  if (await collection.findOne({})) {
+    res.status(200).send(await collection.find({}).toArray());
   } else {
     res.status(404).send({
       msg: 'No staking found.',
@@ -92,7 +92,7 @@ chains, it will return a 404 error. If the user has staked for any chains, it wi
 staking documents for the user. */
 router.get('/user', isRequired, async (req, res) => {
   if (
-    await db.collection('staking').findOne({
+    await collection.findOne({
       userId: res.locals.userId,
     })
   ) {
@@ -123,7 +123,7 @@ router.get('/:stakeId', getStakeByIdValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const result = await db.collection('staking').findOne({
+  const result = await collection.findOne({
     _id: new ObjectId(req.params.stakeId),
     userId: res.locals.userId,
   });
@@ -147,7 +147,6 @@ router.delete('/', deleteStakeValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const collection = db.collection('staking');
   const stake = await collection.findOne({
     chainId: req.query.chainId,
     userId: res.locals.userId,
