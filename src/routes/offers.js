@@ -133,7 +133,6 @@ router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
     offerId: req.params.offerId,
     userId: res.locals.userId,
   });
-  console.log(req.body.isActive !== undefined);
   if (offer) {
     res.status(200).send(
       await collection.updateOne(offer, {
