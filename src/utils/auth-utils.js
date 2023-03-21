@@ -4,22 +4,22 @@ import jwt_decode from 'jwt-decode';
 const checkToken = async (token, workspaceKey) => {
   let res;
   try {
-    // res = await axios.post(
-    //   'https://orchestrator.grindery.org',
-    //   {
-    //     jsonrpc: '2.0',
-    //     method: 'or_listWorkflows',
-    //     id: new Date(),
-    //     params: {
-    //       ...(typeof workspaceKey !== 'undefined' && { workspaceKey }),
-    //     },
-    //   },
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //   }
-    // );
+    res = await axios.post(
+      'https://orchestrator.grindery.org',
+      {
+        jsonrpc: '2.0',
+        method: 'or_listWorkflows',
+        id: new Date(),
+        params: {
+          ...(typeof workspaceKey !== 'undefined' && { workspaceKey }),
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
   } catch (err) {
     throw new Error(
       (err && err.response && err.response.data && err.response.data.message) ||
