@@ -49,3 +49,11 @@ export const deleteLiquidityWalletValidator = [
   query('walletAddress').notEmpty().withMessage('should not be empty'),
   query('chainId').notEmpty().withMessage('should not be empty'),
 ];
+
+export const getWalletByIdValidator = [
+  query('id')
+    .isMongoId()
+    .withMessage('must not be mongodb id')
+    .notEmpty()
+    .withMessage('must not be empty'),
+];

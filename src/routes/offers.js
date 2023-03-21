@@ -29,7 +29,6 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
     let newDocument = req.body;
     newDocument.date = new Date();
     newDocument.userId = res.locals.userId;
-    newDocument.trades = new Map();
     res.send(await collection.insertOne(newDocument)).status(201);
   } else {
     res.status(404).send({
