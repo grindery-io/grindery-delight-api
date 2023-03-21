@@ -21,7 +21,7 @@ router.post('/', createTradeValidator, isRequired, async (req, res) => {
   }
   if (
     !(await collection.findOne({
-      idTrade: req.body.idTrade,
+      tradeId: req.body.tradeId,
     }))
   ) {
     let newDocument = req.body;
@@ -50,13 +50,13 @@ router.get('/user', isRequired, async (req, res) => {
 
 /* This is a GET request that returns a trade for a specific user by the trade id. */
 router.get(
-  '/idTrade',
+  '/tradeId',
   getTradeByTradeIdValidator,
   isRequired,
   async (req, res) => {
     const result = await collection.findOne({
       userId: res.locals.userId,
-      idTrade: req.query.idTrade,
+      tradeId: req.query.tradeId,
     });
     if (result) {
       res.send(result).status(200);
@@ -94,7 +94,7 @@ router.put(
       return res.status(400).send(validator);
     }
     const trade = await collection.findOne({
-      idTrade: req.body.idTrade,
+      tradeId: req.body.tradeId,
       userId: res.locals.userId,
     });
     if (trade) {

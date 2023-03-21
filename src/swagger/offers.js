@@ -148,7 +148,7 @@
  */
 
 /**
- * DELETE /offers/:idOffer
+ * DELETE /offers/:offerId
  *
  * @summary Delete Offer
  * @description Deleting an entry from the database
@@ -173,7 +173,7 @@
  */
 
 /**
- * Update /offers/:idOffer
+ * Update /offers/:offerId
  *
  * @summary Update Offer
  * @description Updating an offer document from the database

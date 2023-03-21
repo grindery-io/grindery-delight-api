@@ -31,7 +31,7 @@ export const createOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('idOffer')
+  body('offerId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -44,7 +44,7 @@ export const createOfferValidator = [
 ];
 
 export const getOfferByOfferIdValidator = [
-  query('idOffer')
+  query('offerId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -60,11 +60,11 @@ export const getOfferByIdValidator = [
 ];
 
 export const deleteOfferValidator = [
-  param('idOffer').notEmpty().withMessage('must not be empty'),
+  param('offerId').notEmpty().withMessage('must not be empty'),
 ];
 
 export const updateOfferValidator = [
-  body('idOffer').notEmpty().withMessage('must not be empty'),
+  body('offerId').notEmpty().withMessage('must not be empty'),
 ];
 
 export const addTradeOfferValidator = [
@@ -73,7 +73,7 @@ export const addTradeOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('should not be empty'),
-  body('idOffer')
+  body('offerId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -93,7 +93,7 @@ export const addTradeOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('should not be empty'),
-  body('idTrade')
+  body('tradeId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()

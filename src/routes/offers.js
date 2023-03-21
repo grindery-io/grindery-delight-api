@@ -22,7 +22,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   }
   if (
     !(await collection.findOne({
-      idOffer: req.body.idOffer,
+      offerId: req.body.offerId,
       userId: res.locals.userId,
     }))
   ) {
@@ -58,7 +58,7 @@ router.get('/user', isRequired, async (req, res) => {
 
 /* This is a GET request that returns an offer by id. */
 router.get(
-  '/idOffer',
+  '/offerId',
   getOfferByOfferIdValidator,
   isRequired,
   async (req, res) => {
@@ -67,7 +67,7 @@ router.get(
       return res.status(400).send(validator);
     }
     const result = await collection.findOne({
-      idOffer: req.query.idOffer,
+      offerId: req.query.offerId,
       userId: res.locals.userId,
     });
     if (result) {
@@ -101,7 +101,7 @@ router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
 
 /* This is a DELETE request that deletes an offer by id. */
 router.delete(
-  '/:idOffer',
+  '/:offerId',
   deleteOfferValidator,
   isRequired,
   async (req, res) => {
@@ -110,7 +110,7 @@ router.delete(
       return res.status(400).send(validator);
     }
     const offer = await collection.findOne({
-      idOffer: req.params.idOffer,
+      offerId: req.params.offerId,
       userId: res.locals.userId,
     });
     if (offer) {
@@ -124,13 +124,13 @@ router.delete(
 );
 
 /* This is a PUT request that updates an offer by id. */
-router.put('/:idOffer', updateOfferValidator, isRequired, async (req, res) => {
+router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
   }
   const offer = await collection.findOne({
-    idOffer: req.params.idOffer,
+    offerId: req.params.offerId,
     userId: res.locals.userId,
   });
   if (offer) {

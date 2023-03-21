@@ -1,7 +1,7 @@
 import { body, param, query } from 'express-validator';
 
 export const createTradeValidator = [
-  body('idTrade')
+  body('tradeId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -21,7 +21,7 @@ export const createTradeValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('idOffer')
+  body('offerId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -29,7 +29,7 @@ export const createTradeValidator = [
 ];
 
 export const getTradeByTradeIdValidator = [
-  query('idTrade')
+  query('tradeId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -45,7 +45,7 @@ export const getTradeByIdValidator = [
 ];
 
 export const setTradeStatusValidator = [
-  body('idTrade')
+  body('tradeId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
