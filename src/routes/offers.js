@@ -51,14 +51,9 @@ router.get('/', isRequired, async (req, res) => {
 
 /* This is a GET request that returns all offers for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
-  let results = await collection.find({ userId: res.locals.userId }).toArray();
-  if (results.length !== 0) {
-    res.send(results).status(200);
-  } else {
-    res.status(404).send({
-      msg: 'No offer found',
-    });
-  }
+  res
+    .send(await collection.find({ userId: res.locals.userId }).toArray())
+    .status(200);
 });
 
 /* This is a GET request that returns an offer by id. */
