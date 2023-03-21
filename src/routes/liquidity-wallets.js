@@ -82,7 +82,6 @@ router.get('/', getLiquidityWalletValidator, isRequired, async (req, res) => {
   const wallets = await collection
     .find({ chainId: req.query.chainId, userId: res.locals.userId })
     .toArray();
-  console.log(wallets);
   if (wallets.length !== 0) {
     res.status(200).send(wallets);
   } else {

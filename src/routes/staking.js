@@ -65,7 +65,7 @@ router.put('/', updateStakingValidator, isRequired, async (req, res) => {
     res.status(201).send(result);
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'No staking mapping found for this blockchain.',
     });
   }
 });
@@ -131,7 +131,7 @@ router.get('/:stakeId', getStakeByIdValidator, isRequired, async (req, res) => {
     res.status(200).send(result);
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'No staking found for this id',
     });
   }
 });
@@ -155,7 +155,7 @@ router.delete('/', deleteStakeValidator, isRequired, async (req, res) => {
     res.status(200).send(await collection.deleteOne(stake));
   } else {
     res.status(404).send({
-      msg: 'Not Found',
+      msg: 'No staking found',
     });
   }
 });

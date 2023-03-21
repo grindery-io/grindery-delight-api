@@ -84,28 +84,33 @@ router.get('/id', getTradeByIdValidator, isRequired, async (req, res) => {
 });
 
 /* This is a PUT request that adds a trade to an offer. */
-router.put('/complete', isRequired, async (req, res) => {
-  const validator = validateResult(req, res);
-  if (validator.length) {
-    return res.status(400).send(validator);
-  }
-  const trade = await collection.findOne({
-    idTrade: req.body.idTrade,
-    userId: res.locals.userId,
-  });
-  if (trade) {
-    res.status(200).send(
-      await collection.updateOne(trade, {
-        $set: {
-          isComplete: req.body.isComplete,
-        },
-      })
-    );
-  } else {
-    res.status(404).send({
-      msg: 'No trade found.',
+router.put(
+  '/complete',
+  setTradeStatusValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+    const trade = await collection.findOne({
+      idTrade: req.body.idTrade,
+      userId: res.locals.userId,
     });
+    if (trade) {
+      res.status(200).send(
+        await collection.updateOne(trade, {
+          $set: {
+            isComplete: req.body.isComplete,
+          },
+        })
+      );
+    } else {
+      res.status(404).send({
+        msg: 'No trade found.',
+      });
+    }
   }
-});
+);
 
 export default router;
