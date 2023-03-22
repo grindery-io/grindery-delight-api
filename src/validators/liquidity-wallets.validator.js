@@ -51,7 +51,7 @@ export const deleteLiquidityWalletValidator = [
 ];
 
 export const getWalletByIdValidator = [
-  query('id')
+  param('id')
     .isMongoId()
     .withMessage('must not be mongodb id')
     .notEmpty()

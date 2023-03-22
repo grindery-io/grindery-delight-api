@@ -135,13 +135,13 @@ router.get(
 );
 
 /* This is a route that is used to get a single wallet. */
-router.get('/id', getWalletByIdValidator, isRequired, async (req, res) => {
+router.get('/id/:id', getWalletByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
   }
   const wallet = await collection.findOne({
-    _id: new ObjectId(req.query.id),
+    _id: new ObjectId(req.params.id),
     userId: res.locals.userId,
   });
   if (wallet) {
