@@ -29,7 +29,7 @@ export const updateStakingValidator = [
 export const getStakeByIdValidator = [
   param('stakeId')
     .isMongoId()
-    .withMessage('must not be mongodb id')
+    .withMessage('must be mongodb id')
     .notEmpty()
     .withMessage('must not be empty'),
 ];

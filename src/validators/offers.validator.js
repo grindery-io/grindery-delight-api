@@ -54,7 +54,7 @@ export const getOfferByOfferIdValidator = [
 export const getOfferByIdValidator = [
   query('id')
     .isMongoId()
-    .withMessage('must not be mongodb id')
+    .withMessage('must be mongodb id')
     .notEmpty()
     .withMessage('must not be empty'),
 ];
