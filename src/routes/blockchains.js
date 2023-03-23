@@ -22,7 +22,7 @@ router.post('/', createBlockchainValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  if (!(await collection.findOne(req.body))) {
+  if (!(await collection.findOne({ caipId: req.body.caipId }))) {
     res.send(await collection.insertOne(req.body)).status(201);
   } else {
     res.status(404).send({

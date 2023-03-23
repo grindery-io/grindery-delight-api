@@ -1,0 +1,109 @@
+import express from 'express';
+import db from '../db/conn.js';
+import isRequired from '../utils/auth-utils.js';
+import { ObjectId } from 'mongodb';
+import {
+  createTokenValidator,
+  getTokenByIdValidator,
+  modifyTokenValidator,
+} from '../validators/tokens.validator.js';
+import { validateResult } from '../utils/validators-utils.js';
+
+const router = express.Router();
+const collection = db.collection('tokens');
+
+/* Creating a new token. */
+router.post('/', createTokenValidator, isRequired, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+  if (
+    !(await collection.findOne({
+      chainId: req.body.chainId,
+      address: req.body.address,
+    }))
+  ) {
+    res.send(await collection.insertOne(req.body)).status(201);
+  } else {
+    res.status(404).send({
+      msg: 'This token already exists.',
+    });
+  }
+});
+
+/* This is a route that is used to get a token by its id. */
+router.get('/:tokenId', getTokenByIdValidator, isRequired, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+  res.status(200).send(
+    await collection.findOne({
+      _id: new ObjectId(req.params.tokenId),
+    })
+  );
+});
+
+/* This is a route that is used to modify a token by its id. */
+router.put('/:tokenId', modifyTokenValidator, isRequired, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+  const token = await collection.findOne({
+    _id: new ObjectId(req.params.tokenId),
+  });
+  if (token) {
+    res.status(200).send(
+      await collection.updateOne(token, {
+        $set: {
+          coinmarketcapId: req.body.coinmarketcapId
+            ? req.body.coinmarketcapId
+            : token.coinmarketcapId,
+          symbol: req.body.symbol ? req.body.symbol : token.symbol,
+          icon: req.body.icon ? req.body.icon : token.icon,
+          chainId: req.body.chainId ? req.body.chainId : token.chainId,
+          address: req.body.address ? req.body.address : token.address,
+          isNative:
+            req.body.isNative === undefined
+              ? token.isNative
+              : req.body.isNative,
+          isActive:
+            req.body.isActive === undefined
+              ? token.isActive
+              : req.body.isActive,
+        },
+      })
+    );
+  } else {
+    res.status(404).send({
+      msg: 'No token found',
+    });
+  }
+});
+
+/* This is a route that is used to delete a token by its id. */
+router.delete(
+  '/:tokenId',
+  getTokenByIdValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+    const token = await collection.findOne({
+      _id: new ObjectId(req.params.tokenId),
+    });
+    if (token) {
+      res.status(200).send(await collection.deleteOne(token));
+    } else {
+      res.status(404).send({
+        msg: 'No token found',
+      });
+    }
+  }
+);
+
+export default router;
