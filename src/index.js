@@ -10,6 +10,7 @@ import trades from './routes/trades.js';
 import staking from './routes/staking.js';
 import liquidity_wallets from './routes/liquidity-wallets.js';
 import coinmarketcap from './routes/coinmarketcap.js';
+import blockchains from './routes/blockchains.js';
 
 const { json, urlencoded } = pkg;
 const __filename = fileURLToPath(import.meta.url);
@@ -126,3 +127,4 @@ app.use('/staking', staking);
 app.use('/liquidity-wallets', liquidity_wallets);
 app.use('/trades', trades);
 app.use('/coinmarketcap', coinmarketcap);
+app.use('/blockchains', blockchains);

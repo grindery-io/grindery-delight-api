@@ -3,7 +3,7 @@ import { body, param, query } from 'express-validator';
 export const createOfferValidator = [
   body('chainId')
     .isString()
-    .withMessage('must be numeric value')
+    .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
   body('min')
