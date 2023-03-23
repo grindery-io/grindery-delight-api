@@ -11,6 +11,7 @@ import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
 const collection = db.collection('blockchains');
+const collectionAdmin = db.collection('admins');
 
 /* This is a post request to the blockchain route. It is using the createBlockchainValidator to
 validate the request body. It is also using the isRequired middleware to check if the user is logged
@@ -19,7 +20,10 @@ check if the blockchain already exists. If it does not exist, it will create the
 does exist, it will return a 404 error. */
 router.post('/', createBlockchainValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  if (validator.length) {
+  if (
+    validator.length ||
+    !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+  ) {
     return res.status(400).send(validator);
   }
   if (!(await collection.findOne({ caipId: req.body.caipId }))) {
@@ -29,6 +33,25 @@ router.post('/', createBlockchainValidator, isRequired, async (req, res) => {
       msg: 'This blockchain already exists.',
     });
   }
+});
+
+/* This is a get request to the blockchain route. It is using the getBlockchainByIdValidator to
+validate the request body. It is also using the isRequired middleware to check if the user is logged
+in. If the user is not logged in, it will return a 401 error. If the user is logged in, it will
+check if the blockchain already exists. If it does not exist, it will create the blockchain. If it
+does exist, it will return a 404 error. */
+router.get('/active', isRequired, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+  res.status(200).send(
+    await collection
+      .find({
+        isActive: true,
+      })
+      .toArray()
+  );
 });
 
 /* This is a get request to the blockchain route. It is using the getBlockchainByIdValidator to
@@ -64,7 +87,10 @@ router.put(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    if (validator.length) {
+    if (
+      validator.length ||
+      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+    ) {
       return res.status(400).send(validator);
     }
     const blockchain = await collection.findOne({
@@ -114,7 +140,10 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    if (validator.length) {
+    if (
+      validator.length ||
+      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+    ) {
       return res.status(400).send(validator);
     }
     const blockchain = await collection.findOne({

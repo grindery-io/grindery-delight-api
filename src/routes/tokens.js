@@ -11,11 +11,15 @@ import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
 const collection = db.collection('tokens');
+const collectionAdmin = db.collection('admins');
 
 /* Creating a new token. */
 router.post('/', createTokenValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  if (validator.length) {
+  if (
+    validator.length ||
+    !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+  ) {
     return res.status(400).send(validator);
   }
   if (
@@ -30,6 +34,21 @@ router.post('/', createTokenValidator, isRequired, async (req, res) => {
       msg: 'This token already exists.',
     });
   }
+});
+
+/* This is a route that is used to get all active tokens. */
+router.get('/active', isRequired, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+  res.status(200).send(
+    await collection
+      .find({
+        isActive: true,
+      })
+      .toArray()
+  );
 });
 
 /* This is a route that is used to get a token by its id. */
@@ -48,7 +67,10 @@ router.get('/:tokenId', getTokenByIdValidator, isRequired, async (req, res) => {
 /* This is a route that is used to modify a token by its id. */
 router.put('/:tokenId', modifyTokenValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  if (validator.length) {
+  if (
+    validator.length ||
+    !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+  ) {
     return res.status(400).send(validator);
   }
   const token = await collection.findOne({
@@ -90,7 +112,10 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    if (validator.length) {
+    if (
+      validator.length ||
+      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+    ) {
       return res.status(400).send(validator);
     }
     const token = await collection.findOne({
