@@ -6,7 +6,17 @@ export const createTradeValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('amountGRT')
+  body('amountTokenDeposit')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('addressTokenDeposit')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('chainIdTokenDeposit')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -16,7 +26,7 @@ export const createTradeValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('amountToken')
+  body('amountTokenOffer')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
