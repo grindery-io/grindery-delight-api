@@ -39,14 +39,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all offers. */
 router.get('/', isRequired, async (req, res) => {
-  let results = await collection.find({}).toArray();
-  if (results.length !== 0) {
-    res.send(results).status(200);
-  } else {
-    res.status(404).send({
-      msg: 'No offer found.',
-    });
-  }
+  res.send(await collection.find({}).toArray()).status(200);
 });
 
 /* This is a GET request that returns all offers for a specific user. */
@@ -66,17 +59,12 @@ router.get(
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const result = await collection.findOne({
-      offerId: req.query.offerId,
-      userId: res.locals.userId,
-    });
-    if (result) {
-      res.status(200).send(result);
-    } else {
-      res.status(404).send({
-        msg: 'No offer found',
-      });
-    }
+    res.status(200).send(
+      await collection.findOne({
+        offerId: req.query.offerId,
+        userId: res.locals.userId,
+      })
+    );
   }
 );
 
@@ -86,17 +74,12 @@ router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const result = await collection.findOne({
-    _id: new ObjectId(req.query.id),
-    userId: res.locals.userId,
-  });
-  if (result) {
-    res.status(200).send(result);
-  } else {
-    res.status(404).send({
-      msg: 'No offer found',
-    });
-  }
+  res.status(200).send(
+    await collection.findOne({
+      _id: new ObjectId(req.query.id),
+      userId: res.locals.userId,
+    })
+  );
 });
 
 /* This is a DELETE request that deletes an offer by id. */
