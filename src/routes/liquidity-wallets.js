@@ -79,16 +79,13 @@ router.get('/', getLiquidityWalletValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const wallets = await collection
-    .find({ chainId: req.query.chainId, userId: res.locals.userId })
-    .toArray();
-  if (wallets.length !== 0) {
-    res.status(200).send(wallets);
-  } else {
-    res.status(404).send({
-      msg: 'No wallet found.',
-    });
-  }
+  res
+    .status(200)
+    .send(
+      await collection
+        .find({ chainId: req.query.chainId, userId: res.locals.userId })
+        .toArray()
+    );
 });
 
 /* This is a route that is used to get all the wallets for a specific chain. */
@@ -97,16 +94,9 @@ router.get('/all', isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const wallets = await collection
-    .find({ userId: res.locals.userId })
-    .toArray();
-  if (wallets.length !== 0) {
-    res.status(200).send(wallets);
-  } else {
-    res.status(404).send({
-      msg: 'No wallet found.',
-    });
-  }
+  res
+    .status(200)
+    .send(await collection.find({ userId: res.locals.userId }).toArray());
 });
 
 /* This is a route that is used to get a single wallet. */
@@ -119,18 +109,13 @@ router.get(
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const wallet = await collection.findOne({
-      walletAddress: req.query.walletAddress,
-      chainId: req.query.chainId,
-      userId: res.locals.userId,
-    });
-    if (wallet) {
-      res.status(200).send(wallet);
-    } else {
-      res.status(404).send({
-        msg: 'No wallet found.',
-      });
-    }
+    res.status(200).send(
+      await collection.findOne({
+        walletAddress: req.query.walletAddress,
+        chainId: req.query.chainId,
+        userId: res.locals.userId,
+      })
+    );
   }
 );
 
@@ -140,17 +125,12 @@ router.get('/id/:id', getWalletByIdValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  const wallet = await collection.findOne({
-    _id: new ObjectId(req.params.id),
-    userId: res.locals.userId,
-  });
-  if (wallet) {
-    res.status(200).send(wallet);
-  } else {
-    res.status(404).send({
-      msg: 'No wallet found.',
-    });
-  }
+  res.status(200).send(
+    await collection.findOne({
+      _id: new ObjectId(req.params.id),
+      userId: res.locals.userId,
+    })
+  );
 });
 
 /* This is a route that is used to delete a wallet. */

@@ -38,14 +38,9 @@ router.post('/', createTradeValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all trades for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
-  let results = await collection.find({ userId: res.locals.userId }).toArray();
-  if (results.length !== 0) {
-    res.send(results).status(200);
-  } else {
-    res.status(404).send({
-      msg: 'No trade found.',
-    });
-  }
+  res
+    .send(await collection.find({ userId: res.locals.userId }).toArray())
+    .status(200);
 });
 
 /* This is a GET request that returns a trade for a specific user by the trade id. */
@@ -54,33 +49,27 @@ router.get(
   getTradeByTradeIdValidator,
   isRequired,
   async (req, res) => {
-    const result = await collection.findOne({
-      userId: res.locals.userId,
-      tradeId: req.query.tradeId,
-    });
-    if (result) {
-      res.send(result).status(200);
-    } else {
-      res.status(404).send({
-        msg: 'No trade found.',
-      });
-    }
+    res
+      .send(
+        await collection.findOne({
+          userId: res.locals.userId,
+          tradeId: req.query.tradeId,
+        })
+      )
+      .status(200);
   }
 );
 
 /* This is a GET request that returns a trade for a specific user by the trade id. */
 router.get('/id', getTradeByIdValidator, isRequired, async (req, res) => {
-  const result = await collection.findOne({
-    userId: res.locals.userId,
-    _id: new ObjectId(req.query.id),
-  });
-  if (result) {
-    res.send(result).status(200);
-  } else {
-    res.status(404).send({
-      msg: 'No trade found',
-    });
-  }
+  res
+    .send(
+      await collection.findOne({
+        userId: res.locals.userId,
+        _id: new ObjectId(req.query.id),
+      })
+    )
+    .status(200);
 });
 
 /* This is a PUT request that adds a trade to an offer. */
