@@ -12,6 +12,7 @@ import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 const collection = db.collection('trades');
+const offerCollection = db.collection('offers');
 
 /* This is a POST request that creates a new trade. */
 router.post('/', createTradeValidator, isRequired, async (req, res) => {
@@ -70,6 +71,29 @@ router.get('/id', getTradeByIdValidator, isRequired, async (req, res) => {
       })
     )
     .status(200);
+});
+
+router.get('/liquidity-provider', isRequired, async (req, res) => {
+  let result = [];
+  const resultOffers = await offerCollection
+    .find({
+      userId: res.locals.userId,
+      isActive: true,
+    })
+    .toArray();
+
+  await Promise.all(
+    resultOffers.map(async (offer) => {
+      const resultTrades = await collection
+        .find({
+          offerId: offer.offerId,
+        })
+        .toArray();
+      result.push(...resultTrades);
+    })
+  );
+
+  res.send(result).status(200);
 });
 
 /* This is a PUT request that adds a trade to an offer. */
