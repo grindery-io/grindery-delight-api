@@ -46,6 +46,31 @@ export const createOfferValidator = [
     .withMessage('must be boolean value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body('estimatedTime')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('exchangeRate')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('exchangeToken')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('chain')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('provider')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
 ];
 
 export const getOfferByOfferIdValidator = [
