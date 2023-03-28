@@ -2,27 +2,27 @@ import express, { query } from 'express';
 import db from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {
-  createTradeValidator,
-  getTradeByTradeIdValidator,
-  getTradeByIdValidator,
-  setTradeStatusValidator,
-} from '../validators/trades.validator.js';
+  createOrderValidator,
+  getOrderByIdValidator,
+  setOrderStatusValidator,
+  getOrderByOrderIdValidator,
+} from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
 
 const router = express.Router();
-const collection = db.collection('trades');
+const collection = db.collection('orders');
 const offerCollection = db.collection('offers');
 
-/* This is a POST request that creates a new trade. */
-router.post('/', createTradeValidator, isRequired, async (req, res) => {
+/* This is a POST request that creates a new order. */
+router.post('/', createOrderValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
     return res.status(400).send(validator);
   }
   if (
     !(await collection.findOne({
-      tradeId: req.body.tradeId,
+      orderId: req.body.orderId,
     }))
   ) {
     let newDocument = req.body;
@@ -32,37 +32,37 @@ router.post('/', createTradeValidator, isRequired, async (req, res) => {
     res.send(await collection.insertOne(newDocument)).status(201);
   } else {
     res.status(404).send({
-      msg: 'This trade already exists.',
+      msg: 'This order already exists.',
     });
   }
 });
 
-/* This is a GET request that returns all trades for a specific user. */
+/* This is a GET request that returns all orders for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
   res
     .send(await collection.find({ userId: res.locals.userId }).toArray())
     .status(200);
 });
 
-/* This is a GET request that returns a trade for a specific user by the trade id. */
+/* This is a GET request that returns a order for a specific user by the order id. */
 router.get(
-  '/tradeId',
-  getTradeByTradeIdValidator,
+  '/orderId',
+  getOrderByOrderIdValidator,
   isRequired,
   async (req, res) => {
     res
       .send(
         await collection.findOne({
           userId: res.locals.userId,
-          tradeId: req.query.tradeId,
+          orderId: req.query.orderId,
         })
       )
       .status(200);
   }
 );
 
-/* This is a GET request that returns a trade for a specific user by the trade id. */
-router.get('/id', getTradeByIdValidator, isRequired, async (req, res) => {
+/* This is a GET request that returns a order for a specific user by the order id. */
+router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
   res
     .send(
       await collection.findOne({
@@ -84,35 +84,35 @@ router.get('/liquidity-provider', isRequired, async (req, res) => {
 
   await Promise.all(
     resultOffers.map(async (offer) => {
-      const resultTrades = await collection
+      const resultOrders = await collection
         .find({
           offerId: offer.offerId,
         })
         .toArray();
-      result.push(...resultTrades);
+      result.push(...resultOrders);
     })
   );
 
   res.send(result).status(200);
 });
 
-/* This is a PUT request that adds a trade to an offer. */
+/* This is a PUT request that adds a order to an offer. */
 router.put(
   '/complete',
-  setTradeStatusValidator,
+  setOrderStatusValidator,
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const trade = await collection.findOne({
-      tradeId: req.body.tradeId,
+    const order = await collection.findOne({
+      orderId: req.body.orderId,
       userId: res.locals.userId,
     });
-    if (trade) {
+    if (order) {
       res.status(200).send(
-        await collection.updateOne(trade, {
+        await collection.updateOne(order, {
           $set: {
             isComplete: req.body.isComplete,
           },
@@ -120,7 +120,7 @@ router.put(
       );
     } else {
       res.status(404).send({
-        msg: 'No trade found.',
+        msg: 'No order found.',
       });
     }
   }

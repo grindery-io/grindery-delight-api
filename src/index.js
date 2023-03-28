@@ -6,7 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import './loadEnvironment.js';
 import offers from './routes/offers.js';
-import trades from './routes/trades.js';
+import orders from './routes/orders.js';
 import staking from './routes/staking.js';
 import liquidity_wallets from './routes/liquidity-wallets.js';
 import coinmarketcap from './routes/coinmarketcap.js';
@@ -127,7 +127,7 @@ app.listen(port, function () {
 app.use('/offers', offers);
 app.use('/staking', staking);
 app.use('/liquidity-wallets', liquidity_wallets);
-app.use('/trades', trades);
+app.use('/orders', orders);
 app.use('/coinmarketcap', coinmarketcap);
 app.use('/blockchains', blockchains);
 app.use('/tokens', tokens);
