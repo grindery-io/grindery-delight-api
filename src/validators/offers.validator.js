@@ -66,11 +66,6 @@ export const createOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('provider')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
 ];
 
 export const getOfferByOfferIdValidator = [
@@ -87,6 +82,14 @@ export const getOfferByIdValidator = [
     .withMessage('must be mongodb id')
     .notEmpty()
     .withMessage('must not be empty'),
+];
+
+export const getOffersValidator = [
+  query('depositChainId').notEmpty().withMessage('must not be empty'),
+  query('depositTokenId').notEmpty().withMessage('must not be empty'),
+  query('offerChain').notEmpty().withMessage('must not be empty'),
+  query('offerToken').notEmpty().withMessage('must not be empty'),
+  query('depositAmount').notEmpty().withMessage('must not be empty'),
 ];
 
 export const deleteOfferValidator = [

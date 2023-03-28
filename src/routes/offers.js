@@ -7,6 +7,7 @@ import {
   deleteOfferValidator,
   updateOfferValidator,
   getOfferByIdValidator,
+  getOffersValidator,
 } from '../validators/offers.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -40,6 +41,31 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 /* This is a GET request that returns all offers. */
 router.get('/', isRequired, async (req, res) => {
   res.send(await collection.find({}).toArray()).status(200);
+});
+
+/* This is a GET request that returns all activated offers 
+and filter by depositChainId, depositTokenId, offerChain,offerToken */
+router.get('/search', getOffersValidator, isRequired, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+  let offers = await collection
+    .find({
+      isActive: true,
+      exchangeChainId: req.query.depositChainId,
+      exchangeToken: req.query.depositTokenId,
+      chainId: req.query.offerChain,
+      token: req.query.offerToken,
+    })
+    .toArray();
+
+  offers = offers.filter((offer) => {
+    offer.rateAmount = req.query.depositAmount / offer.exchangeRate;
+    return offer.min <= offer.rateAmount && offer.max >= offer.rateAmount;
+  });
+
+  res.send(offers).status(200);
 });
 
 /* This is a GET request that returns all offers for a specific user. */
