@@ -13,6 +13,7 @@ import coinmarketcap from './routes/coinmarketcap.js';
 import blockchains from './routes/blockchains.js';
 import tokens from './routes/tokens.js';
 import admins from './routes/admins.js';
+import view_blockchains from './routes/view-blockchains.js';
 
 const { json, urlencoded } = pkg;
 const __filename = fileURLToPath(import.meta.url);
@@ -132,3 +133,4 @@ app.use('/coinmarketcap', coinmarketcap);
 app.use('/blockchains', blockchains);
 app.use('/tokens', tokens);
 app.use('/admins', admins);
+app.use('/view-blockchains', view_blockchains);
