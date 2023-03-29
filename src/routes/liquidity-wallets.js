@@ -109,13 +109,10 @@ router.get(
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    res.status(200).send(
-      await collection.findOne({
-        walletAddress: req.query.walletAddress,
-        chainId: req.query.chainId,
-        userId: res.locals.userId,
-      })
-    );
+    const query = { chainId: req.query.chainId, userId: res.locals.userId };
+    if (req.query.walletAddress)
+      query['walletAddress'] = req.query.walletAddress;
+    res.status(200).send(await collection.findOne(query));
   }
 );
 

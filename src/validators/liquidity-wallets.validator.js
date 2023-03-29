@@ -36,8 +36,7 @@ export const getSingleLiquidityWalletValidator = [
   query('walletAddress')
     .isString()
     .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('should not be empty'),
+    .optional(),
   query('chainId')
     .isString()
     .withMessage('must be string value')
