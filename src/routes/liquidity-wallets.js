@@ -103,13 +103,16 @@ router.get('/all', isRequired, async (req, res) => {
 router.get(
   '/single',
   getSingleLiquidityWalletValidator,
-  isRequired,
+  //isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const query = { chainId: req.query.chainId, userId: res.locals.userId };
+    const query = {
+      chainId: req.query.chainId,
+      userId: req.query.userId,
+    };
     if (req.query.walletAddress)
       query['walletAddress'] = req.query.walletAddress;
     res.status(200).send(await collection.findOne(query));

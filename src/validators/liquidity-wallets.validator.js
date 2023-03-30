@@ -42,6 +42,11 @@ export const getSingleLiquidityWalletValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('should not be empty'),
+  query('userId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
 ];
 
 export const deleteLiquidityWalletValidator = [
