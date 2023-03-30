@@ -17,3 +17,11 @@ export const getBalanceTokenValidator = [
     .notEmpty()
     .withMessage('must not be empty'),
 ];
+
+export const getDroneAddressValidator = [
+  query('chainId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+];
