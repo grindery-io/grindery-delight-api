@@ -1,4 +1,5 @@
 import { body, param, query, check } from 'express-validator';
+import { validateFields } from '../utils/validators-utils.js';
 
 export const createBlockchainValidator = [
   body('chainId')
@@ -30,10 +31,20 @@ export const createBlockchainValidator = [
     .withMessage('must be an array')
     .notEmpty()
     .withMessage('must not be empty'),
-  check('rpc.*').isString().withMessage('must be an array of string'),
+  check('rpc.*').isURL().withMessage('must be an array of URL'),
   body('nativeTokenSymbol')
     .isString()
     .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('transactionExplorerUrl')
+    .isURL()
+    .withMessage('must be URL')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('addressExplorerUrl')
+    .isURL()
+    .withMessage('must be URL')
     .notEmpty()
     .withMessage('must not be empty'),
   body('isEvm')
@@ -51,6 +62,34 @@ export const createBlockchainValidator = [
     .withMessage('must be boolean value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body().custom((value, { req }) => {
+    validateFields(
+      req.body,
+      [
+        'chainId',
+        'caipId',
+        'label',
+        'icon',
+        'rpc',
+        'nativeTokenSymbol',
+        'isEvm',
+        'isTestnet',
+        'isActive',
+        'transactionExplorerUrl',
+        'addressExplorerUrl',
+      ],
+      'body'
+    );
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
 ];
 
 export const getBlockchainByIdValidator = [
@@ -67,8 +106,8 @@ export const modifyBlockchainValidator = [
     .withMessage('must be mongodb id')
     .notEmpty()
     .withMessage('must not be empty'),
-  check('chainId').optional().isString().withMessage('must be string value'),
-  check('caipId')
+  body('chainId').optional().isString().withMessage('must be string value'),
+  body('caipId')
     .optional()
     .custom((value) => {
       if (/[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}/.test(value)) {
@@ -76,20 +115,44 @@ export const modifyBlockchainValidator = [
       }
       throw new Error('caipId field does not match the CAIP-2 specifications.');
     }),
-  check('label').optional().isString().withMessage('must be string value'),
-  check('icon').optional().isString().withMessage('must be string value'),
-  check('rpc.*')
-    .optional()
-    .isString()
-    .withMessage('must be an array of string'),
-  check('nativeTokenSymbol')
+  body('label').optional().isString().withMessage('must be string value'),
+  body('icon').optional().isString().withMessage('must be string value'),
+  body('rpc.*').optional().isURL().withMessage('must be an array of URL'),
+  body('nativeTokenSymbol')
     .optional()
     .isString()
     .withMessage('must be string value'),
-  check('isEvm').optional().isBoolean().withMessage('must be boolean value'),
-  check('isTestnet')
-    .optional()
-    .isBoolean()
-    .withMessage('must be boolean value'),
-  check('isActive').optional().isBoolean().withMessage('must be boolean value'),
+  body('isEvm').optional().isBoolean().withMessage('must be boolean value'),
+  body('isTestnet').optional().isBoolean().withMessage('must be boolean value'),
+  body('isActive').optional().isBoolean().withMessage('must be boolean value'),
+  body('transactionExplorerUrl').optional().isURL().withMessage('must be URL'),
+  body('addressExplorerUrl').optional().isURL().withMessage('must be URL'),
+  body().custom((value, { req }) => {
+    validateFields(
+      req.body,
+      [
+        'chainId',
+        'caipId',
+        'label',
+        'icon',
+        'rpc',
+        'nativeTokenSymbol',
+        'isEvm',
+        'isTestnet',
+        'isActive',
+        'transactionExplorerUrl',
+        'addressExplorerUrl',
+      ],
+      'body'
+    );
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, ['blockchainId'], 'params');
+    return true;
+  }),
 ];
