@@ -3,6 +3,18 @@ import { body, query, param } from 'express-validator';
 export const createLiquidityWalletValidator = [
   body('walletAddress').isString().withMessage('must be string value'),
   body('chainId').isString().withMessage('must be string value'),
+  body().custom((value, { req }) => {
+    validateFields(req.body, ['walletAddress', 'chainId'], 'body');
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
 ];
 
 export const updateLiquidityWalletValidator = [
@@ -26,6 +38,22 @@ export const updateLiquidityWalletValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('should not be empty'),
+  body().custom((value, { req }) => {
+    validateFields(
+      req.body,
+      ['walletAddress', 'chainId', 'tokenId', 'amount'],
+      'body'
+    );
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
 ];
 
 export const getLiquidityWalletValidator = [
