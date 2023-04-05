@@ -75,7 +75,7 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
 
 router.get('/liquidity-provider', isRequired, async (req, res) => {
   let result = [];
-  const resultOffers = await offerCollection
+  const activeOffersForUser = await offerCollection
     .find({
       userId: res.locals.userId,
       isActive: true,
@@ -83,13 +83,13 @@ router.get('/liquidity-provider', isRequired, async (req, res) => {
     .toArray();
 
   await Promise.all(
-    resultOffers.map(async (offer) => {
-      const resultOrders = await collection
+    activeOffersForUser.map(async (offer) => {
+      const OrdersForUser = await collection
         .find({
           offerId: offer.offerId,
         })
         .toArray();
-      result.push(...resultOrders);
+      result.push(...OrdersForUser);
     })
   );
 
@@ -114,7 +114,7 @@ router.put(
       res.status(200).send(
         await collection.updateOne(order, {
           $set: {
-            isComplete: req.body.isComplete,
+            isComplete: true,
           },
         })
       );

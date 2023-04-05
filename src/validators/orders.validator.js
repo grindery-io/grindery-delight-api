@@ -1,4 +1,5 @@
 import { body, param, query } from 'express-validator';
+import { validateFields } from '../utils/validators-utils.js';
 
 export const createOrderValidator = [
   body('orderId')
@@ -36,6 +37,36 @@ export const createOrderValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body('hash')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body().custom((value, { req }) => {
+    validateFields(
+      req.body,
+      [
+        'orderId',
+        'amountTokenDeposit',
+        'addressTokenDeposit',
+        'chainIdTokenDeposit',
+        'destAddr',
+        'amountTokenOffer',
+        'offerId',
+        'hash',
+      ],
+      'body'
+    );
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
 ];
 
 export const getOrderByOrderIdValidator = [
@@ -60,9 +91,16 @@ export const setOrderStatusValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('isComplete')
-    .isBoolean()
-    .withMessage('must be boolean value')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  body().custom((value, { req }) => {
+    validateFields(req.body, ['orderId'], 'body');
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
 ];
