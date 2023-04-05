@@ -1,4 +1,5 @@
 import { body, query, param } from 'express-validator';
+import { validateFields } from '../utils/validators-utils.js';
 
 export const createLiquidityWalletValidator = [
   body('walletAddress').isString().withMessage('must be string value'),

@@ -43,8 +43,8 @@ router.get('/', isRequired, async (req, res) => {
   res.send(await collection.find({}).toArray()).status(200);
 });
 
-/* This is a GET request that returns all activated offers 
-and filter by depositChainId, depositTokenId, offerChain,offerToken */
+/* This is a GET request that returns all activated offers
+and filter by exchangeChainId, exchangeToken, chainId,token */
 router.get('/search', getOffersValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
@@ -53,10 +53,10 @@ router.get('/search', getOffersValidator, isRequired, async (req, res) => {
   let offers = await collection
     .find({
       isActive: true,
-      exchangeChainId: req.query.depositChainId,
-      exchangeToken: req.query.depositTokenId,
-      chainId: req.query.offerChain,
-      token: req.query.offerToken,
+      exchangeChainId: req.query.exchangeChainId,
+      exchangeToken: req.query.exchangeToken,
+      chainId: req.query.chainId,
+      token: req.query.token,
     })
     .toArray();
 
@@ -158,6 +158,22 @@ router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
             req.body.isActive === undefined
               ? offer.isActive
               : req.body.isActive,
+          exchangeRate: req.body.exchangeRate
+            ? req.body.exchangeRate
+            : offer.exchangeRate,
+          exchangeToken: req.body.exchangeToken
+            ? req.body.exchangeToken
+            : offer.exchangeToken,
+          exchangeChainId: req.body.exchangeChainId
+            ? req.body.exchangeChainId
+            : offer.exchangeChainId,
+          estimatedTime: req.body.estimatedTime
+            ? req.body.estimatedTime
+            : offer.estimatedTime,
+          provider: req.body.provider ? req.body.provider : offer.provider,
+          title: req.body.title ? req.body.title : offer.title,
+          image: req.body.image ? req.body.image : offer.image,
+          amount: req.body.amount ? req.body.amount : offer.amount,
         },
       })
     );

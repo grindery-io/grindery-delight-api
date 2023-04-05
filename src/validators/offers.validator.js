@@ -1,4 +1,5 @@
 import { body, param, query } from 'express-validator';
+import { validateFields } from '../utils/validators-utils.js';
 
 export const createOfferValidator = [
   body('chainId')
@@ -66,6 +67,48 @@ export const createOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body('provider')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('title').isString().withMessage('must be string value'),
+  body('image').isString().withMessage('must be string value'),
+  body('amount').isString().withMessage('must be string value'),
+  body().custom((value, { req }) => {
+    validateFields(
+      req.body,
+      [
+        'chainId',
+        'min',
+        'max',
+        'tokenId',
+        'token',
+        'tokenAddress',
+        'hash',
+        'exchangeRate',
+        'exchangeToken',
+        'exchangeChainId',
+        'estimatedTime',
+        'provider',
+        'offerId',
+        'isActive',
+        'title',
+        'image',
+        'amount',
+      ],
+      'body'
+    );
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
 ];
 
 export const getOfferByOfferIdValidator = [
@@ -85,11 +128,10 @@ export const getOfferByIdValidator = [
 ];
 
 export const getOffersValidator = [
-  query('depositChainId').notEmpty().withMessage('must not be empty'),
-  query('depositTokenId').notEmpty().withMessage('must not be empty'),
-  query('offerChain').notEmpty().withMessage('must not be empty'),
-  query('offerToken').notEmpty().withMessage('must not be empty'),
-  query('depositAmount').notEmpty().withMessage('must not be empty'),
+  query('exchangeChainId').notEmpty().withMessage('must not be empty'),
+  query('exchangeToken').notEmpty().withMessage('must not be empty'),
+  query('chainId').notEmpty().withMessage('must not be empty'),
+  query('token').notEmpty().withMessage('must not be empty'),
 ];
 
 export const deleteOfferValidator = [
@@ -97,5 +139,117 @@ export const deleteOfferValidator = [
 ];
 
 export const updateOfferValidator = [
-  body('offerId').notEmpty().withMessage('must not be empty'),
+  body('chainId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('min')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('max')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('tokenId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('token')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('tokenAddress')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('offerId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('isActive')
+    .optional()
+    .isBoolean()
+    .withMessage('must be boolean value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('estimatedTime')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('exchangeRate')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('exchangeToken')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('exchangeChainId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('provider')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('title').optional().isString().withMessage('must be string value'),
+  body('image').optional().isString().withMessage('must be string value'),
+  body('amount').optional().isString().withMessage('must be string value'),
+  body().custom((value, { req }) => {
+    validateFields(
+      req.body,
+      [
+        'chainId',
+        'min',
+        'max',
+        'tokenId',
+        'token',
+        'tokenAddress',
+        'exchangeRate',
+        'exchangeToken',
+        'exchangeChainId',
+        'estimatedTime',
+        'provider',
+        'offerId',
+        'isActive',
+        'title',
+        'image',
+        'amount',
+      ],
+      'body'
+    );
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
 ];
