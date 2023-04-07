@@ -1,4 +1,5 @@
 import { body, param, query, check, matchedData } from 'express-validator';
+import { validateFields } from '../utils/validators-utils.js';
 
 export const createTokenValidator = [
   body('coinmarketcapId')
@@ -36,6 +37,30 @@ export const createTokenValidator = [
     .withMessage('must be boolean value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body().custom((value, { req }) => {
+    validateFields(
+      req.body,
+      [
+        'coinmarketcapId',
+        'symbol',
+        'icon',
+        'chainId',
+        'address',
+        'isNative',
+        'isActive',
+      ],
+      'body'
+    );
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
 ];
 
 export const getTokenByIdValidator = [
@@ -52,14 +77,38 @@ export const modifyTokenValidator = [
     .withMessage('must be mongodb id')
     .notEmpty()
     .withMessage('must not be empty'),
-  check('coinmarketcapId')
+  body('coinmarketcapId')
     .optional()
     .isString()
     .withMessage('must be string value'),
-  check('symbol').optional().isString().withMessage('must be string value'),
-  check('icon').optional().isString().withMessage('must be string value'),
-  check('chainId').optional().isString().withMessage('must be string value'),
-  check('address').optional().isString().withMessage('must be string value'),
-  check('isNative').optional().isBoolean().withMessage('must be boolean value'),
-  check('isActive').optional().isBoolean().withMessage('must be boolean value'),
+  body('symbol').optional().isString().withMessage('must be string value'),
+  body('icon').optional().isString().withMessage('must be string value'),
+  body('chainId').optional().isString().withMessage('must be string value'),
+  body('address').optional().isString().withMessage('must be string value'),
+  body('isNative').optional().isBoolean().withMessage('must be boolean value'),
+  body('isActive').optional().isBoolean().withMessage('must be boolean value'),
+  body().custom((value, { req }) => {
+    validateFields(
+      req.body,
+      [
+        'coinmarketcapId',
+        'symbol',
+        'icon',
+        'chainId',
+        'address',
+        'isNative',
+        'isActive',
+      ],
+      'body'
+    );
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, ['tokenId'], 'params');
+    return true;
+  }),
 ];

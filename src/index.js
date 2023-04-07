@@ -134,3 +134,5 @@ app.use('/blockchains', blockchains);
 app.use('/tokens', tokens);
 app.use('/admins', admins);
 app.use('/view-blockchains', view_blockchains);
+
+export default app;
