@@ -175,7 +175,7 @@ export const updateOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('offerId')
+  param('offerId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -234,7 +234,6 @@ export const updateOfferValidator = [
         'exchangeChainId',
         'estimatedTime',
         'provider',
-        'offerId',
         'isActive',
         'title',
         'image',
@@ -249,7 +248,7 @@ export const updateOfferValidator = [
     return true;
   }),
   param().custom((value, { req }) => {
-    validateFields(req.params, [], 'params');
+    validateFields(req.params, ['offerId'], 'params');
     return true;
   }),
 ];
