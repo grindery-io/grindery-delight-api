@@ -8,6 +8,8 @@ import { mockedToken } from './mock.js';
 chai.use(chaiHttp);
 const expect = chai.expect;
 
+const collection = db.collection('offers');
+
 const offerId =
   '0x02689c291c6d392ab9c02fc2a459a08cc46cc816b77cec928c86109d37ed2843';
 
@@ -1364,6 +1366,356 @@ describe('Offers route', () => {
             'The following fields are not allowed in query: unknownField'
           );
       });
+    });
+  });
+
+  describe('GET all offers', () => {
+    it('Should return an array with the correct MongoDB elements', async function () {
+      // Transform each item in mongoData
+      const formattedData = (await collection.find({}).toArray()).map(
+        (item) => {
+          // Return a new object with the formatted fields
+          return {
+            ...item,
+            _id: item._id.toString(),
+            date: item.date.toISOString(),
+          };
+        }
+      );
+
+      const res = await chai
+        .request(app)
+        .get('/offers')
+        .set({ Authorization: `Bearer ${mockedToken}` });
+
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.deep.equal(formattedData);
+    });
+  });
+
+  describe('GET all active offers with filters', () => {
+    it('Should return only active offers', async function () {
+      this.timeout(50000);
+      const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
+      const nbrOffers = 5;
+      for (let i = 0; i < customOffer; i++) {
+        customOffer.offerId = `offerId-number${i}`;
+        // isActive est true pour les i pairs, false pour les i impairs
+        customOffer.isActive = i % 2 === 0;
+
+        const createResponse = await chai
+          .request(app)
+          .post('/offers')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(customOffer);
+        chai.expect(createResponse).to.have.status(200);
+      }
+
+      const query = {
+        exchangeChainId: offer.exchangeChainId,
+        exchangeToken: offer.exchangeToken,
+        chainId: offer.chainId,
+        token: offer.token,
+        depositAmount: '1',
+      };
+
+      const res = await chai
+        .request(app)
+        .get('/offers/search')
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query(query);
+
+      chai.expect(res).to.have.status(200);
+
+      for (const offer of res.body) {
+        chai.expect(offer.isActive).to.be.true;
+      }
+
+      for (let i = 0; i < customOffer; i++) {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/offers/offerId-number${i}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      }
+    });
+
+    it('Should return only offers with proper exchangeChainId', async function () {
+      this.timeout(50000);
+      const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
+      const nbrOffers = 5;
+      for (let i = 0; i < customOffer; i++) {
+        customOffer.offerId = `offerId-number${i}`;
+        // isActive est true pour les i pairs, false pour les i impairs
+        customOffer.isActive = i % 2 === 0;
+
+        const createResponse = await chai
+          .request(app)
+          .post('/offers')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(customOffer);
+        chai.expect(createResponse).to.have.status(200);
+      }
+
+      const query = {
+        exchangeChainId: offer.exchangeChainId,
+        exchangeToken: offer.exchangeToken,
+        chainId: offer.chainId,
+        token: offer.token,
+        depositAmount: '1',
+      };
+
+      const res = await chai
+        .request(app)
+        .get('/offers/search')
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query(query);
+
+      chai.expect(res).to.have.status(200);
+
+      for (const offer of res.body) {
+        chai.expect(offer.exchangeChainId).to.equal(offer.exchangeChainId);
+      }
+
+      for (let i = 0; i < customOffer; i++) {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/offers/offerId-number${i}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      }
+    });
+
+    it('Should return only offers with proper exchangeToken', async function () {
+      this.timeout(50000);
+      const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
+      const nbrOffers = 5;
+      for (let i = 0; i < customOffer; i++) {
+        customOffer.offerId = `offerId-number${i}`;
+        // isActive est true pour les i pairs, false pour les i impairs
+        customOffer.isActive = i % 2 === 0;
+
+        const createResponse = await chai
+          .request(app)
+          .post('/offers')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(customOffer);
+        chai.expect(createResponse).to.have.status(200);
+      }
+
+      const query = {
+        exchangeChainId: offer.exchangeChainId,
+        exchangeToken: offer.exchangeToken,
+        chainId: offer.chainId,
+        token: offer.token,
+        depositAmount: '1',
+      };
+
+      const res = await chai
+        .request(app)
+        .get('/offers/search')
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query(query);
+
+      chai.expect(res).to.have.status(200);
+
+      for (const offer of res.body) {
+        chai.expect(offer.exchangeToken).to.equal(offer.exchangeToken);
+      }
+
+      for (let i = 0; i < customOffer; i++) {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/offers/offerId-number${i}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      }
+    });
+
+    it('Should return only offers with proper chainId', async function () {
+      this.timeout(50000);
+      const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
+      const nbrOffers = 5;
+      for (let i = 0; i < customOffer; i++) {
+        customOffer.offerId = `offerId-number${i}`;
+        // isActive est true pour les i pairs, false pour les i impairs
+        customOffer.isActive = i % 2 === 0;
+
+        const createResponse = await chai
+          .request(app)
+          .post('/offers')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(customOffer);
+        chai.expect(createResponse).to.have.status(200);
+      }
+
+      const query = {
+        exchangeChainId: offer.exchangeChainId,
+        exchangeToken: offer.exchangeToken,
+        chainId: offer.chainId,
+        token: offer.token,
+        depositAmount: '1',
+      };
+
+      const res = await chai
+        .request(app)
+        .get('/offers/search')
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query(query);
+
+      chai.expect(res).to.have.status(200);
+
+      for (const offer of res.body) {
+        chai.expect(offer.chainId).to.equal(offer.chainId);
+      }
+
+      for (let i = 0; i < customOffer; i++) {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/offers/offerId-number${i}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      }
+    });
+
+    it('Should return only offers with proper token', async function () {
+      this.timeout(50000);
+      const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
+      const nbrOffers = 5;
+      for (let i = 0; i < customOffer; i++) {
+        customOffer.offerId = `offerId-number${i}`;
+        // isActive est true pour les i pairs, false pour les i impairs
+        customOffer.isActive = i % 2 === 0;
+
+        const createResponse = await chai
+          .request(app)
+          .post('/offers')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(customOffer);
+        chai.expect(createResponse).to.have.status(200);
+      }
+
+      const query = {
+        exchangeChainId: offer.exchangeChainId,
+        exchangeToken: offer.exchangeToken,
+        chainId: offer.chainId,
+        token: offer.token,
+        depositAmount: '1',
+      };
+
+      const res = await chai
+        .request(app)
+        .get('/offers/search')
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query(query);
+
+      chai.expect(res).to.have.status(200);
+
+      for (const offer of res.body) {
+        chai.expect(offer.token).to.equal(offer.token);
+      }
+
+      for (let i = 0; i < customOffer; i++) {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/offers/offerId-number${i}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      }
+    });
+
+    it('Should return only offers with min less than depositAmount/exchangeRate', async function () {
+      this.timeout(50000);
+      const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
+      const nbrOffers = 5;
+      for (let i = 0; i < customOffer; i++) {
+        customOffer.offerId = `offerId-number${i}`;
+        // isActive est true pour les i pairs, false pour les i impairs
+        customOffer.isActive = i % 2 === 0;
+
+        const createResponse = await chai
+          .request(app)
+          .post('/offers')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(customOffer);
+        chai.expect(createResponse).to.have.status(200);
+      }
+
+      const query = {
+        exchangeChainId: offer.exchangeChainId,
+        exchangeToken: offer.exchangeToken,
+        chainId: offer.chainId,
+        token: offer.token,
+        depositAmount: '1',
+      };
+
+      const res = await chai
+        .request(app)
+        .get('/offers/search')
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query(query);
+
+      chai.expect(res).to.have.status(200);
+
+      for (const offer of res.body) {
+        const rateAmount = query.depositAmount / offer.exchangeRate;
+        chai.expect(Number(offer.min)).to.be.at.most(rateAmount);
+      }
+
+      for (let i = 0; i < customOffer; i++) {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/offers/offerId-number${i}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      }
+    });
+
+    it('Should return only offers with max greater than depositAmount/exchangeRate', async function () {
+      this.timeout(50000);
+      const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
+      const nbrOffers = 5;
+      for (let i = 0; i < customOffer; i++) {
+        customOffer.offerId = `offerId-number${i}`;
+        // isActive est true pour les i pairs, false pour les i impairs
+        customOffer.isActive = i % 2 === 0;
+
+        const createResponse = await chai
+          .request(app)
+          .post('/offers')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(customOffer);
+        chai.expect(createResponse).to.have.status(200);
+      }
+
+      const query = {
+        exchangeChainId: offer.exchangeChainId,
+        exchangeToken: offer.exchangeToken,
+        chainId: offer.chainId,
+        token: offer.token,
+        depositAmount: '1',
+      };
+
+      const res = await chai
+        .request(app)
+        .get('/offers/search')
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query(query);
+
+      chai.expect(res).to.have.status(200);
+
+      for (const offer of res.body) {
+        const rateAmount = query.depositAmount / offer.exchangeRate;
+        chai.expect(Number(offer.max)).to.be.at.least(rateAmount);
+      }
+
+      for (let i = 0; i < customOffer; i++) {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/offers/offerId-number${i}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      }
     });
   });
 });
