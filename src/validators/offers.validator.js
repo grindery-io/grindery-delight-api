@@ -109,6 +109,14 @@ export const createOfferValidator = [
     validateFields(req.params, [], 'params');
     return true;
   }),
+  body().custom((value, { req }) => {
+    const { min, max } = req.body;
+    if (parseFloat(min) > parseFloat(max)) {
+      throw new Error('min must be less than max');
+    }
+    // validation is successful
+    return true;
+  }),
 ];
 
 export const getOfferByOfferIdValidator = [

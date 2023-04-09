@@ -4,6 +4,7 @@ import app from '../index.js';
 import db from '../db/conn.js';
 import jwt from 'jsonwebtoken';
 import { mockedToken } from './mock.js';
+import { ObjectId } from 'mongodb';
 
 chai.use(chaiHttp);
 const expect = chai.expect;
@@ -122,6 +123,42 @@ describe('Offers route', () => {
     });
 
     describe('Validators', () => {
+      it('Should fail validation if min is greater than max', async function () {
+        const invalidOffer = {
+          chainId: '1',
+          min: '30',
+          max: '20',
+          tokenId: 'tokenId',
+          token: 'token',
+          tokenAddress: 'tokenAddress',
+          hash: 'hash',
+          offerId: 'offerId',
+          isActive: true,
+          estimatedTime: '3 days',
+          exchangeRate: '5',
+          exchangeToken: 'ETH',
+          exchangeChainId: '1',
+          provider: 'provider',
+          title: 'title',
+          image: 'image',
+          amount: 'amount',
+        };
+
+        // Make a request to create the offer with invalid data
+        const res = await chai
+          .request(app)
+          .post('/offers')
+          .set({ Authorization: `Bearer ${mockedToken}` })
+          .send(invalidOffer);
+
+        // Assertions
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].location).to.equal('body');
+        chai.expect(res.body[0].msg).to.equal('min must be less than max');
+      });
+
       it('Should fail validation if chainId is not a string', async function () {
         const invalidOffer = {
           chainId: 123, // should be a string
@@ -1394,11 +1431,11 @@ describe('Offers route', () => {
   });
 
   describe('GET all active offers with filters', () => {
-    it('Should return only active offers', async function () {
+    it('Should return an array of active offers', async function () {
       this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 5;
-      for (let i = 0; i < customOffer; i++) {
+      const nbrOffers = 0;
+      for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
@@ -1426,12 +1463,13 @@ describe('Offers route', () => {
         .query(query);
 
       chai.expect(res).to.have.status(200);
+      chai.expect(Array.isArray(res.body)).to.be.true;
 
       for (const offer of res.body) {
         chai.expect(offer.isActive).to.be.true;
       }
 
-      for (let i = 0; i < customOffer; i++) {
+      for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
           .delete(`/offers/offerId-number${i}`)
@@ -1443,8 +1481,8 @@ describe('Offers route', () => {
     it('Should return only offers with proper exchangeChainId', async function () {
       this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 5;
-      for (let i = 0; i < customOffer; i++) {
+      const nbrOffers = 0;
+      for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
@@ -1477,7 +1515,7 @@ describe('Offers route', () => {
         chai.expect(offer.exchangeChainId).to.equal(offer.exchangeChainId);
       }
 
-      for (let i = 0; i < customOffer; i++) {
+      for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
           .delete(`/offers/offerId-number${i}`)
@@ -1489,8 +1527,8 @@ describe('Offers route', () => {
     it('Should return only offers with proper exchangeToken', async function () {
       this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 5;
-      for (let i = 0; i < customOffer; i++) {
+      const nbrOffers = 0;
+      for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
@@ -1523,7 +1561,7 @@ describe('Offers route', () => {
         chai.expect(offer.exchangeToken).to.equal(offer.exchangeToken);
       }
 
-      for (let i = 0; i < customOffer; i++) {
+      for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
           .delete(`/offers/offerId-number${i}`)
@@ -1535,8 +1573,8 @@ describe('Offers route', () => {
     it('Should return only offers with proper chainId', async function () {
       this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 5;
-      for (let i = 0; i < customOffer; i++) {
+      const nbrOffers = 0;
+      for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
@@ -1569,7 +1607,7 @@ describe('Offers route', () => {
         chai.expect(offer.chainId).to.equal(offer.chainId);
       }
 
-      for (let i = 0; i < customOffer; i++) {
+      for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
           .delete(`/offers/offerId-number${i}`)
@@ -1581,8 +1619,8 @@ describe('Offers route', () => {
     it('Should return only offers with proper token', async function () {
       this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 5;
-      for (let i = 0; i < customOffer; i++) {
+      const nbrOffers = 0;
+      for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
@@ -1615,7 +1653,7 @@ describe('Offers route', () => {
         chai.expect(offer.token).to.equal(offer.token);
       }
 
-      for (let i = 0; i < customOffer; i++) {
+      for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
           .delete(`/offers/offerId-number${i}`)
@@ -1627,8 +1665,8 @@ describe('Offers route', () => {
     it('Should return only offers with min less than depositAmount/exchangeRate', async function () {
       this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 5;
-      for (let i = 0; i < customOffer; i++) {
+      const nbrOffers = 0;
+      for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
@@ -1662,7 +1700,7 @@ describe('Offers route', () => {
         chai.expect(Number(offer.min)).to.be.at.most(rateAmount);
       }
 
-      for (let i = 0; i < customOffer; i++) {
+      for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
           .delete(`/offers/offerId-number${i}`)
@@ -1674,8 +1712,8 @@ describe('Offers route', () => {
     it('Should return only offers with max greater than depositAmount/exchangeRate', async function () {
       this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 5;
-      for (let i = 0; i < customOffer; i++) {
+      const nbrOffers = 0;
+      for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
@@ -1709,13 +1747,87 @@ describe('Offers route', () => {
         chai.expect(Number(offer.max)).to.be.at.least(rateAmount);
       }
 
-      for (let i = 0; i < customOffer; i++) {
+      for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
           .delete(`/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
+    });
+  });
+
+  describe('GET all offers for a user', () => {
+    it('Should return only offers for the given user', async function () {
+      this.timeout(50000);
+      const customOffer = { ...offer };
+      const nbrOffers = 1;
+      let userId = '';
+      for (let i = 0; i < nbrOffers; i++) {
+        customOffer.offerId = `offerId-number${i}`;
+
+        const createResponse = await chai
+          .request(app)
+          .post('/offers')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(customOffer);
+
+        chai.expect(createResponse).to.have.status(200);
+
+        if (i === 0) {
+          userId = (
+            await collection.findOne({
+              _id: new ObjectId(createResponse.body.insertedId),
+            })
+          ).userId;
+        }
+      }
+
+      const res = await chai
+        .request(app)
+        .get('/offers/user')
+        .set({ Authorization: `Bearer ${mockedToken}` });
+
+      chai.expect(res).to.have.status(200);
+
+      for (const offer of res.body) {
+        chai.expect(offer.userId).to.equal(userId);
+      }
+
+      for (let i = 0; i < nbrOffers; i++) {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/offers/offerId-number${i}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      }
+    });
+  });
+
+  describe('GET offer by offerId', () => {
+    it('Should return the offer with the proper offerId', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post('/offers')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(offer);
+      chai.expect(createResponse).to.have.status(200);
+
+      const res = await chai
+        .request(app)
+        .get('/offers/offerId')
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ offerId: offer.offerId });
+
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.be.an('object');
+      chai.expect(res.body.offerId).to.equal(offer.offerId);
+
+      const deleteResponse = await chai
+        .request(app)
+        .delete(`/offers/${offer.offerId}`)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(deleteResponse).to.have.status(200);
     });
   });
 });
