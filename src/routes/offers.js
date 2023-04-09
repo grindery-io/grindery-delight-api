@@ -88,7 +88,6 @@ router.get(
     res.status(200).send(
       await collection.findOne({
         offerId: req.query.offerId,
-        userId: res.locals.userId,
       })
     );
   }
