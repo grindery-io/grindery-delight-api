@@ -2788,5 +2788,417 @@ describe('Offers route', () => {
           .set('Authorization', `Bearer ${mockedToken}`);
       });
     });
+
+    describe('Validators', () => {
+      it('Should return an error if chainId is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            chainId: 1000,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('chainId');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+      it('Should return an error if chainId is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            chainId: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('chainId');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+      it('Should return an error if min is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            min: 1000,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('min');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+      it('Should return an error if min is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            min: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('min');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+      it('Should return an error if max is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            max: 1000,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('max');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if max is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            max: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('max');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+
+      it('Should return an error if tokenId is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            tokenId: 1000,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('tokenId');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if tokenId is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            tokenId: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('tokenId');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+
+      it('Should return an error if token is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            token: 1000,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('token');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if token is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            token: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('token');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+
+      it('Should return an error if tokenAddress is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            tokenAddress: 1234,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('tokenAddress');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if tokenAddress is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            tokenAddress: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('tokenAddress');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+
+      it('Should return an error if isActive is not a boolean', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            isActive: 'notBool',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('isActive');
+        chai.expect(res.body[0].msg).to.equal('must be boolean value');
+      });
+
+      it('Should return an error if isActive is an empty value', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            isActive: '',
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(2);
+        chai.expect(res.body[0].param).to.equal('isActive');
+        chai.expect(res.body[0].msg).to.equal('must be boolean value');
+        chai.expect(res.body[1].param).to.equal('isActive');
+        chai.expect(res.body[1].msg).to.equal('must not be empty');
+      });
+
+      it('Should return an error if estimatedTime is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            estimatedTime: 1234,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('estimatedTime');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if estimatedTime is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            estimatedTime: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('estimatedTime');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+
+      it('Should return an error if exchangeRate is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            exchangeRate: 1234,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('exchangeRate');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if exchangeRate is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            exchangeRate: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('exchangeRate');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+
+      it('Should return an error if exchangeChainId is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            exchangeChainId: 1234,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('exchangeChainId');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if exchangeChainId is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            exchangeChainId: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('exchangeChainId');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+
+      it('Should return an error if provider is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            provider: 1234,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('provider');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if provider is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            provider: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('provider');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
+      });
+
+      it('Should return an error if title is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            title: 1234,
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('title');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if image is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            image: 1234,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('image');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should return an error if amount is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            amount: 1234,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0].param).to.equal('amount');
+        chai.expect(res.body[0].msg).to.equal('must be string value');
+      });
+
+      it('Should throw an error if unknown fields are passed in the request body', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            unknownField: 'value',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai
+          .expect(res.body[0].msg)
+          .to.equal(
+            'The following fields are not allowed in body: unknownField'
+          );
+      });
+
+      it('Should throw an error if unknown fields are passed in the request query', async function () {
+        const res = await chai
+          .request(app)
+          .put('/offers/1234')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({ unknownField: 'value' });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body.length).to.equal(1);
+        chai
+          .expect(res.body[0].msg)
+          .to.equal(
+            'The following fields are not allowed in query: unknownField'
+          );
+      });
+    });
   });
 });
