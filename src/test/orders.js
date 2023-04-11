@@ -88,6 +88,7 @@ describe('Orders route', () => {
           .expect(getOrder.body.amountTokenOffer)
           .to.equal(order.amountTokenOffer);
         chai.expect(getOrder.body.hash).to.equal(order.hash);
+        chai.expect(getOrder.body.isComplete).to.equal(false);
 
         const deleteResponse = await chai
           .request(app)
@@ -519,6 +520,106 @@ describe('Orders route', () => {
             'The following fields are not allowed in query: unexpectedField'
           );
       });
+    });
+  });
+
+  describe('GET by user', () => {
+    it('Should return 403 if no token is provided', async function () {
+      const res = await chai.request(app).get('/orders/user');
+      chai.expect(res).to.have.status(403);
+    });
+
+    it('Should return only orders for the given user', async function () {
+      this.timeout(50000);
+      const customOrder = { ...order };
+      const nbrOrders = 1;
+      let userId = '';
+      for (let i = 0; i < nbrOrders; i++) {
+        customOrder.orderId = `orderId-number${i}`;
+
+        const createResponse = await chai
+          .request(app)
+          .post('/orders')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(customOrder);
+        chai.expect(createResponse).to.have.status(200);
+
+        if (i === 0) {
+          userId = (
+            await collection.findOne({
+              _id: new ObjectId(createResponse.body.insertedId),
+            })
+          ).userId;
+        }
+      }
+
+      const res = await chai
+        .request(app)
+        .get('/orders/user')
+        .set({ Authorization: `Bearer ${mockedToken}` });
+
+      chai.expect(res).to.have.status(200);
+
+      for (const order of res.body) {
+        chai.expect(order.userId).to.equal(userId);
+      }
+
+      for (let i = 0; i < nbrOrders; i++) {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/orders/orderId-number${i}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      }
+    });
+  });
+
+  describe('GET by orderId', () => {
+    it('Should return 403 if no token is provided', async function () {
+      const res = await chai
+        .request(app)
+        .get('/orders/orderId')
+        .query({ orderId: orderId });
+      chai.expect(res).to.have.status(403);
+    });
+
+    it('Should get an order corresponding to orderId', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post('/orders')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(order);
+      chai.expect(createResponse).to.have.status(200);
+
+      const res = await chai
+        .request(app)
+        .get('/orders/orderId')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ orderId: orderId });
+      chai.expect(res).to.have.status(200);
+
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.be.an('object');
+      chai.expect(res.body.orderId).to.equal(orderId);
+
+      const deleteResponse = await chai
+        .request(app)
+        .delete(`/orders/${orderId}`)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(deleteResponse).to.have.status(200);
+    });
+
+    it('Should return an empty string if no order exists', async function () {
+      const res = await chai
+        .request(app)
+        .get('/orders/orderId')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ orderId: orderId });
+      chai.expect(res).to.have.status(200);
+
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.be.an('object');
+      chai.expect(res.body).to.be.empty;
     });
   });
 });
