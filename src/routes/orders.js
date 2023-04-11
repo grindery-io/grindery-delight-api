@@ -6,6 +6,7 @@ import {
   getOrderByIdValidator,
   setOrderStatusValidator,
   getOrderByOrderIdValidator,
+  deleteOrderValidator,
 } from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -121,6 +122,29 @@ router.put(
     } else {
       res.status(404).send({
         msg: 'No order found.',
+      });
+    }
+  }
+);
+
+router.delete(
+  '/:orderId',
+  deleteOrderValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+    const order = await collection.findOne({
+      orderId: req.params.orderId,
+      userId: res.locals.userId,
+    });
+    if (order) {
+      res.status(200).send(await collection.deleteOne(order));
+    } else {
+      res.status(404).send({
+        msg: 'No order found',
       });
     }
   }

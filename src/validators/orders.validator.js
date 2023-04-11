@@ -104,3 +104,7 @@ export const setOrderStatusValidator = [
     return true;
   }),
 ];
+
+export const deleteOrderValidator = [
+  param('orderId').notEmpty().withMessage('must not be empty'),
+];

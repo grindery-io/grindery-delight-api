@@ -52,6 +52,10 @@ describe('Offers route', () => {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
+        chai.expect(createResponse.body).to.have.property('acknowledged').that
+          .is.true;
+        chai.expect(createResponse.body).to.have.property('insertedId').that.is
+          .not.empty;
 
         const deleteResponse = await chai
           .request(app)
