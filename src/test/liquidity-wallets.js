@@ -520,4 +520,77 @@ describe('Liquidity wallets route', () => {
       });
     });
   });
+
+  describe('GET liquidity wallet by MongoDbId', () => {
+    describe('Core of the route', () => {
+      it('Should return 403 if no token is provided', async function () {
+        const createResponse = await chai
+          .request(app)
+          .get('/liquidity-wallets/id/myId');
+        chai.expect(createResponse).to.have.status(403);
+      });
+
+      it('Should return a single liquidity wallet', async function () {
+        const createResponse = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(liquidityWallet);
+        chai.expect(createResponse).to.have.status(201);
+
+        const userId = (
+          await collection.findOne({
+            _id: new ObjectId(createResponse.body.insertedId),
+          })
+        ).userId;
+
+        const MongoDBId = createResponse.body.insertedId;
+
+        const res = await chai
+          .request(app)
+          .get(`/liquidity-wallets/id/${MongoDBId}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+        chai.expect(res).to.have.status(200);
+        chai.expect(res.body).to.be.an('object');
+        chai.expect(res.body._id).to.equal(MongoDBId);
+        chai.expect(res.body.userId).to.equal(userId);
+        chai
+          .expect(res.body.walletAddress)
+          .to.equal(liquidityWallet.walletAddress);
+        chai.expect(res.body.chainId).to.equal(liquidityWallet.chainId);
+
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/liquidity-wallets`)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            walletAddress: liquidityWallet.walletAddress,
+          });
+        chai.expect(deleteResponse).to.have.status(200);
+      });
+
+      it('Should return an empty object if no wallet exists', async function () {
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets/id/111111111111111111111111')
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+        chai.expect(res.body).to.be.an('object').that.is.empty;
+      });
+    });
+
+    describe('Validator', () => {
+      it('Should return a 400 status and an error message if id is not a MongoDbId', async function () {
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets/id/notAValidMongoDbId')
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body[0].msg).to.equal('must be mongodb id');
+      });
+    });
+  });
 });
