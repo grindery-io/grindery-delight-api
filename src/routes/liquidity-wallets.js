@@ -148,7 +148,7 @@ router.delete(
       res.status(200).send(await collection.deleteOne(wallet));
     } else {
       res.status(404).send({
-        msg: 'Not Found',
+        msg: 'No liquidity wallet found',
       });
     }
   }

@@ -593,4 +593,375 @@ describe('Liquidity wallets route', () => {
       });
     });
   });
+
+  describe('DELETE liquidity wallets', () => {
+    describe('Core of the route', () => {
+      it('Should return 403 if no token is provided', async function () {
+        const createResponse = await chai
+          .request(app)
+          .delete('/liquidity-wallets');
+        chai.expect(createResponse).to.have.status(403);
+      });
+
+      it('Should delete one liquidity wallet', async function () {
+        const createResponse = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(liquidityWallet);
+        chai.expect(createResponse).to.have.status(201);
+
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/liquidity-wallets`)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            walletAddress: liquidityWallet.walletAddress,
+          });
+        chai.expect(deleteResponse).to.have.status(200);
+        chai.expect(deleteResponse.body).to.be.an('object').that.deep.equals({
+          acknowledged: true,
+          deletedCount: 1,
+        });
+
+        chai.expect(
+          await collection.findOne({
+            _id: new ObjectId(createResponse.body.insertedId),
+          })
+        ).to.be.null;
+      });
+
+      it('Should return a 404 status and an error message if the wallet does not exist', async function () {
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/liquidity-wallets`)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            walletAddress: '0xnonexistentwalletaddress',
+          });
+        chai.expect(deleteResponse).to.have.status(404);
+        chai.expect(deleteResponse.body).to.be.an('object');
+        chai
+          .expect(deleteResponse.body.msg)
+          .to.equal('No liquidity wallet found');
+      });
+    });
+  });
+
+  describe('PUT liquidity wallets', () => {
+    describe('Core of the route', () => {
+      it('Should return 403 if no token is provided', async function () {
+        const createResponse = await chai
+          .request(app)
+          .put('/liquidity-wallets');
+        chai.expect(createResponse).to.have.status(403);
+      });
+
+      it('Should modify one liquidity wallet', async function () {
+        const createResponse = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(liquidityWallet);
+        chai.expect(createResponse).to.have.status(201);
+
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            tokenId: 'USDC',
+            amount: '3435',
+          });
+        chai.expect(res).to.have.status(201);
+        chai.expect(res.body).to.deep.equal({
+          acknowledged: true,
+          modifiedCount: 1,
+          upsertedId: null,
+          upsertedCount: 0,
+          matchedCount: 1,
+        });
+
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/liquidity-wallets`)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            walletAddress: liquidityWallet.walletAddress,
+          });
+        chai.expect(deleteResponse).to.have.status(200);
+      });
+
+      it('Should modify token amount of the liquidity wallet', async function () {
+        const createResponse = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(liquidityWallet);
+        chai.expect(createResponse).to.have.status(201);
+
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            tokenId: 'USDC',
+            amount: '3435',
+          });
+        chai.expect(res).to.have.status(201);
+        const wallet = await collection.findOne({
+          _id: new ObjectId(createResponse.body.insertedId),
+        });
+        chai.expect(wallet.tokens['USDC']).to.equal('3435');
+
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/liquidity-wallets`)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            walletAddress: liquidityWallet.walletAddress,
+          });
+        chai.expect(deleteResponse).to.have.status(200);
+      });
+
+      it('Should fail if liquidity wallet doesnt exist', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            walletAddress: 'unexpectedWalletAddress',
+            tokenId: 'USDC',
+            amount: '3435',
+          });
+
+        chai.expect(res).to.have.status(404);
+        chai
+          .expect(res.body)
+          .to.deep.equal({ msg: 'This liquidity wallet does not exist.' });
+      });
+
+      it('Should fail if walletAddress is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            walletAddress: 123,
+            tokenId: 'USDC',
+            amount: '3435',
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array').that.deep.includes({
+          value: 123,
+          msg: 'must be string value',
+          param: 'walletAddress',
+          location: 'body',
+        });
+      });
+
+      it('Should fail if walletAddress is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            walletAddress: '',
+            tokenId: 'USDC',
+            amount: '3435',
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array').that.deep.includes({
+          value: '',
+          msg: 'should not be empty',
+          param: 'walletAddress',
+          location: 'body',
+        });
+      });
+
+      it('Should return a validation error if chainId is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            chainId: 123,
+            tokenId: 'USDC',
+            amount: '3435',
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array').that.deep.includes({
+          value: 123,
+          msg: 'must be string value',
+          param: 'chainId',
+          location: 'body',
+        });
+      });
+
+      it('Should return a validation error if chainId is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            chainId: '',
+            tokenId: 'USDC',
+            amount: '3435',
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array').that.deep.includes({
+          value: '',
+          msg: 'should not be empty',
+          param: 'chainId',
+          location: 'body',
+        });
+      });
+
+      it('Should fail if tokenId is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            walletAddress: 'unexpectedWalletAddress',
+            chainId: '1',
+            tokenId: 123,
+            amount: '3435',
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array').that.is.not.empty;
+        chai
+          .expect(res.body[0])
+          .to.have.property('msg', 'must be string value');
+        chai.expect(res.body[0]).to.have.property('param', 'tokenId');
+        chai.expect(res.body[0]).to.have.property('location', 'body');
+      });
+
+      it('Should fail if tokenId is empty', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            walletAddress: 'unexpectedWalletAddress',
+            chainId: '1',
+            tokenId: '',
+            amount: '3435',
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array').that.is.not.empty;
+        chai.expect(res.body[0]).to.have.property('msg', 'should not be empty');
+        chai.expect(res.body[0]).to.have.property('param', 'tokenId');
+        chai.expect(res.body[0]).to.have.property('location', 'body');
+      });
+
+      it('Should return an error if amount is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            walletAddress: 'randomWalletAddress',
+            chainId: '1',
+            tokenId: 'USDC',
+            amount: 123,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.deep.equal([
+          {
+            value: 123,
+            msg: 'must be string value',
+            param: 'amount',
+            location: 'body',
+          },
+        ]);
+      });
+
+      it('Should return an error if amount is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            walletAddress: 'randomWalletAddress',
+            chainId: '1',
+            tokenId: 'USDC',
+            amount: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.deep.equal([
+          {
+            value: '',
+            msg: 'should not be empty',
+            param: 'amount',
+            location: 'body',
+          },
+        ]);
+      });
+
+      it('Should fail if body contains unexpected field', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            walletAddress: 'unexpectedWalletAddress',
+            tokenId: 'USDC',
+            amount: '3435',
+            unexpectedField: 'someValue',
+          });
+
+        expect(res).to.have.status(400);
+        expect(res.body).to.be.an('array');
+        expect(res.body[0].msg).to.equal(
+          'The following fields are not allowed in body: unexpectedField'
+        );
+      });
+
+      it('Should fail if unexpected field in query', async function () {
+        const res = await chai
+          .request(app)
+          .put('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            unexpectedField: 'someValue',
+          })
+          .send({
+            ...liquidityWallet,
+            walletAddress: 'myWalletAddress',
+            chainId: 'myChainId',
+            tokenId: 'USDC',
+            amount: '3435',
+          });
+
+        expect(res).to.have.status(400);
+        expect(res.body).to.be.an('array');
+        expect(res.body[0].msg).to.equal(
+          'The following fields are not allowed in query: unexpectedField'
+        );
+      });
+    });
+  });
 });

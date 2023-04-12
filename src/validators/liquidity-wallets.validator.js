@@ -93,8 +93,16 @@ export const getSingleLiquidityWalletValidator = [
 ];
 
 export const deleteLiquidityWalletValidator = [
-  query('walletAddress').notEmpty().withMessage('should not be empty'),
-  query('chainId').notEmpty().withMessage('should not be empty'),
+  query('walletAddress')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
+  query('chainId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
 ];
 
 export const getWalletByIdValidator = [
