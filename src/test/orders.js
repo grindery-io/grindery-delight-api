@@ -976,4 +976,172 @@ describe('Orders route', () => {
       chai.expect(res.body).to.deep.equal({ msg: 'No order found' });
     });
   });
+
+  describe('PUT order as complete', () => {
+    describe('Core of the route', () => {
+      it('Should return 403 if no token is provided', async function () {
+        const res = await chai.request(app).put('/orders/complete').send({
+          orderId: 'myOrderId',
+        });
+        chai.expect(res).to.have.status(403);
+      });
+
+      it('Should modify one order if the order was previously not completed', async function () {
+        const createResponse = await chai
+          .request(app)
+          .post('/orders')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(order);
+        chai.expect(createResponse).to.have.status(200);
+
+        const res = await chai
+          .request(app)
+          .put('/orders/complete')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            orderId: orderId,
+          });
+        chai.expect(res).to.have.status(200);
+        chai.expect(res.body).to.deep.equal({
+          acknowledged: true,
+          modifiedCount: 1,
+          upsertedId: null,
+          upsertedCount: 0,
+          matchedCount: 1,
+        });
+
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/orders/${orderId}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      });
+
+      it('Should modify no order if the order was previously completed', async function () {
+        const createResponse = await chai
+          .request(app)
+          .post('/orders')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(order);
+        chai.expect(createResponse).to.have.status(200);
+
+        const res = await chai
+          .request(app)
+          .put('/orders/complete')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            orderId: orderId,
+          });
+        chai.expect(res).to.have.status(200);
+
+        const res1 = await chai
+          .request(app)
+          .put('/orders/complete')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            orderId: orderId,
+          });
+        chai.expect(res1).to.have.status(200);
+        chai.expect(res1.body).to.deep.equal({
+          acknowledged: true,
+          modifiedCount: 0,
+          upsertedId: null,
+          upsertedCount: 0,
+          matchedCount: 1,
+        });
+
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/orders/${orderId}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      });
+
+      it('Should fail if no order exists', async function () {
+        const res = await chai
+          .request(app)
+          .put('/orders/complete')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            orderId: orderId,
+          });
+        chai.expect(res).to.have.status(404);
+        chai.expect(res.body).to.deep.equal({ msg: 'No order found.' });
+      });
+    });
+
+    describe('Validators', () => {
+      it('Should fail if orderId is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .put('/orders/complete')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            orderId: 123,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0]).to.have.property('param', 'orderId');
+        chai
+          .expect(res.body[0])
+          .to.have.property('msg', 'must be string value');
+      });
+
+      it('Should fail if orderId is empty', async function () {
+        const res = await chai
+          .request(app)
+          .put('/orders/complete')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            orderId: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0]).to.have.property('param', 'orderId');
+        chai.expect(res.body[0]).to.have.property('msg', 'must not be empty');
+      });
+
+      it('Should fail if unexpected field in body', async function () {
+        const res = await chai
+          .request(app)
+          .put('/orders/complete')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            orderId: '123',
+            unexpectedField: 'Unexpected field',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body.length).to.equal(1);
+        chai
+          .expect(res.body[0])
+          .to.have.property(
+            'msg',
+            'The following fields are not allowed in body: unexpectedField'
+          );
+        chai.expect(res.body[0]).to.have.property('location', 'body');
+      });
+
+      it('Should fail if unexpected field in query', async function () {
+        const res = await chai
+          .request(app)
+          .put('/orders/complete')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            orderId: '123',
+          })
+          .query({
+            unexpectedField: 'Unexpected field',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0]).to.have.property('location', 'query');
+        chai
+          .expect(res.body[0])
+          .to.have.property(
+            'msg',
+            'The following fields are not allowed in query: unexpectedField'
+          );
+      });
+    });
+  });
 });
