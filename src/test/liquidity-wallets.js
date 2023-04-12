@@ -133,6 +133,116 @@ describe('Liquidity wallets route', () => {
       });
     });
 
-    describe('Validators', () => {});
+    describe('Validators', () => {
+      it('Should fail if walletAddress is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            walletAddress: 123,
+            chainId: 'myChainId',
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0]).to.have.property('param', 'walletAddress');
+        chai
+          .expect(res.body[0])
+          .to.have.property('msg', 'must be string value');
+      });
+
+      it('Should fail if walletAddress is empty', async function () {
+        const res = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            ...liquidityWallet,
+            walletAddress: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0]).to.have.property('param', 'walletAddress');
+        chai.expect(res.body[0]).to.have.property('msg', 'should not be empty');
+      });
+
+      it('Should fail if chainId is not a string', async function () {
+        const res = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            walletAddress: 'myWalletAddress',
+            chainId: 123,
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0]).to.have.property('param', 'chainId');
+        chai
+          .expect(res.body[0])
+          .to.have.property('msg', 'must be string value');
+      });
+
+      it('Should fail if chainId is empty', async function () {
+        const res = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            walletAddress: 'myWalletAddress',
+            chainId: '',
+          });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0]).to.have.property('param', 'chainId');
+        chai.expect(res.body[0]).to.have.property('msg', 'should not be empty');
+      });
+
+      it('Should return an error if unexpected field in body', async function () {
+        const response = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            walletAddress: 'myWalletAddress',
+            chainId: 'myChainId',
+            unexpectedField: 'unexpectedValue',
+          });
+        chai.expect(response).to.have.status(400);
+        chai.expect(response.body).to.deep.equal([
+          {
+            value: {
+              walletAddress: 'myWalletAddress',
+              chainId: 'myChainId',
+              unexpectedField: 'unexpectedValue',
+            },
+            msg: 'The following fields are not allowed in body: unexpectedField',
+            param: '',
+            location: 'body',
+          },
+        ]);
+      });
+
+      it('Should fail with unexpected field in query', async function () {
+        const response = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(liquidityWallet)
+          .query({ unexpectedField: 'unexpectedValue' });
+        chai.expect(response).to.have.status(400);
+        chai.expect(response.body).to.deep.equal([
+          {
+            value: {
+              unexpectedField: 'unexpectedValue',
+            },
+            msg: 'The following fields are not allowed in query: unexpectedField',
+            param: '',
+            location: 'query',
+          },
+        ]);
+      });
+    });
   });
 });

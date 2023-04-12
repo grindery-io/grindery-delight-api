@@ -2,8 +2,16 @@ import { body, query, param } from 'express-validator';
 import { validateFields } from '../utils/validators-utils.js';
 
 export const createLiquidityWalletValidator = [
-  body('walletAddress').isString().withMessage('must be string value'),
-  body('chainId').isString().withMessage('must be string value'),
+  body('walletAddress')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
+  body('chainId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
   body().custom((value, { req }) => {
     validateFields(req.body, ['walletAddress', 'chainId'], 'body');
     return true;
