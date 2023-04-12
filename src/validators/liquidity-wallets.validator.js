@@ -66,7 +66,11 @@ export const updateLiquidityWalletValidator = [
 ];
 
 export const getLiquidityWalletValidator = [
-  query('chainId').notEmpty().withMessage('should not be empty'),
+  query('chainId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('should not be empty'),
 ];
 
 export const getSingleLiquidityWalletValidator = [

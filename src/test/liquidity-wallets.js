@@ -245,4 +245,94 @@ describe('Liquidity wallets route', () => {
       });
     });
   });
+
+  describe('GET by chainId', () => {
+    describe('Core of the route', () => {
+      it('Should return 403 if no token is provided', async function () {
+        const createResponse = await chai
+          .request(app)
+          .get('/liquidity-wallets')
+          .query({ chainId: liquidityWallet.chainId });
+        chai.expect(createResponse).to.have.status(403);
+      });
+
+      it('Should return empty array if no offer available', async function () {
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({ chainId: liquidityWallet.chainId });
+        chai.expect(res).to.have.status(200);
+        chai.expect(res.body).to.be.an('array').that.is.empty;
+      });
+
+      it('Should return an array of liquidity wallets with the proper chainId', async function () {
+        const nbrLiquidityWallet = 1;
+        let wallets = [];
+        let userId = '';
+        for (let i = 0; i < nbrLiquidityWallet; i++) {
+          const createResponse = await chai
+            .request(app)
+            .post('/liquidity-wallets')
+            .set('Authorization', `Bearer ${mockedToken}`)
+            .send({
+              chainId: liquidityWallet.chainId,
+              walletAddress: `${liquidityWallet.walletAddress}-${i}`,
+            });
+          chai.expect(createResponse).to.have.status(201);
+
+          wallets.push(
+            await collection.findOne({
+              _id: new ObjectId(createResponse.body.insertedId),
+            })
+          );
+
+          if (i === 0) {
+            userId = (
+              await collection.findOne({
+                _id: new ObjectId(createResponse.body.insertedId),
+              })
+            ).userId;
+          }
+        }
+
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({ chainId: liquidityWallet.chainId });
+        chai.expect(res).to.have.status(200);
+        chai.expect(res.body).to.be.an('array').that.is.not.empty;
+        res.body.forEach((wallet) => {
+          chai.expect(wallet.chainId).to.equal(liquidityWallet.chainId);
+        });
+
+        for (let i = 0; i < nbrLiquidityWallet; i++) {
+          const deleteResponse = await chai
+            .request(app)
+            .delete(`/liquidity-wallets`)
+            .set('Authorization', `Bearer ${mockedToken}`)
+            .query({
+              chainId: liquidityWallet.chainId,
+              walletAddress: `${liquidityWallet.walletAddress}-${i}`,
+            });
+          chai.expect(deleteResponse).to.have.status(200);
+        }
+      });
+    });
+
+    describe('Validators', () => {
+      it('Should return a 400 error if `chainId` is empty', async function () {
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({ chainId: '' });
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body.length).to.equal(1);
+        chai.expect(res.body[0]).to.have.property('param', 'chainId');
+        chai.expect(res.body[0]).to.have.property('msg', 'should not be empty');
+      });
+    });
+  });
 });
