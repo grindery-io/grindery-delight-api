@@ -386,4 +386,138 @@ describe('Liquidity wallets route', () => {
       chai.expect(deleteResponse).to.have.status(200);
     });
   });
+
+  describe('GET single liquidity wallets', () => {
+    describe('Core of the route', () => {
+      it('Should return a single liquidity wallet (without walletAddress in the query)', async function () {
+        const createResponse = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(liquidityWallet);
+        chai.expect(createResponse).to.have.status(201);
+
+        const userId = (
+          await collection.findOne({
+            _id: new ObjectId(createResponse.body.insertedId),
+          })
+        ).userId;
+
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets/single')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({ chainId: liquidityWallet.chainId, userId: userId });
+        chai.expect(res).to.have.status(200);
+        chai.expect(res.body).to.be.an('object');
+        chai.expect(res.body.userId).to.equal(userId);
+        chai
+          .expect(res.body.walletAddress)
+          .to.equal(liquidityWallet.walletAddress);
+        chai.expect(res.body.chainId).to.equal(liquidityWallet.chainId);
+
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/liquidity-wallets`)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            walletAddress: liquidityWallet.walletAddress,
+          });
+        chai.expect(deleteResponse).to.have.status(200);
+      });
+
+      it('Should return a single liquidity wallet (with walletAddress in the query)', async function () {
+        const createResponse = await chai
+          .request(app)
+          .post('/liquidity-wallets')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(liquidityWallet);
+        chai.expect(createResponse).to.have.status(201);
+
+        const userId = (
+          await collection.findOne({
+            _id: new ObjectId(createResponse.body.insertedId),
+          })
+        ).userId;
+
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets/single')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            userId: userId,
+            walletAddress: liquidityWallet.walletAddress,
+          });
+        chai.expect(res).to.have.status(200);
+        chai.expect(res.body).to.be.an('object');
+        chai.expect(res.body.userId).to.equal(userId);
+        chai
+          .expect(res.body.walletAddress)
+          .to.equal(liquidityWallet.walletAddress);
+        chai.expect(res.body.chainId).to.equal(liquidityWallet.chainId);
+
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/liquidity-wallets`)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            walletAddress: liquidityWallet.walletAddress,
+          });
+        chai.expect(deleteResponse).to.have.status(200);
+      });
+    });
+
+    describe('Validators', () => {
+      it('Should return a 400 status and an error message when walletAddress is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets/single')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            userId: 'myUserId',
+            walletAddress: '',
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body[0].msg).to.equal('should not be empty');
+      });
+
+      it('Should return a 400 status and an error message when chainId is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets/single')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: '',
+            userId: 'myUserId',
+            walletAddress: liquidityWallet.walletAddress,
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body[0].msg).to.equal('should not be empty');
+      });
+
+      it('Should return a 400 status and an error message when userId is an empty string', async function () {
+        const res = await chai
+          .request(app)
+          .get('/liquidity-wallets/single')
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .query({
+            chainId: liquidityWallet.chainId,
+            userId: '',
+            walletAddress: liquidityWallet.walletAddress,
+          });
+
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai.expect(res.body[0].msg).to.equal('should not be empty');
+      });
+    });
+  });
 });

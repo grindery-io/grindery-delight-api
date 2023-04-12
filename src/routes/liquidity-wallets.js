@@ -99,41 +99,41 @@ router.get('/all', isRequired, async (req, res) => {
     .send(await collection.find({ userId: res.locals.userId }).toArray());
 });
 
-/* This is a route that is used to get a single wallet. */
-router.get(
-  '/single',
-  getSingleLiquidityWalletValidator,
-  //isRequired,
-  async (req, res) => {
-    const validator = validateResult(req, res);
-    if (validator.length) {
-      return res.status(400).send(validator);
-    }
-    const query = {
-      chainId: req.query.chainId,
-      userId: req.query.userId,
-    };
-    if (req.query.walletAddress)
-      query['walletAddress'] = req.query.walletAddress;
-    res.status(200).send(await collection.findOne(query));
-  }
-);
-
-// router.get('/single', getSingleLiquidityWalletValidator, async (req, res) => {
-//   const validator = validateResult(req, res);
-//   if (validator.length) {
-//     return res.status(400).send(validator);
-//   }
-//   res.status(200).send(
-//     await collection.findOne({
+// /* This is a route that is used to get a single wallet. */
+// router.get(
+//   '/single',
+//   getSingleLiquidityWalletValidator,
+//   //isRequired,
+//   async (req, res) => {
+//     const validator = validateResult(req, res);
+//     if (validator.length) {
+//       return res.status(400).send(validator);
+//     }
+//     const query = {
 //       chainId: req.query.chainId,
 //       userId: req.query.userId,
-//       ...(req.query.walletAddress && {
-//         walletAddress: req.query.walletAddress,
-//       }),
-//     })
-//   );
-// });
+//     };
+//     if (req.query.walletAddress)
+//       query['walletAddress'] = req.query.walletAddress;
+//     res.status(200).send(await collection.findOne(query));
+//   }
+// );
+
+router.get('/single', getSingleLiquidityWalletValidator, async (req, res) => {
+  const validator = validateResult(req, res);
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+  res.status(200).send(
+    await collection.findOne({
+      chainId: req.query.chainId,
+      userId: req.query.userId,
+      ...(req.query.walletAddress && {
+        walletAddress: req.query.walletAddress,
+      }),
+    })
+  );
+});
 
 /* This is a route that is used to get a single wallet. */
 router.get('/id/:id', getWalletByIdValidator, isRequired, async (req, res) => {
