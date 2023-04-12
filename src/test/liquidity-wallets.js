@@ -335,4 +335,55 @@ describe('Liquidity wallets route', () => {
       });
     });
   });
+
+  describe('GET all liquidity wallets', () => {
+    it('Should return 403 if no token is provided', async function () {
+      const createResponse = await chai
+        .request(app)
+        .get('/liquidity-wallets/all');
+      chai.expect(createResponse).to.have.status(403);
+    });
+
+    it('Should return an array with all the liquidity wallets', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post('/liquidity-wallets')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(liquidityWallet);
+      chai.expect(createResponse).to.have.status(201);
+
+      const userId = (
+        await collection.findOne({
+          _id: new ObjectId(createResponse.body.insertedId),
+        })
+      ).userId;
+
+      const res = await chai
+        .request(app)
+        .get('/liquidity-wallets/all')
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      const wallets = await collection.find({ userId: userId }).toArray();
+
+      // Check that all objects in the response body have chainId and walletAddress elements that exist in wallets
+      res.body.forEach((wallet) => {
+        chai.expect(wallet.chainId).to.be.oneOf(wallets.map((w) => w.chainId));
+        chai
+          .expect(wallet.walletAddress)
+          .to.be.oneOf(wallets.map((w) => w.walletAddress));
+        chai.expect(wallet.userId).to.equal(userId);
+      });
+
+      const deleteResponse = await chai
+        .request(app)
+        .delete(`/liquidity-wallets`)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({
+          chainId: liquidityWallet.chainId,
+          walletAddress: liquidityWallet.walletAddress,
+        });
+      chai.expect(deleteResponse).to.have.status(200);
+    });
+  });
 });
