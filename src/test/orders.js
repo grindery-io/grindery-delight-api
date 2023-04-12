@@ -916,4 +916,64 @@ describe('Orders route', () => {
       }
     });
   });
+
+  describe('DELETE order by orderId', () => {
+    it('Should return 403 if no token is provided', async function () {
+      const res = await chai.request(app).delete('/orders/myOrderId');
+      chai.expect(res).to.have.status(403);
+    });
+
+    it('Should delete one order', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post('/orders')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(order);
+
+      chai.expect(createResponse).to.have.status(200);
+
+      const deleteResponse = await chai
+        .request(app)
+        .delete(`/orders/${orderId}`)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(deleteResponse).to.have.status(200);
+      chai.expect(deleteResponse.body.acknowledged).to.be.true;
+      chai.expect(deleteResponse.body.deletedCount).to.equal(1);
+    });
+
+    it('Should delete the appropriate order', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post('/orders')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(order);
+
+      chai.expect(createResponse).to.have.status(200);
+      chai.expect(
+        await collection.findOne({
+          _id: new ObjectId(createResponse.body.insertedId),
+        })
+      ).to.not.be.empty;
+
+      const deleteResponse = await chai
+        .request(app)
+        .delete(`/orders/${orderId}`)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(deleteResponse).to.have.status(200);
+      chai.expect(
+        await collection.findOne({
+          _id: new ObjectId(createResponse.body.insertedId),
+        })
+      ).to.be.null;
+    });
+
+    it('Should return 404 with message if no order found', async function () {
+      const res = await chai
+        .request(app)
+        .delete('/orders/myOrderId')
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(404);
+      chai.expect(res.body).to.deep.equal({ msg: 'No order found' });
+    });
+  });
 });
