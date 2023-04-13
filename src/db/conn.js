@@ -11,5 +11,9 @@ try {
 } catch (e) {
   console.error(e);
 }
-let db = conn.db('grindery-delight');
+let db = conn.db(
+  process.env.NODE_ENV === 'test'
+    ? 'grindery-delight-tests'
+    : 'grindery-delight'
+);
 export default db;
