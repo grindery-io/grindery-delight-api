@@ -77,37 +77,6 @@ router.get(
 );
 
 router.put(
-  '/chainId/:blockchainId',
-  modifyBlockchainValidator,
-  isRequired,
-  async (req, res) => {
-    const validator = validateResult(req, res);
-    if (
-      validator.length ||
-      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
-    ) {
-      return res.status(400).send(validator);
-    }
-    const blockchain = await collection.findOne({
-      _id: new ObjectId(req.params.blockchainId),
-    });
-    if (blockchain) {
-      res.status(200).send(
-        await collection.updateOne(blockchain, {
-          $set: {
-            chainId: req.body.chainId ? req.body.chainId : blockchain.chainId,
-          },
-        })
-      );
-    } else {
-      res.status(404).send({
-        msg: 'No blockchain found',
-      });
-    }
-  }
-);
-
-router.put(
   '/:blockchainId',
   modifyBlockchainValidator,
   isRequired,
