@@ -113,51 +113,39 @@ router.put(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    if (
-      validator.length ||
-      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
-    ) {
+    const user = await collectionAdmin.findOne({ userId: res.locals.userId });
+    if (validator.length || !user) {
       return res.status(400).send(validator);
     }
+
     const blockchain = await collection.findOne({
       _id: new ObjectId(req.params.blockchainId),
     });
-    if (blockchain) {
-      res.status(200).send(
-        await collection.updateOne(blockchain, {
-          $set: {
-            chainId: req.body.chainId ? req.body.chainId : blockchain.chainId,
-            caipId: req.body.caipId ? req.body.caipId : blockchain.caipId,
-            label: req.body.label ? req.body.label : blockchain.label,
-            icon: req.body.icon ? req.body.icon : blockchain.icon,
-            rpc: req.body.rpc ? req.body.rpc : blockchain.rpc,
-            nativeTokenSymbol: req.body.nativeTokenSymbol
-              ? req.body.nativeTokenSymbol
-              : blockchain.nativeTokenSymbol,
-            isEvm:
-              req.body.isEvm === undefined ? blockchain.isEvm : req.body.isEvm,
-            isTestnet:
-              req.body.isTestnet === undefined
-                ? blockchain.isTestnet
-                : req.body.isTestnet,
-            isActive:
-              req.body.isActive === undefined
-                ? blockchain.isActive
-                : req.body.isActive,
-            transactionExplorerUrl: req.body.transactionExplorerUrl
-              ? req.body.transactionExplorerUrl
-              : blockchain.transactionExplorerUrl,
-            addressExplorerUrl: req.body.addressExplorerUrl
-              ? req.body.addressExplorerUrl
-              : blockchain.addressExplorerUrl,
-          },
-        })
-      );
-    } else {
-      res.status(404).send({
-        msg: 'No blockchain found',
-      });
+    if (!blockchain) {
+      return res.status(404).send({ msg: 'No blockchain found' });
     }
+
+    res.status(200).send(
+      await collection.updateOne(blockchain, {
+        $set: {
+          chainId: req.body.chainId || blockchain.chainId,
+          caipId: req.body.caipId || blockchain.caipId,
+          label: req.body.label || blockchain.label,
+          icon: req.body.icon || blockchain.icon,
+          rpc: req.body.rpc || blockchain.rpc,
+          nativeTokenSymbol:
+            req.body.nativeTokenSymbol || blockchain.nativeTokenSymbol,
+          isEvm: req.body.isEvm ?? blockchain.isEvm,
+          isTestnet: req.body.isTestnet ?? blockchain.isTestnet,
+          isActive: req.body.isActive ?? blockchain.isActive,
+          transactionExplorerUrl:
+            req.body.transactionExplorerUrl ||
+            blockchain.transactionExplorerUrl,
+          addressExplorerUrl:
+            req.body.addressExplorerUrl || blockchain.addressExplorerUrl,
+        },
+      })
+    );
   }
 );
 
