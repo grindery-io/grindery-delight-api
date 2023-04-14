@@ -108,3 +108,40 @@ export const testUnexpectedField = ({
     ).to.be.true;
   });
 };
+
+export const testNonCaipId = ({ method, path, body, query, field }) => {
+  it(`Should fail if ${field} is not caipId format`, async function () {
+    const res = await chai
+      .request(app)
+      [method](path)
+      .set('Authorization', `Bearer ${mockedToken}`)
+      .send(body)
+      .query(query);
+    chai.expect(res).to.have.status(400);
+    chai.expect(res.body).to.be.an('array');
+    chai.expect(
+      res.body.some(
+        (err) =>
+          err.msg ===
+            'caipId field does not match the CAIP-2 specifications.' &&
+          err.param === field
+      )
+    ).to.be.true;
+  });
+};
+
+export const testNonURL = ({ method, path, body, query, field }) => {
+  it(`Should fail if ${field} is not URL`, async function () {
+    const res = await chai
+      .request(app)
+      [method](path)
+      .set('Authorization', `Bearer ${mockedToken}`)
+      .send(body)
+      .query(query);
+    chai.expect(res).to.have.status(400);
+    chai.expect(res.body).to.be.an('array');
+    chai.expect(
+      res.body.some((err) => err.msg === 'must be URL' && err.param === field)
+    ).to.be.true;
+  });
+};

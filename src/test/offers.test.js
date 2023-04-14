@@ -16,10 +16,9 @@ chai.use(chaiHttp);
 const expect = chai.expect;
 
 const collection = db.collection('offers');
-
+const offerPath = '/offers';
 const offerId =
   '0x02689c291c6d392ab9c02fc2a459a08cc46cc816b77cec928c86109d37ed2843';
-
 const offer = {
   chainId: '97',
   min: '0.02',
@@ -46,7 +45,7 @@ describe('Offers route', () => {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .send(offer);
         chai.expect(createResponse).to.have.status(403);
       });
@@ -54,7 +53,7 @@ describe('Offers route', () => {
       it('Should POST a new offer if all fields are completed and no existing offer', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -73,7 +72,7 @@ describe('Offers route', () => {
       it('Should POST a new offer if all fields are completed and no existing offer (with correct fields)', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -117,14 +116,14 @@ describe('Offers route', () => {
       it('Should fail if same offerId exists', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
 
         const createDuplicateResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createDuplicateResponse).to.have.status(404);
@@ -165,7 +164,7 @@ describe('Offers route', () => {
         // Make a request to create the offer with invalid data
         const res = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set({ Authorization: `Bearer ${mockedToken}` })
           .send(invalidOffer);
 
@@ -201,7 +200,7 @@ describe('Offers route', () => {
         if (testCase !== 'isActive') {
           testNonString({
             method: 'post',
-            path: '/offers',
+            path: offerPath,
             body: {
               ...offer,
               [testCase]: 123,
@@ -218,7 +217,7 @@ describe('Offers route', () => {
         ) {
           testNonEmpty({
             method: 'post',
-            path: '/offers',
+            path: offerPath,
             body: {
               ...offer,
               [testCase]: '',
@@ -231,7 +230,7 @@ describe('Offers route', () => {
 
       testNonBoolean({
         method: 'post',
-        path: '/offers',
+        path: offerPath,
         body: {
           ...offer,
           isActive: 123,
@@ -242,7 +241,7 @@ describe('Offers route', () => {
 
       testUnexpectedField({
         method: 'post',
-        path: '/offers',
+        path: offerPath,
         body: {
           ...offer,
           unexpectedField: 'Unexpected field',
@@ -254,7 +253,7 @@ describe('Offers route', () => {
 
       testUnexpectedField({
         method: 'post',
-        path: '/offers',
+        path: offerPath,
         body: {
           ...offer,
         },
@@ -267,7 +266,7 @@ describe('Offers route', () => {
 
   describe('GET all offers', () => {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get('/offers');
+      const res = await chai.request(app).get(offerPath);
       chai.expect(res).to.have.status(403);
     });
 
@@ -286,7 +285,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers')
+        .get(offerPath)
         .set({ Authorization: `Bearer ${mockedToken}` });
 
       chai.expect(res).to.have.status(200);
@@ -317,7 +316,7 @@ describe('Offers route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(createResponse).to.have.status(200);
@@ -364,7 +363,7 @@ describe('Offers route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(createResponse).to.have.status(200);
@@ -410,7 +409,7 @@ describe('Offers route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(createResponse).to.have.status(200);
@@ -456,7 +455,7 @@ describe('Offers route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(createResponse).to.have.status(200);
@@ -502,7 +501,7 @@ describe('Offers route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(createResponse).to.have.status(200);
@@ -548,7 +547,7 @@ describe('Offers route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(createResponse).to.have.status(200);
@@ -595,7 +594,7 @@ describe('Offers route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(createResponse).to.have.status(200);
@@ -665,7 +664,7 @@ describe('Offers route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
 
@@ -713,7 +712,7 @@ describe('Offers route', () => {
     it('Should return the offer with the proper offerId', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/offers')
+        .post(offerPath)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
       chai.expect(createResponse).to.have.status(200);
@@ -759,7 +758,7 @@ describe('Offers route', () => {
     it('Should return the offer with the proper MongoDB id', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/offers')
+        .post(offerPath)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
       chai.expect(createResponse).to.have.status(200);
@@ -788,7 +787,7 @@ describe('Offers route', () => {
     it('Should return the offer with the proper userId', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/offers')
+        .post(offerPath)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
       chai.expect(createResponse).to.have.status(200);
@@ -836,7 +835,7 @@ describe('Offers route', () => {
     it('Should delete one offer', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/offers')
+        .post(offerPath)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
       chai.expect(createResponse).to.have.status(200);
@@ -854,7 +853,7 @@ describe('Offers route', () => {
     it('Should delete the appropriate offer', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/offers')
+        .post(offerPath)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
       chai.expect(createResponse).to.have.status(200);
@@ -894,7 +893,7 @@ describe('Offers route', () => {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -926,7 +925,7 @@ describe('Offers route', () => {
       it('Should modify only one offer', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -955,7 +954,7 @@ describe('Offers route', () => {
       it('Should modify all offer fields', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1012,7 +1011,7 @@ describe('Offers route', () => {
       it('Should modify only the chainId field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1054,7 +1053,7 @@ describe('Offers route', () => {
       it('Should modify only min field of an offer', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1096,7 +1095,7 @@ describe('Offers route', () => {
       it('Should modify only max field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1138,7 +1137,7 @@ describe('Offers route', () => {
       it('Should modify only tokenId field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1180,7 +1179,7 @@ describe('Offers route', () => {
       it('Should modify only the token field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1222,7 +1221,7 @@ describe('Offers route', () => {
       it('Should modify only tokenAddress field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1264,7 +1263,7 @@ describe('Offers route', () => {
       it('Should modify isActive field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1306,7 +1305,7 @@ describe('Offers route', () => {
       it('Should modify the exchangeRate field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1348,7 +1347,7 @@ describe('Offers route', () => {
       it('Should modify the exchangeToken field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1390,7 +1389,7 @@ describe('Offers route', () => {
       it('Should modify the exchangeChainId field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1432,7 +1431,7 @@ describe('Offers route', () => {
       it('Should modify only estimatedTime field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1474,7 +1473,7 @@ describe('Offers route', () => {
       it('Should modify only provider field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1516,7 +1515,7 @@ describe('Offers route', () => {
       it('Should modify the title field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1558,7 +1557,7 @@ describe('Offers route', () => {
       it('Should modify only the image field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
@@ -1600,7 +1599,7 @@ describe('Offers route', () => {
       it('Should modify the amount field', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/offers')
+          .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createResponse).to.have.status(200);
