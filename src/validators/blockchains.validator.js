@@ -106,7 +106,12 @@ export const modifyBlockchainValidator = [
     .withMessage('must be mongodb id')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('chainId').optional().isString().withMessage('must be string value'),
+  body('chainId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body('caipId')
     .optional()
     .custom((value) => {
@@ -114,19 +119,64 @@ export const modifyBlockchainValidator = [
         return true;
       }
       throw new Error('caipId field does not match the CAIP-2 specifications.');
-    }),
-  body('label').optional().isString().withMessage('must be string value'),
-  body('icon').optional().isString().withMessage('must be string value'),
+    })
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('label')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('icon')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('rpc')
+    .optional()
+    .isArray()
+    .withMessage('must be an array')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body('rpc.*').optional().isURL().withMessage('must be an array of URL'),
   body('nativeTokenSymbol')
     .optional()
     .isString()
-    .withMessage('must be string value'),
-  body('isEvm').optional().isBoolean().withMessage('must be boolean value'),
-  body('isTestnet').optional().isBoolean().withMessage('must be boolean value'),
-  body('isActive').optional().isBoolean().withMessage('must be boolean value'),
-  body('transactionExplorerUrl').optional().isURL().withMessage('must be URL'),
-  body('addressExplorerUrl').optional().isURL().withMessage('must be URL'),
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('isEvm')
+    .optional()
+    .isBoolean()
+    .withMessage('must be boolean value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('isTestnet')
+    .optional()
+    .isBoolean()
+    .withMessage('must be boolean value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('isActive')
+    .optional()
+    .isBoolean()
+    .withMessage('must be boolean value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('transactionExplorerUrl')
+    .optional()
+    .isURL()
+    .withMessage('must be URL')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('addressExplorerUrl')
+    .optional()
+    .isURL()
+    .withMessage('must be URL')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(
       req.body,

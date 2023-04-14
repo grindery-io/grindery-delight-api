@@ -29,7 +29,7 @@ async function getAccessToken() {
 export const mockedToken = await getAccessToken();
 
 export const testNonString = ({ method, path, body, query, field }) => {
-  it(`Should fail if ${field} is not a string`, async function () {
+  it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not a string`, async function () {
     const res = await chai
       .request(app)
       [method](path)
@@ -47,7 +47,7 @@ export const testNonString = ({ method, path, body, query, field }) => {
 };
 
 export const testNonBoolean = ({ method, path, body, query, field }) => {
-  it(`Should fail if ${field} is not a boolean`, async function () {
+  it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not a boolean`, async function () {
     const res = await chai
       .request(app)
       [method](path)
@@ -65,7 +65,7 @@ export const testNonBoolean = ({ method, path, body, query, field }) => {
 };
 
 export const testNonEmpty = ({ method, path, body, query, field }) => {
-  it(`Should fail if ${field} is empty`, async function () {
+  it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is empty`, async function () {
     const res = await chai
       .request(app)
       [method](path)
@@ -90,7 +90,7 @@ export const testUnexpectedField = ({
   field,
   location,
 }) => {
-  it(`Should fail if unexpected field in ${location}`, async function () {
+  it(`${method.toUpperCase()} ${path} - Should fail if unexpected field in ${location}`, async function () {
     const res = await chai
       .request(app)
       [method](path)
@@ -110,7 +110,7 @@ export const testUnexpectedField = ({
 };
 
 export const testNonCaipId = ({ method, path, body, query, field }) => {
-  it(`Should fail if ${field} is not caipId format`, async function () {
+  it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not caipId format`, async function () {
     const res = await chai
       .request(app)
       [method](path)
@@ -131,7 +131,7 @@ export const testNonCaipId = ({ method, path, body, query, field }) => {
 };
 
 export const testNonURL = ({ method, path, body, query, field }) => {
-  it(`Should fail if ${field} is not URL`, async function () {
+  it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not URL`, async function () {
     const res = await chai
       .request(app)
       [method](path)
@@ -142,6 +142,24 @@ export const testNonURL = ({ method, path, body, query, field }) => {
     chai.expect(res.body).to.be.an('array');
     chai.expect(
       res.body.some((err) => err.msg === 'must be URL' && err.param === field)
+    ).to.be.true;
+  });
+};
+
+export const testNonMongodbId = ({ method, path, body, query, field }) => {
+  it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not MongoDBId`, async function () {
+    const res = await chai
+      .request(app)
+      [method](path)
+      .set('Authorization', `Bearer ${mockedToken}`)
+      .send(body)
+      .query(query);
+    chai.expect(res).to.have.status(400);
+    chai.expect(res.body).to.be.an('array');
+    chai.expect(
+      res.body.some(
+        (err) => err.msg === 'must be mongodb id' && err.param === field
+      )
     ).to.be.true;
   });
 };

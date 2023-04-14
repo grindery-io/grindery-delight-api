@@ -144,6 +144,12 @@ router.put(
               req.body.isActive === undefined
                 ? blockchain.isActive
                 : req.body.isActive,
+            transactionExplorerUrl: req.body.transactionExplorerUrl
+              ? req.body.transactionExplorerUrl
+              : blockchain.transactionExplorerUrl,
+            addressExplorerUrl: req.body.addressExplorerUrl
+              ? req.body.addressExplorerUrl
+              : blockchain.addressExplorerUrl,
           },
         })
       );
