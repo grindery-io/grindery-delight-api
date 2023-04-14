@@ -3,7 +3,7 @@ import chaiHttp from 'chai-http';
 import app from '../index.js';
 import db from '../db/conn.js';
 import jwt from 'jsonwebtoken';
-import { mockedToken } from './mock.js';
+import { mockedToken } from './utils.js';
 
 chai.use(chaiHttp);
 const expect = chai.expect;

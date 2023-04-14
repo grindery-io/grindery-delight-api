@@ -2,8 +2,12 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
 import db from '../db/conn.js';
-import jwt from 'jsonwebtoken';
-import { mockedToken } from './mock.js';
+import {
+  mockedToken,
+  testNonString,
+  testNonEmpty,
+  testUnexpectedField,
+} from './utils.js';
 import { ObjectId } from 'mongodb';
 
 chai.use(chaiHttp);
@@ -148,401 +152,62 @@ describe('Orders route', () => {
     });
 
     describe('Validators', () => {
-      it('Should return a 400 if orderId is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: 1234,
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('orderId');
-        chai.expect(res.body[0].msg).to.equal('must be string value');
+      const testCases = [
+        'orderId',
+        'amountTokenDeposit',
+        'addressTokenDeposit',
+        'chainIdTokenDeposit',
+        'destAddr',
+        'amountTokenOffer',
+        'offerId',
+        'hash',
+      ];
+
+      for (const testCase of testCases) {
+        testNonString({
+          method: 'post',
+          path: '/orders',
+          body: {
+            ...order,
+            [testCase]: 123,
+          },
+          query: {},
+          field: testCase,
+        });
+
+        testNonEmpty({
+          method: 'post',
+          path: '/orders',
+          body: {
+            ...order,
+            [testCase]: '',
+          },
+          query: {},
+          field: testCase,
+        });
+      }
+
+      testUnexpectedField({
+        method: 'post',
+        path: '/orders',
+        body: {
+          ...order,
+          unexpectedField: 'Unexpected field',
+        },
+        query: {},
+        field: 'unexpectedField',
+        location: 'body',
       });
 
-      it('Should return a 400 if orderId is an empty string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('orderId');
-        chai.expect(res.body[0].msg).to.equal('must not be empty');
-      });
-
-      it('Should return a 400 if amountTokenDeposit is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: 10,
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('amountTokenDeposit');
-        chai.expect(res.body[0].msg).to.equal('must be string value');
-      });
-
-      it('Should return a 400 if amountTokenDeposit is an empty string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('amountTokenDeposit');
-        chai.expect(res.body[0].msg).to.equal('must not be empty');
-      });
-
-      it('Should return a 400 if addressTokenDeposit is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: 1234,
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('addressTokenDeposit');
-        chai.expect(res.body[0].msg).to.equal('must be string value');
-      });
-
-      it('Should return a 400 if addressTokenDeposit is an empty string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('addressTokenDeposit');
-        chai.expect(res.body[0].msg).to.equal('must not be empty');
-      });
-
-      it('Should return a 400 if chainIdTokenDeposit is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: 1,
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('chainIdTokenDeposit');
-        chai.expect(res.body[0].msg).to.equal('must be string value');
-      });
-
-      it('Should return a 400 if chainIdTokenDeposit is an empty string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('chainIdTokenDeposit');
-        chai.expect(res.body[0].msg).to.equal('must not be empty');
-      });
-
-      it('Should return a 400 if destAddr is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: 1234,
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('destAddr');
-        chai.expect(res.body[0].msg).to.equal('must be string value');
-      });
-
-      it('Should return a 400 if destAddr is an empty string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('destAddr');
-        chai.expect(res.body[0].msg).to.equal('must not be empty');
-      });
-
-      it('Should return a 400 if amountTokenOffer is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: 20,
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('amountTokenOffer');
-        chai.expect(res.body[0].msg).to.equal('must be string value');
-      });
-
-      it('Should return a 400 if amountTokenOffer is an empty string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '',
-            offerId: '5678',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('amountTokenOffer');
-        chai.expect(res.body[0].msg).to.equal('must not be empty');
-      });
-
-      it('Should return a 400 if offerId is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: 5678,
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('offerId');
-        chai.expect(res.body[0].msg).to.equal('must be string value');
-      });
-
-      it('Should return a 400 if offerId is an empty string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '',
-            hash: '0x789...',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('offerId');
-        chai.expect(res.body[0].msg).to.equal('must not be empty');
-      });
-
-      it('Should return a 400 if hash is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: 1234,
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('hash');
-        chai.expect(res.body[0].msg).to.equal('must be string value');
-      });
-
-      it('Should return a 400 if hash is an empty string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0].param).to.equal('hash');
-        chai.expect(res.body[0].msg).to.equal('must not be empty');
-      });
-
-      it('Should return a 400 if adding an unexpected field', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '1234',
-            amountTokenDeposit: '10',
-            addressTokenDeposit: '0x123...',
-            chainIdTokenDeposit: '1',
-            destAddr: '0x456...',
-            amountTokenOffer: '20',
-            offerId: '5678',
-            hash: '0x789...',
-            unexpectedField: 'unexpected value',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai
-          .expect(res.body[0].msg)
-          .to.equal(
-            'The following fields are not allowed in body: unexpectedField'
-          );
-      });
-
-      it('Should return a 400 if an unexpected field is present in query', async function () {
-        const res = await chai
-          .request(app)
-          .post('/orders')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .query({
-            unexpectedField: 'unexpectedValue',
-          })
-          .send(order);
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body.length).to.equal(1);
-        chai
-          .expect(res.body[0].msg)
-          .to.equal(
-            'The following fields are not allowed in query: unexpectedField'
-          );
+      testUnexpectedField({
+        method: 'post',
+        path: '/orders',
+        body: {
+          ...order,
+        },
+        query: { unexpectedField: 'Unexpected field' },
+        field: 'unexpectedField',
+        location: 'query',
       });
     });
   });
@@ -1071,76 +736,47 @@ describe('Orders route', () => {
     });
 
     describe('Validators', () => {
-      it('Should fail if orderId is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .put('/orders/complete')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: 123,
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0]).to.have.property('param', 'orderId');
-        chai
-          .expect(res.body[0])
-          .to.have.property('msg', 'must be string value');
+      testNonString({
+        method: 'put',
+        path: '/orders/complete',
+        body: {
+          orderId: 123,
+        },
+        query: {},
+        field: 'orderId',
       });
 
-      it('Should fail if orderId is empty', async function () {
-        const res = await chai
-          .request(app)
-          .put('/orders/complete')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0]).to.have.property('param', 'orderId');
-        chai.expect(res.body[0]).to.have.property('msg', 'must not be empty');
+      testNonEmpty({
+        method: 'put',
+        path: '/orders/complete',
+        body: {
+          orderId: '',
+        },
+        query: {},
+        field: 'orderId',
       });
 
-      it('Should fail if unexpected field in body', async function () {
-        const res = await chai
-          .request(app)
-          .put('/orders/complete')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '123',
-            unexpectedField: 'Unexpected field',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body.length).to.equal(1);
-        chai
-          .expect(res.body[0])
-          .to.have.property(
-            'msg',
-            'The following fields are not allowed in body: unexpectedField'
-          );
-        chai.expect(res.body[0]).to.have.property('location', 'body');
+      testUnexpectedField({
+        method: 'put',
+        path: '/orders/complete',
+        body: {
+          orderId: '123',
+          unexpectedField: 'Unexpected field',
+        },
+        field: {},
+        field: 'unexpectedField',
+        location: 'body',
       });
 
-      it('Should fail if unexpected field in query', async function () {
-        const res = await chai
-          .request(app)
-          .put('/orders/complete')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: '123',
-          })
-          .query({
-            unexpectedField: 'Unexpected field',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0]).to.have.property('location', 'query');
-        chai
-          .expect(res.body[0])
-          .to.have.property(
-            'msg',
-            'The following fields are not allowed in query: unexpectedField'
-          );
+      testUnexpectedField({
+        method: 'put',
+        path: '/orders/complete',
+        body: {
+          orderId: '123',
+        },
+        query: { unexpectedField: 'Unexpected field' },
+        field: 'unexpectedField',
+        location: 'query',
       });
     });
   });

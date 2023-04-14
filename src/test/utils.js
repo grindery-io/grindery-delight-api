@@ -1,0 +1,110 @@
+import dotenv from 'dotenv';
+import axios from 'axios';
+import chai from 'chai';
+import app from '../index.js';
+
+dotenv.config();
+
+async function getAccessToken() {
+  try {
+    const res = await axios.post(
+      'https://orchestrator.grindery.org/oauth/token',
+      {
+        grant_type: 'refresh_token',
+        refresh_token: process.env.GRINDERY_NEXUS_REFRESH_TOKEN,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return res.data.access_token;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export const mockedToken = await getAccessToken();
+
+export const testNonString = ({ method, path, body, query, field }) => {
+  it(`Should fail if ${field} is not a string`, async function () {
+    const res = await chai
+      .request(app)
+      [method](path)
+      .set('Authorization', `Bearer ${mockedToken}`)
+      .send(body)
+      .query(query);
+    chai.expect(res).to.have.status(400);
+    chai.expect(res.body).to.be.an('array');
+    chai.expect(
+      res.body.some(
+        (err) => err.msg === 'must be string value' && err.param === field
+      )
+    ).to.be.true;
+  });
+};
+
+export const testNonBoolean = ({ method, path, body, query, field }) => {
+  it(`Should fail if ${field} is not a boolean`, async function () {
+    const res = await chai
+      .request(app)
+      [method](path)
+      .set('Authorization', `Bearer ${mockedToken}`)
+      .send(body)
+      .query(query);
+    chai.expect(res).to.have.status(400);
+    chai.expect(res.body).to.be.an('array');
+    chai.expect(
+      res.body.some(
+        (err) => err.msg === 'must be boolean value' && err.param === field
+      )
+    ).to.be.true;
+  });
+};
+
+export const testNonEmpty = ({ method, path, body, query, field }) => {
+  it(`Should fail if ${field} is empty`, async function () {
+    const res = await chai
+      .request(app)
+      [method](path)
+      .set('Authorization', `Bearer ${mockedToken}`)
+      .send(body)
+      .query(query);
+    chai.expect(res).to.have.status(400);
+    chai.expect(res.body).to.be.an('array');
+    chai.expect(
+      res.body.some(
+        (err) => err.msg === 'must not be empty' && err.param === field
+      )
+    ).to.be.true;
+  });
+};
+
+export const testUnexpectedField = ({
+  method,
+  path,
+  body,
+  query,
+  field,
+  location,
+}) => {
+  it(`Should fail if unexpected field in ${location}`, async function () {
+    const res = await chai
+      .request(app)
+      [method](path)
+      .set('Authorization', `Bearer ${mockedToken}`)
+      .send(body)
+      .query(query);
+    chai.expect(res).to.have.status(400);
+    chai.expect(
+      res.body.some(
+        (err) =>
+          err.msg ===
+            `The following fields are not allowed in ${location}: ${field}` &&
+          err.location === location
+      )
+    ).to.be.true;
+  });
+};

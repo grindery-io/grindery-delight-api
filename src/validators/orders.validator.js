@@ -74,7 +74,7 @@ export const getOrderByOrderIdValidator = [
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
 ];
 
 export const getOrderByIdValidator = [

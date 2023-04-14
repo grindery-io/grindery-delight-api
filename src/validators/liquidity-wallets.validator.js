@@ -6,12 +6,12 @@ export const createLiquidityWalletValidator = [
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
   body('chainId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(req.body, ['walletAddress', 'chainId'], 'body');
     return true;
@@ -31,22 +31,22 @@ export const updateLiquidityWalletValidator = [
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
   body('chainId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
   body('tokenId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
   body('amount')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(
       req.body,
@@ -70,7 +70,7 @@ export const getLiquidityWalletValidator = [
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
 ];
 
 export const getSingleLiquidityWalletValidator = [
@@ -78,18 +78,18 @@ export const getSingleLiquidityWalletValidator = [
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty')
+    .withMessage('must not be empty')
     .optional(),
   query('chainId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
   query('userId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
 ];
 
 export const deleteLiquidityWalletValidator = [
@@ -97,12 +97,12 @@ export const deleteLiquidityWalletValidator = [
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
   query('chainId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('should not be empty'),
+    .withMessage('must not be empty'),
 ];
 
 export const getWalletByIdValidator = [

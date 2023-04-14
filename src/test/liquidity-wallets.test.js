@@ -2,27 +2,31 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
 import db from '../db/conn.js';
-import jwt from 'jsonwebtoken';
-import { mockedToken } from './mock.js';
+import {
+  mockedToken,
+  testNonString,
+  testNonEmpty,
+  testUnexpectedField,
+} from './utils.js';
 import { ObjectId } from 'mongodb';
 
 chai.use(chaiHttp);
 const expect = chai.expect;
 
 const collection = db.collection('liquidity-wallets');
-
+const liquidityWalletPath = '/liquidity-wallets';
 const liquidityWallet = {
   walletAddress: 'myWalletAddress',
   chainId: 'myChainId',
 };
 
-describe('Liquidity wallets route', () => {
+describe('Liquidity wallets route', async function () {
   describe('POST new liquidity wallet', () => {
     describe('Core of the route', () => {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(403);
       });
@@ -30,7 +34,7 @@ describe('Liquidity wallets route', () => {
       it('Should create a new liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
@@ -50,7 +54,7 @@ describe('Liquidity wallets route', () => {
       it('Should create a new liquidity wallet with the proper walletAddress and chainId', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
@@ -79,7 +83,7 @@ describe('Liquidity wallets route', () => {
       it('Should create a new liquidity wallet with empty token object', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
@@ -105,14 +109,14 @@ describe('Liquidity wallets route', () => {
       it('Should fail if liquidity wallet already exists', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
 
         const createResponse1 = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse1).to.have.status(404);
@@ -133,114 +137,51 @@ describe('Liquidity wallets route', () => {
     });
 
     describe('Validators', () => {
-      it('Should fail if walletAddress is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/liquidity-wallets')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            walletAddress: 123,
-            chainId: 'myChainId',
-          });
+      const testCases = ['walletAddress', 'chainId'];
 
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0]).to.have.property('param', 'walletAddress');
-        chai
-          .expect(res.body[0])
-          .to.have.property('msg', 'must be string value');
-      });
-
-      it('Should fail if walletAddress is empty', async function () {
-        const res = await chai
-          .request(app)
-          .post('/liquidity-wallets')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
+      for (const testCase of testCases) {
+        testNonString({
+          method: 'post',
+          path: liquidityWalletPath,
+          body: {
             ...liquidityWallet,
-            walletAddress: '',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0]).to.have.property('param', 'walletAddress');
-        chai.expect(res.body[0]).to.have.property('msg', 'should not be empty');
-      });
-
-      it('Should fail if chainId is not a string', async function () {
-        const res = await chai
-          .request(app)
-          .post('/liquidity-wallets')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            walletAddress: 'myWalletAddress',
-            chainId: 123,
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0]).to.have.property('param', 'chainId');
-        chai
-          .expect(res.body[0])
-          .to.have.property('msg', 'must be string value');
-      });
-
-      it('Should fail if chainId is empty', async function () {
-        const res = await chai
-          .request(app)
-          .post('/liquidity-wallets')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            walletAddress: 'myWalletAddress',
-            chainId: '',
-          });
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body.length).to.equal(1);
-        chai.expect(res.body[0]).to.have.property('param', 'chainId');
-        chai.expect(res.body[0]).to.have.property('msg', 'should not be empty');
-      });
-
-      it('Should return an error if unexpected field in body', async function () {
-        const response = await chai
-          .request(app)
-          .post('/liquidity-wallets')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            walletAddress: 'myWalletAddress',
-            chainId: 'myChainId',
-            unexpectedField: 'unexpectedValue',
-          });
-        chai.expect(response).to.have.status(400);
-        chai.expect(response.body).to.deep.equal([
-          {
-            value: {
-              walletAddress: 'myWalletAddress',
-              chainId: 'myChainId',
-              unexpectedField: 'unexpectedValue',
-            },
-            msg: 'The following fields are not allowed in body: unexpectedField',
-            param: '',
-            location: 'body',
+            [testCase]: 123,
           },
-        ]);
+          query: {},
+          field: testCase,
+        });
+
+        testNonEmpty({
+          method: 'post',
+          path: liquidityWalletPath,
+          body: {
+            ...liquidityWallet,
+            [testCase]: '',
+          },
+          query: {},
+          field: testCase,
+        });
+      }
+
+      testUnexpectedField({
+        method: 'post',
+        path: liquidityWalletPath,
+        body: {
+          ...liquidityWallet,
+          unexpectedField: 'unexpectedValue',
+        },
+        query: {},
+        field: 'unexpectedField',
+        location: 'body',
       });
 
-      it('Should fail with unexpected field in query', async function () {
-        const response = await chai
-          .request(app)
-          .post('/liquidity-wallets')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet)
-          .query({ unexpectedField: 'unexpectedValue' });
-        chai.expect(response).to.have.status(400);
-        chai.expect(response.body).to.deep.equal([
-          {
-            value: {
-              unexpectedField: 'unexpectedValue',
-            },
-            msg: 'The following fields are not allowed in query: unexpectedField',
-            param: '',
-            location: 'query',
-          },
-        ]);
+      testUnexpectedField({
+        method: 'post',
+        path: liquidityWalletPath,
+        body: liquidityWallet,
+        query: { unexpectedField: 'unexpectedValue' },
+        field: 'unexpectedField',
+        location: 'query',
       });
     });
   });
@@ -250,7 +191,7 @@ describe('Liquidity wallets route', () => {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .get('/liquidity-wallets')
+          .get(liquidityWalletPath)
           .query({ chainId: liquidityWallet.chainId });
         chai.expect(createResponse).to.have.status(403);
       });
@@ -258,7 +199,7 @@ describe('Liquidity wallets route', () => {
       it('Should return empty array if no offer available', async function () {
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets')
+          .get(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ chainId: liquidityWallet.chainId });
         chai.expect(res).to.have.status(200);
@@ -272,7 +213,7 @@ describe('Liquidity wallets route', () => {
         for (let i = 0; i < nbrLiquidityWallet; i++) {
           const createResponse = await chai
             .request(app)
-            .post('/liquidity-wallets')
+            .post(liquidityWalletPath)
             .set('Authorization', `Bearer ${mockedToken}`)
             .send({
               chainId: liquidityWallet.chainId,
@@ -297,7 +238,7 @@ describe('Liquidity wallets route', () => {
 
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets')
+          .get(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ chainId: liquidityWallet.chainId });
         chai.expect(res).to.have.status(200);
@@ -324,13 +265,13 @@ describe('Liquidity wallets route', () => {
       it('Should return a 400 error if `chainId` is empty', async function () {
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets')
+          .get(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ chainId: '' });
         chai.expect(res).to.have.status(400);
         chai.expect(res.body.length).to.equal(1);
         chai.expect(res.body[0]).to.have.property('param', 'chainId');
-        chai.expect(res.body[0]).to.have.property('msg', 'should not be empty');
+        chai.expect(res.body[0]).to.have.property('msg', 'must not be empty');
       });
     });
   });
@@ -346,7 +287,7 @@ describe('Liquidity wallets route', () => {
     it('Should return an array with all the liquidity wallets', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/liquidity-wallets')
+        .post(liquidityWalletPath)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(liquidityWallet);
       chai.expect(createResponse).to.have.status(201);
@@ -391,7 +332,7 @@ describe('Liquidity wallets route', () => {
       it('Should return a single liquidity wallet (without walletAddress in the query)', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
@@ -429,7 +370,7 @@ describe('Liquidity wallets route', () => {
       it('Should return a single liquidity wallet (with walletAddress in the query)', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
@@ -483,7 +424,7 @@ describe('Liquidity wallets route', () => {
 
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body[0].msg).to.equal('should not be empty');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
       });
 
       it('Should return a 400 status and an error message when chainId is an empty string', async function () {
@@ -499,7 +440,7 @@ describe('Liquidity wallets route', () => {
 
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body[0].msg).to.equal('should not be empty');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
       });
 
       it('Should return a 400 status and an error message when userId is an empty string', async function () {
@@ -515,7 +456,7 @@ describe('Liquidity wallets route', () => {
 
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array');
-        chai.expect(res.body[0].msg).to.equal('should not be empty');
+        chai.expect(res.body[0].msg).to.equal('must not be empty');
       });
     });
   });
@@ -532,7 +473,7 @@ describe('Liquidity wallets route', () => {
       it('Should return a single liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
@@ -598,14 +539,14 @@ describe('Liquidity wallets route', () => {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .delete('/liquidity-wallets');
+          .delete(liquidityWalletPath);
         chai.expect(createResponse).to.have.status(403);
       });
 
       it('Should delete one liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
@@ -652,23 +593,21 @@ describe('Liquidity wallets route', () => {
   describe('PUT liquidity wallets', () => {
     describe('Core of the route', () => {
       it('Should return 403 if no token is provided', async function () {
-        const createResponse = await chai
-          .request(app)
-          .put('/liquidity-wallets');
+        const createResponse = await chai.request(app).put(liquidityWalletPath);
         chai.expect(createResponse).to.have.status(403);
       });
 
       it('Should modify one liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
 
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -698,14 +637,14 @@ describe('Liquidity wallets route', () => {
       it('Should modify token amount of the liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/liquidity-wallets')
+          .post(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
 
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -732,7 +671,7 @@ describe('Liquidity wallets route', () => {
       it('Should fail if liquidity wallet doesnt exist', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -750,7 +689,7 @@ describe('Liquidity wallets route', () => {
       it('Should fail if walletAddress is not a string', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -771,7 +710,7 @@ describe('Liquidity wallets route', () => {
       it('Should fail if walletAddress is an empty string', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -783,7 +722,7 @@ describe('Liquidity wallets route', () => {
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array').that.deep.includes({
           value: '',
-          msg: 'should not be empty',
+          msg: 'must not be empty',
           param: 'walletAddress',
           location: 'body',
         });
@@ -792,7 +731,7 @@ describe('Liquidity wallets route', () => {
       it('Should return a validation error if chainId is not a string', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -813,7 +752,7 @@ describe('Liquidity wallets route', () => {
       it('Should return a validation error if chainId is an empty string', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -825,7 +764,7 @@ describe('Liquidity wallets route', () => {
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array').that.deep.includes({
           value: '',
-          msg: 'should not be empty',
+          msg: 'must not be empty',
           param: 'chainId',
           location: 'body',
         });
@@ -834,7 +773,7 @@ describe('Liquidity wallets route', () => {
       it('Should fail if tokenId is not a string', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -856,7 +795,7 @@ describe('Liquidity wallets route', () => {
       it('Should fail if tokenId is empty', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -868,7 +807,7 @@ describe('Liquidity wallets route', () => {
 
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array').that.is.not.empty;
-        chai.expect(res.body[0]).to.have.property('msg', 'should not be empty');
+        chai.expect(res.body[0]).to.have.property('msg', 'must not be empty');
         chai.expect(res.body[0]).to.have.property('param', 'tokenId');
         chai.expect(res.body[0]).to.have.property('location', 'body');
       });
@@ -876,7 +815,7 @@ describe('Liquidity wallets route', () => {
       it('Should return an error if amount is not a string', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -899,7 +838,7 @@ describe('Liquidity wallets route', () => {
       it('Should return an error if amount is an empty string', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -912,7 +851,7 @@ describe('Liquidity wallets route', () => {
         chai.expect(res.body).to.deep.equal([
           {
             value: '',
-            msg: 'should not be empty',
+            msg: 'must not be empty',
             param: 'amount',
             location: 'body',
           },
@@ -922,7 +861,7 @@ describe('Liquidity wallets route', () => {
       it('Should fail if body contains unexpected field', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             ...liquidityWallet,
@@ -942,7 +881,7 @@ describe('Liquidity wallets route', () => {
       it('Should fail if unexpected field in query', async function () {
         const res = await chai
           .request(app)
-          .put('/liquidity-wallets')
+          .put(liquidityWalletPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             unexpectedField: 'someValue',
