@@ -138,15 +138,78 @@ describe('Tokens route', async function () {
   //     });
   //   });
 
-  describe('GET active tokens', () => {
+  //   describe('GET active tokens', () => {
+  //     it('Should return 403 if no token is provided', async function () {
+  //       const createResponse = await chai.request(app).get('/tokens/active');
+  //       chai.expect(createResponse).to.have.status(403);
+  //     });
+
+  //     it('Should return all active tokens', async function () {
+  //       this.timeout(50000);
+
+  //       const createResponse = await chai
+  //         .request(app)
+  //         .post(tokensPath)
+  //         .set('Authorization', `Bearer ${mockedToken}`)
+  //         .send(token);
+  //       chai.expect(createResponse).to.have.status(201);
+
+  //       const createResponse1 = await chai
+  //         .request(app)
+  //         .post(tokensPath)
+  //         .set('Authorization', `Bearer ${mockedToken}`)
+  //         .send({ ...token, chainId: 'newChainId', address: 'newAddress' });
+  //       chai.expect(createResponse1).to.have.status(201);
+
+  //       const res = await chai
+  //         .request(app)
+  //         .get('/tokens/active')
+  //         .set('Authorization', `Bearer ${mockedToken}`);
+  //       chai.expect(res).to.have.status(200);
+  //       chai.expect(res.body).to.be.an('array');
+  //       const expectedArray = await collection
+  //         .find({
+  //           isActive: true,
+  //         })
+  //         .toArray();
+  //       expectedArray.forEach((obj) => {
+  //         obj._id = obj._id.toString();
+  //       });
+  //       chai.expect(res.body).to.deep.equal(expectedArray);
+  //       chai.expect(res.body.every((obj) => obj.isActive === true)).to.be.true;
+
+  //       const deleteResponse = await chai
+  //         .request(app)
+  //         .delete(`/tokens/${createResponse.body.insertedId}`)
+  //         .set('Authorization', `Bearer ${mockedToken}`);
+  //       chai.expect(deleteResponse).to.have.status(200);
+
+  //       const deleteResponse1 = await chai
+  //         .request(app)
+  //         .delete(`/tokens/${createResponse1.body.insertedId}`)
+  //         .set('Authorization', `Bearer ${mockedToken}`);
+  //       chai.expect(deleteResponse1).to.have.status(200);
+  //     });
+
+  //     it('Should return an empty array if no token available', async function () {
+  //       const res = await chai
+  //         .request(app)
+  //         .get('/tokens/active')
+  //         .set('Authorization', `Bearer ${mockedToken}`);
+  //       chai.expect(res).to.have.status(200);
+  //       chai.expect(res.body).to.be.an('array').that.is.empty;
+  //     });
+  //   });
+
+  describe('GET by MongoDBId', () => {
     it('Should return 403 if no token is provided', async function () {
-      const createResponse = await chai.request(app).get('/tokens/active');
+      const createResponse = await chai
+        .request(app)
+        .get('/tokens/111111111111111111111111');
       chai.expect(createResponse).to.have.status(403);
     });
 
-    it('Should return all active tokens', async function () {
-      this.timeout(50000);
-
+    it('Should get the adequate token', async function () {
       const createResponse = await chai
         .request(app)
         .post(tokensPath)
@@ -154,50 +217,39 @@ describe('Tokens route', async function () {
         .send(token);
       chai.expect(createResponse).to.have.status(201);
 
-      const createResponse1 = await chai
-        .request(app)
-        .post(tokensPath)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send({ ...token, chainId: 'newChainId', address: 'newAddress' });
-      chai.expect(createResponse1).to.have.status(201);
-
       const res = await chai
         .request(app)
-        .get('/tokens/active')
+        .get(`/tokens/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.be.an('array');
-      const expectedArray = await collection
-        .find({
-          isActive: true,
-        })
-        .toArray();
-      expectedArray.forEach((obj) => {
-        obj._id = obj._id.toString();
-      });
-      chai.expect(res.body).to.deep.equal(expectedArray);
-      chai.expect(res.body.every((obj) => obj.isActive === true)).to.be.true;
+      chai
+        .expect(res.body._id.toString())
+        .to.equal(createResponse.body.insertedId);
+      delete res.body._id;
+      chai.expect(res.body).to.deep.equal(token);
 
       const deleteResponse = await chai
         .request(app)
         .delete(`/tokens/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
-
-      const deleteResponse1 = await chai
-        .request(app)
-        .delete(`/tokens/${createResponse1.body.insertedId}`)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(deleteResponse1).to.have.status(200);
     });
 
-    it('Should return an empty array if no token available', async function () {
+    it('Should return an empty object if no token available', async function () {
       const res = await chai
         .request(app)
-        .get('/tokens/active')
+        .get('/tokens/111111111111111111111111')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.be.an('array').that.is.empty;
+      chai.expect(res.body).to.be.an('object').that.is.empty;
+    });
+
+    testNonMongodbId({
+      method: 'get',
+      path: '/tokens/1111111111111111',
+      body: {},
+      query: {},
+      field: 'tokenId',
     });
   });
 });
