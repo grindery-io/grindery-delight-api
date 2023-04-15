@@ -40,6 +40,7 @@ describe('Liquidity wallets route', async function () {
         chai.expect(createResponse).to.have.status(201);
         chai.expect(createResponse.body).to.have.property('acknowledged', true);
         chai.expect(createResponse.body).to.have.property('insertedId');
+
         const deleteResponse = await chai
           .request(app)
           .delete(`/liquidity-wallets`)

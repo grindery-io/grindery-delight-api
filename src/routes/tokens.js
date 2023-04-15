@@ -16,24 +16,24 @@ const collectionAdmin = db.collection('admins');
 /* Creating a new token. */
 router.post('/', createTokenValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+
   if (
     validator.length ||
     !(await collectionAdmin.findOne({ userId: res.locals.userId }))
   ) {
     return res.status(400).send(validator);
   }
+
   if (
-    !(await collection.findOne({
+    await collection.findOne({
       chainId: req.body.chainId,
       address: req.body.address,
-    }))
+    })
   ) {
-    res.send(await collection.insertOne(req.body)).status(201);
-  } else {
-    res.status(404).send({
-      msg: 'This token already exists.',
-    });
+    return res.status(404).send({ msg: 'This token already exists.' });
   }
+
+  res.status(201).send(await collection.insertOne(req.body));
 });
 
 /* This is a route that is used to get all active tokens. */
