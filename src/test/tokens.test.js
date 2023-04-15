@@ -424,4 +424,48 @@ describe('Tokens route', async function () {
       });
     });
   });
+
+  describe('DELETE by MongoDBId', () => {
+    it('Should return 403 if no token is provided', async function () {
+      const createResponse = await chai
+        .request(app)
+        .delete('/tokens/111111111111111111111111');
+      chai.expect(createResponse).to.have.status(403);
+    });
+
+    it('Should delete one token', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post(tokensPath)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(token);
+      chai.expect(createResponse).to.have.status(201);
+
+      const deleteResponse = await chai
+        .request(app)
+        .delete(`/tokens/${createResponse.body.insertedId}`)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(deleteResponse).to.have.status(200);
+      chai
+        .expect(deleteResponse.body)
+        .to.deep.equal({ acknowledged: true, deletedCount: 1 });
+    });
+
+    it('Should fail if no token exists', async function () {
+      const deleteResponse = await chai
+        .request(app)
+        .delete(`/tokens/111111111111111111111111`)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(deleteResponse).to.have.status(404);
+      chai.expect(deleteResponse.body).to.deep.equal({ msg: 'No token found' });
+    });
+
+    testNonMongodbId({
+      method: 'delete',
+      path: '/tokens/1111111111111111',
+      body: {},
+      query: {},
+      field: 'tokenId',
+    });
+  });
 });
