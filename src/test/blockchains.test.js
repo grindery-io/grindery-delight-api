@@ -39,11 +39,17 @@ const blockchain = {
 
 function modifyBlockchainField({ field, value }) {
   it(`PUT /blockchains/blockchainId - ${field} - Should modify ${field}`, async function () {
+    const customBlockchain = {
+      ...blockchain,
+      isActive: false,
+      isEvm: false,
+      isTestnet: false,
+    };
     const createResponse = await chai
       .request(app)
       .post(blockchainPath)
       .set('Authorization', `Bearer ${mockedToken}`)
-      .send(blockchain);
+      .send(customBlockchain);
     chai.expect(createResponse).to.have.status(200);
     chai.expect(createResponse.body).to.have.property('acknowledged', true);
     chai.expect(createResponse.body).to.have.property('insertedId');
@@ -64,7 +70,10 @@ function modifyBlockchainField({ field, value }) {
     const blockchainDB = await collection.findOne({
       _id: new ObjectId(createResponse.body.insertedId),
     });
-    chai.expect(blockchainDB[field]).to.deep.equal(value);
+    delete blockchainDB._id;
+    chai
+      .expect(blockchainDB)
+      .to.deep.equal({ ...customBlockchain, [field]: value });
 
     const deleteResponse = await chai
       .request(app)
@@ -400,12 +409,12 @@ describe('Blockchains route', async function () {
         field: 'nativeTokenSymbol',
         value: 'newNativeTokenSymbol',
       });
-      modifyBlockchainField({ field: 'isEvm', value: !blockchain.isEvm });
+      modifyBlockchainField({ field: 'isEvm', value: true });
       modifyBlockchainField({
         field: 'isTestnet',
-        value: !blockchain.isTestnet,
+        value: true,
       });
-      modifyBlockchainField({ field: 'isActive', value: !blockchain.isActive });
+      modifyBlockchainField({ field: 'isActive', value: true });
       modifyBlockchainField({
         field: 'transactionExplorerUrl',
         value: 'https://new.goerli.etherscan.io/tx/{hash}',

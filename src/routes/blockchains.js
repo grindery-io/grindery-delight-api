@@ -97,21 +97,21 @@ router.put(
     res.status(200).send(
       await collection.updateOne(blockchain, {
         $set: {
-          chainId: req.body.chainId || blockchain.chainId,
-          caipId: req.body.caipId || blockchain.caipId,
-          label: req.body.label || blockchain.label,
-          icon: req.body.icon || blockchain.icon,
-          rpc: req.body.rpc || blockchain.rpc,
+          chainId: req.body.chainId ?? blockchain.chainId,
+          caipId: req.body.caipId ?? blockchain.caipId,
+          label: req.body.label ?? blockchain.label,
+          icon: req.body.icon ?? blockchain.icon,
+          rpc: req.body.rpc ?? blockchain.rpc,
           nativeTokenSymbol:
-            req.body.nativeTokenSymbol || blockchain.nativeTokenSymbol,
+            req.body.nativeTokenSymbol ?? blockchain.nativeTokenSymbol,
           isEvm: req.body.isEvm ?? blockchain.isEvm,
           isTestnet: req.body.isTestnet ?? blockchain.isTestnet,
           isActive: req.body.isActive ?? blockchain.isActive,
           transactionExplorerUrl:
-            req.body.transactionExplorerUrl ||
+            req.body.transactionExplorerUrl ??
             blockchain.transactionExplorerUrl,
           addressExplorerUrl:
-            req.body.addressExplorerUrl || blockchain.addressExplorerUrl,
+            req.body.addressExplorerUrl ?? blockchain.addressExplorerUrl,
         },
       })
     );

@@ -65,6 +65,46 @@ router.get('/:tokenId', getTokenByIdValidator, isRequired, async (req, res) => {
 });
 
 /* This is a route that is used to modify a token by its id. */
+// router.put('/:tokenId', modifyTokenValidator, isRequired, async (req, res) => {
+//   const validator = validateResult(req, res);
+//   if (
+//     validator.length ||
+//     !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+//   ) {
+//     return res.status(400).send(validator);
+//   }
+//   const token = await collection.findOne({
+//     _id: new ObjectId(req.params.tokenId),
+//   });
+//   if (token) {
+//     res.status(200).send(
+//       await collection.updateOne(token, {
+//         $set: {
+//           coinmarketcapId: req.body.coinmarketcapId
+//             ? req.body.coinmarketcapId
+//             : token.coinmarketcapId,
+//           symbol: req.body.symbol ? req.body.symbol : token.symbol,
+//           icon: req.body.icon ? req.body.icon : token.icon,
+//           chainId: req.body.chainId ? req.body.chainId : token.chainId,
+//           address: req.body.address ? req.body.address : token.address,
+//           isNative:
+//             req.body.isNative === undefined
+//               ? token.isNative
+//               : req.body.isNative,
+//           isActive:
+//             req.body.isActive === undefined
+//               ? token.isActive
+//               : req.body.isActive,
+//         },
+//       })
+//     );
+//   } else {
+//     res.status(404).send({
+//       msg: 'No token found',
+//     });
+//   }
+// });
+
 router.put('/:tokenId', modifyTokenValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (
@@ -73,36 +113,27 @@ router.put('/:tokenId', modifyTokenValidator, isRequired, async (req, res) => {
   ) {
     return res.status(400).send(validator);
   }
+
   const token = await collection.findOne({
     _id: new ObjectId(req.params.tokenId),
   });
-  if (token) {
-    res.status(200).send(
-      await collection.updateOne(token, {
-        $set: {
-          coinmarketcapId: req.body.coinmarketcapId
-            ? req.body.coinmarketcapId
-            : token.coinmarketcapId,
-          symbol: req.body.symbol ? req.body.symbol : token.symbol,
-          icon: req.body.icon ? req.body.icon : token.icon,
-          chainId: req.body.chainId ? req.body.chainId : token.chainId,
-          address: req.body.address ? req.body.address : token.address,
-          isNative:
-            req.body.isNative === undefined
-              ? token.isNative
-              : req.body.isNative,
-          isActive:
-            req.body.isActive === undefined
-              ? token.isActive
-              : req.body.isActive,
-        },
-      })
-    );
-  } else {
-    res.status(404).send({
-      msg: 'No token found',
-    });
+  if (!token) {
+    return res.status(404).send({ msg: 'No token found' });
   }
+
+  res.status(200).send(
+    await collection.updateOne(token, {
+      $set: {
+        coinmarketcapId: req.body.coinmarketcapId ?? token.coinmarketcapId,
+        symbol: req.body.symbol ?? token.symbol,
+        icon: req.body.icon ?? token.icon,
+        chainId: req.body.chainId ?? token.chainId,
+        address: req.body.address ?? token.address,
+        isNative: req.body.isNative ?? token.isNative,
+        isActive: req.body.isActive ?? token.isActive,
+      },
+    })
+  );
 });
 
 /* This is a route that is used to delete a token by its id. */

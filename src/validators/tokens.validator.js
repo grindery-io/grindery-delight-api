@@ -80,13 +80,45 @@ export const modifyTokenValidator = [
   body('coinmarketcapId')
     .optional()
     .isString()
-    .withMessage('must be string value'),
-  body('symbol').optional().isString().withMessage('must be string value'),
-  body('icon').optional().isString().withMessage('must be string value'),
-  body('chainId').optional().isString().withMessage('must be string value'),
-  body('address').optional().isString().withMessage('must be string value'),
-  body('isNative').optional().isBoolean().withMessage('must be boolean value'),
-  body('isActive').optional().isBoolean().withMessage('must be boolean value'),
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('symbol')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('icon')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('chainId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('address')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('isNative')
+    .optional()
+    .isBoolean()
+    .withMessage('must be boolean value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('isActive')
+    .optional()
+    .isBoolean()
+    .withMessage('must be boolean value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(
       req.body,
