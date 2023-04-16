@@ -187,8 +187,6 @@ describe('Tokens route', async function () {
     });
 
     it('Should return all active tokens', async function () {
-      this.timeout(50000);
-
       const createResponse = await chai
         .request(app)
         .post(tokensPath)

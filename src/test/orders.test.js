@@ -219,7 +219,6 @@ describe('Orders route', () => {
     });
 
     it('Should return only orders for the given user', async function () {
-      this.timeout(50000);
       const customOrder = { ...order };
       const nbrOrders = 1;
       let userId = '';
@@ -400,7 +399,6 @@ describe('Orders route', () => {
     });
 
     it('Should show only orders with existing offerId in the offers collection', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer };
       const customOrder = { ...order };
       const nbrOffersOrders = 1;
@@ -457,7 +455,6 @@ describe('Orders route', () => {
     });
 
     it('Should show only orders corresponding to active offers', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer };
       const customOrder = { ...order };
       const nbrOffersOrders = 1;
@@ -515,7 +512,6 @@ describe('Orders route', () => {
     });
 
     it('Should show only orders corresponding offers created by the user', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer };
       const customOrder = { ...order };
       const nbrOffersOrders = 1;

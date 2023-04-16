@@ -294,7 +294,6 @@ describe('Blockchains route', async function () {
       chai.expect(res).to.have.status(403);
     });
     it('Should return all active blockchains', async function () {
-      this.timeout(50000);
       const createResponse = await chai
         .request(app)
         .post(blockchainPath)
@@ -349,7 +348,6 @@ describe('Blockchains route', async function () {
       chai.expect(res).to.have.status(403);
     });
     it('Should return blockchain with the proper blockchainId', async function () {
-      this.timeout(50000);
       const createResponse = await chai
         .request(app)
         .post(blockchainPath)

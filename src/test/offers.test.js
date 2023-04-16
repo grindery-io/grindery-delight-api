@@ -306,7 +306,6 @@ describe('Offers route', () => {
     });
 
     it('Should return an array of active offers', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
       const nbrOffers = 0;
       for (let i = 0; i < nbrOffers; i++) {
@@ -353,7 +352,6 @@ describe('Offers route', () => {
     });
 
     it('Should return only offers with proper exchangeChainId', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
       const nbrOffers = 0;
       for (let i = 0; i < nbrOffers; i++) {
@@ -399,7 +397,6 @@ describe('Offers route', () => {
     });
 
     it('Should return only offers with proper exchangeToken', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
       const nbrOffers = 0;
       for (let i = 0; i < nbrOffers; i++) {
@@ -445,7 +442,6 @@ describe('Offers route', () => {
     });
 
     it('Should return only offers with proper chainId', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
       const nbrOffers = 0;
       for (let i = 0; i < nbrOffers; i++) {
@@ -491,7 +487,6 @@ describe('Offers route', () => {
     });
 
     it('Should return only offers with proper token', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
       const nbrOffers = 0;
       for (let i = 0; i < nbrOffers; i++) {
@@ -537,7 +532,6 @@ describe('Offers route', () => {
     });
 
     it('Should return only offers with min less than depositAmount/exchangeRate', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
       const nbrOffers = 0;
       for (let i = 0; i < nbrOffers; i++) {
@@ -584,7 +578,6 @@ describe('Offers route', () => {
     });
 
     it('Should return only offers with max greater than depositAmount/exchangeRate', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
       const nbrOffers = 0;
       for (let i = 0; i < nbrOffers; i++) {
@@ -655,7 +648,6 @@ describe('Offers route', () => {
     });
 
     it('Should return only offers for the given user', async function () {
-      this.timeout(50000);
       const customOffer = { ...offer };
       const nbrOffers = 1;
       let userId = '';
