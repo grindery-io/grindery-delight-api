@@ -53,6 +53,9 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
+    const collectionBlockchains = (await getDBConnection(req)).collection(
+      'blockchains'
+    );
     if (validator.length) {
       return res.status(400).send(validator);
     }
