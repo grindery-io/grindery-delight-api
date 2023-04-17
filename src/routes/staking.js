@@ -1,5 +1,5 @@
 import express from 'express';
-import db from '../db/conn.js';
+import getDBConnection from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
 import {
@@ -11,7 +11,6 @@ import {
 import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
-const collection = db.collection('staking');
 
 /* This is a POST request to the /staking endpoint. It is using the createStakingValidator middleware
 to validate the request body. It is also using the isRequired middleware to check if the user is
@@ -21,6 +20,7 @@ it will create a new staking document in the database. If the user has already s
 it will return a 404 error. */
 router.post('/', createStakingValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('staking');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -49,6 +49,7 @@ will return a 404 error. If the user has already staked for the chain, it will u
 document in the database. */
 router.put('/', updateStakingValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('staking');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -76,6 +77,7 @@ logged in, it will check if the user has staked for any chains. If the user has 
 chains, it will return a 404 error. If the user has staked for any chains, it will return all of the
 staking documents for the user. */
 router.get('/', isRequired, async (req, res) => {
+  const collection = (await getDBConnection(req)).collection('staking');
   if (await collection.findOne({})) {
     res.status(200).send(await collection.find({}).toArray());
   } else {
@@ -91,6 +93,7 @@ logged in, it will check if the user has staked for any chains. If the user has 
 chains, it will return a 404 error. If the user has staked for any chains, it will return all of the
 staking documents for the user. */
 router.get('/user', isRequired, async (req, res) => {
+  const collection = (await getDBConnection(req)).collection('staking');
   if (
     await collection.findOne({
       userId: res.locals.userId,
@@ -120,6 +123,7 @@ will return a 404 error. If the user has staked for the chain, it will return th
 for the user. */
 router.get('/:stakeId', getStakeByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('staking');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -144,6 +148,7 @@ return a 404 error. If the user has staked for the chain, it will delete the sta
 the user. */
 router.delete('/', deleteStakeValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('staking');
   if (validator.length) {
     return res.status(400).send(validator);
   }

@@ -1,11 +1,11 @@
 import express from 'express';
-import db from '../db/conn.js';
+import getDBConnection from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 
 const router = express.Router();
-const collection = db.collection('admins');
 
 router.get('/', isRequired, async (req, res) => {
+  const collection = (await getDBConnection(req)).collection('admins');
   res.status(200).send(
     (await collection.findOne({
       userId: res.locals.userId,

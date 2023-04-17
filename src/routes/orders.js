@@ -1,5 +1,5 @@
 import express, { query } from 'express';
-import db from '../db/conn.js';
+import getDBConnection from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {
   createOrderValidator,
@@ -12,12 +12,11 @@ import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
 
 const router = express.Router();
-const collection = db.collection('orders');
-const offerCollection = db.collection('offers');
 
 /* This is a POST request that creates a new order. */
 router.post('/', createOrderValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('orders');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -40,6 +39,7 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all orders for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
+  const collection = (await getDBConnection(req)).collection('orders');
   res
     .send(await collection.find({ userId: res.locals.userId }).toArray())
     .status(200);
@@ -51,6 +51,7 @@ router.get(
   getOrderByOrderIdValidator,
   isRequired,
   async (req, res) => {
+    const collection = (await getDBConnection(req)).collection('orders');
     res
       .send(
         await collection.findOne({
@@ -64,6 +65,7 @@ router.get(
 
 /* This is a GET request that returns a order for a specific user by the order id. */
 router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
+  const collection = (await getDBConnection(req)).collection('orders');
   res
     .send(
       await collection.findOne({
@@ -75,8 +77,10 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
 });
 
 router.get('/liquidity-provider', isRequired, async (req, res) => {
+  const collection = (await getDBConnection(req)).collection('orders');
+  const collectionOffer = (await getDBConnection(req)).collection('offers');
   let result = [];
-  const activeOffersForUser = await offerCollection
+  const activeOffersForUser = await collectionOffer
     .find({
       userId: res.locals.userId,
       isActive: true,
@@ -104,6 +108,7 @@ router.put(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
+    const collection = (await getDBConnection(req)).collection('orders');
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -133,6 +138,7 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
+    const collection = (await getDBConnection(req)).collection('orders');
     if (validator.length) {
       return res.status(400).send(validator);
     }

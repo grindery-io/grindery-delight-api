@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import db from '../db/conn.js';
+import db from '../db/conn-test.js';
 import jwt from 'jsonwebtoken';
 import {
   mockedToken,
@@ -16,7 +16,7 @@ chai.use(chaiHttp);
 const expect = chai.expect;
 
 const collection = db.collection('offers');
-const offerPath = '/offers';
+const offerPath = '/test/offers';
 const offerId =
   '0x02689c291c6d392ab9c02fc2a459a08cc46cc816b77cec928c86109d37ed2843';
 const offer = {
@@ -64,7 +64,7 @@ describe('Offers route', () => {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/${offerId}`)
+          .delete(`/test/offers/${offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -79,7 +79,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .query({ offerId: offerId })
           .set('Authorization', `Bearer ${mockedToken}`);
 
@@ -108,7 +108,7 @@ describe('Offers route', () => {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/${offerId}`)
+          .delete(`/test/offers/${offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -133,7 +133,7 @@ describe('Offers route', () => {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/${offerId}`)
+          .delete(`/test/offers/${offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -295,7 +295,7 @@ describe('Offers route', () => {
 
   describe('GET all active offers with filters', () => {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get('/offers/search').query({
+      const res = await chai.request(app).get('/test/offers/search').query({
         exchangeChainId: offer.exchangeChainId,
         exchangeToken: offer.exchangeToken,
         chainId: offer.chainId,
@@ -331,7 +331,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/search')
+        .get('/test/offers/search')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query(query);
 
@@ -345,7 +345,7 @@ describe('Offers route', () => {
       for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
@@ -377,7 +377,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/search')
+        .get('/test/offers/search')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query(query);
 
@@ -390,7 +390,7 @@ describe('Offers route', () => {
       for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
@@ -422,7 +422,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/search')
+        .get('/test/offers/search')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query(query);
 
@@ -435,7 +435,7 @@ describe('Offers route', () => {
       for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
@@ -467,7 +467,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/search')
+        .get('/test/offers/search')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query(query);
 
@@ -480,7 +480,7 @@ describe('Offers route', () => {
       for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
@@ -512,7 +512,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/search')
+        .get('/test/offers/search')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query(query);
 
@@ -525,7 +525,7 @@ describe('Offers route', () => {
       for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
@@ -557,7 +557,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/search')
+        .get('/test/offers/search')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query(query);
 
@@ -571,7 +571,7 @@ describe('Offers route', () => {
       for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
@@ -603,7 +603,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/search')
+        .get('/test/offers/search')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query(query);
 
@@ -617,7 +617,7 @@ describe('Offers route', () => {
       for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
@@ -626,7 +626,7 @@ describe('Offers route', () => {
     it('Should return an empty array if no offer match', async function () {
       const res = await chai
         .request(app)
-        .get('/offers/search')
+        .get('/test/offers/search')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
           exchangeChainId: '232323232323232323',
@@ -643,7 +643,7 @@ describe('Offers route', () => {
 
   describe('GET all offers for a user', () => {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get('/offers/user');
+      const res = await chai.request(app).get('/test/offers/user');
       chai.expect(res).to.have.status(403);
     });
 
@@ -673,7 +673,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/user')
+        .get('/test/offers/user')
         .set({ Authorization: `Bearer ${mockedToken}` });
 
       chai.expect(res).to.have.status(200);
@@ -685,7 +685,7 @@ describe('Offers route', () => {
       for (let i = 0; i < nbrOffers; i++) {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
@@ -696,7 +696,7 @@ describe('Offers route', () => {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
-        .get('/offers/offerId')
+        .get('/test/offers/offerId')
         .query({ offerId: offer.offerId });
       chai.expect(res).to.have.status(403);
     });
@@ -711,7 +711,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/offerId')
+        .get('/test/offers/offerId')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ offerId: offer.offerId });
 
@@ -721,7 +721,7 @@ describe('Offers route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/offers/${offer.offerId}`)
+        .delete(`/test/offers/${offer.offerId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
     });
@@ -729,7 +729,7 @@ describe('Offers route', () => {
     it('Should return an empty object if offerId doesnt exist', async function () {
       const res = await chai
         .request(app)
-        .get('/offers/offerId')
+        .get('/test/offers/offerId')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ offerId: '111111111111111111111111' });
 
@@ -742,7 +742,7 @@ describe('Offers route', () => {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
-        .get('/offers/id')
+        .get('/test/offers/id')
         .query({ id: '643471eaaceeded45b420be6' });
       chai.expect(res).to.have.status(403);
     });
@@ -757,7 +757,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/id')
+        .get('/test/offers/id')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: createResponse.body.insertedId });
 
@@ -771,7 +771,7 @@ describe('Offers route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/offers/${offerId}`)
+        .delete(`/test/offers/${offerId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
     });
@@ -792,7 +792,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get('/offers/id')
+        .get('/test/offers/id')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: createResponse.body.insertedId });
 
@@ -801,7 +801,7 @@ describe('Offers route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/offers/${offerId}`)
+        .delete(`/test/offers/${offerId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
     });
@@ -809,7 +809,7 @@ describe('Offers route', () => {
     it('Should return an empty object if MongoDB id doesnt exist', async function () {
       const res = await chai
         .request(app)
-        .get('/offers/id')
+        .get('/test/offers/id')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: '111111111111111111111111' });
 
@@ -820,7 +820,7 @@ describe('Offers route', () => {
 
   describe('DELETE offer by offerId', () => {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).delete('/offers/myOfferId');
+      const res = await chai.request(app).delete('/test/offers/myOfferId');
       chai.expect(res).to.have.status(403);
     });
 
@@ -834,7 +834,7 @@ describe('Offers route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/offers/${offer.offerId}`)
+        .delete(`/test/offers/${offer.offerId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
 
       chai.expect(deleteResponse).to.have.status(200);
@@ -858,7 +858,7 @@ describe('Offers route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/offers/${offer.offerId}`)
+        .delete(`/test/offers/${offer.offerId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
 
       chai.expect(deleteResponse).to.have.status(200);
@@ -873,7 +873,7 @@ describe('Offers route', () => {
     it('Should return 404 with message if no offer found', async function () {
       const res = await chai
         .request(app)
-        .delete('/offers/myOfferId')
+        .delete('/test/offers/myOfferId')
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(404);
       chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
@@ -892,21 +892,21 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .send({ chainId: '232323' });
 
         chai.expect(modifyOffer).to.have.status(403);
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should return 404 if offer doesnt exist', async function () {
         const modifyOffer = await chai
           .request(app)
-          .put('/offers/myFalseOfferId')
+          .put('/test/offers/myFalseOfferId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ chainId: '232323' });
 
@@ -924,7 +924,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ chainId: '232323' });
 
@@ -939,7 +939,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -971,7 +971,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -979,7 +979,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -996,7 +996,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1014,7 +1014,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1022,7 +1022,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1038,7 +1038,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1056,7 +1056,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1064,7 +1064,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1080,7 +1080,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1098,7 +1098,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1106,7 +1106,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1122,7 +1122,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1140,7 +1140,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1148,7 +1148,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1164,7 +1164,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1182,7 +1182,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1190,7 +1190,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1206,7 +1206,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1224,7 +1224,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1232,7 +1232,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1248,7 +1248,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1266,7 +1266,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ isActive: modifiedOffer.isActive });
 
@@ -1274,7 +1274,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1290,7 +1290,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1308,7 +1308,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1316,7 +1316,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1332,7 +1332,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1350,7 +1350,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1358,7 +1358,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1374,7 +1374,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1392,7 +1392,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1400,7 +1400,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1416,7 +1416,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1434,7 +1434,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1442,7 +1442,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1458,7 +1458,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1476,7 +1476,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1484,7 +1484,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1500,7 +1500,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1518,7 +1518,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1526,7 +1526,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1542,7 +1542,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1560,7 +1560,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1568,7 +1568,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1584,7 +1584,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
 
@@ -1602,7 +1602,7 @@ describe('Offers route', () => {
 
         const modifyOffer = await chai
           .request(app)
-          .put(`/offers/${offer.offerId}`)
+          .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
 
@@ -1610,7 +1610,7 @@ describe('Offers route', () => {
 
         const getOffer = await chai
           .request(app)
-          .get('/offers/offerId')
+          .get('/test/offers/offerId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ offerId: offer.offerId });
 
@@ -1626,7 +1626,7 @@ describe('Offers route', () => {
 
         await chai
           .request(app)
-          .delete(`/offers/${offer.offerId}`)
+          .delete(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
       });
     });
@@ -1653,7 +1653,7 @@ describe('Offers route', () => {
         if (testCase !== 'isActive') {
           testNonString({
             method: 'put',
-            path: '/offers/1234',
+            path: '/test/offers/1234',
             body: {
               [testCase]: 123,
             },
@@ -1669,7 +1669,7 @@ describe('Offers route', () => {
         ) {
           testNonEmpty({
             method: 'put',
-            path: '/offers/1234',
+            path: '/test/offers/1234',
             body: {
               [testCase]: '',
             },
@@ -1681,7 +1681,7 @@ describe('Offers route', () => {
 
       testUnexpectedField({
         method: 'put',
-        path: '/offers/1234',
+        path: '/test/offers/1234',
         body: {
           unexpectedField: 'Unexpected field',
         },
@@ -1692,7 +1692,7 @@ describe('Offers route', () => {
 
       testUnexpectedField({
         method: 'put',
-        path: '/offers/1234',
+        path: '/test/offers/1234',
         body: {
           chainId: '3434',
         },

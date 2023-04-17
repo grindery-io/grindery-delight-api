@@ -13,7 +13,6 @@ const require = createRequire(import.meta.url);
 const ERC20 = require('../abis/erc20.json');
 const GrinderyNexusHub = require('../abis/GrinderyNexusHub.json');
 const router = express.Router();
-const blockchainsCollection = db.collection('blockchains');
 
 router.get(
   '/balance-token',
@@ -21,10 +20,13 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
+    const collectionBlockchains = (await getDBConnection(req)).collection(
+      'blockchains'
+    );
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const chain = await blockchainsCollection.findOne({
+    const chain = await collectionBlockchains.findOne({
       chainId: req.query.chainId,
     });
     const provider = new ethers.providers.JsonRpcProvider(chain.rpc[0]);
@@ -54,7 +56,7 @@ router.get(
     if (validator.length) {
       return res.status(400).send(validator);
     }
-    const chain = await blockchainsCollection.findOne({
+    const chain = await collectionBlockchains.findOne({
       chainId: req.query.chainId,
     });
     res

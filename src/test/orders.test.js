@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import db from '../db/conn.js';
+import db from '../db/conn-test.js';
 import {
   mockedToken,
   testNonString,
@@ -58,7 +58,7 @@ describe('Orders route', () => {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .send(order);
         chai.expect(createResponse).to.have.status(403);
       });
@@ -66,7 +66,7 @@ describe('Orders route', () => {
       it('Should POST a new order', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(order);
 
@@ -78,7 +78,7 @@ describe('Orders route', () => {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/orders/${orderId}`)
+          .delete(`/test/orders/${orderId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -86,14 +86,14 @@ describe('Orders route', () => {
       it('Should POST a new order with relevant fields', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(order);
         chai.expect(createResponse).to.have.status(200);
 
         const getOrder = await chai
           .request(app)
-          .get('/orders/orderId')
+          .get('/test/orders/orderId')
           .query({ orderId: orderId })
           .set('Authorization', `Bearer ${mockedToken}`);
 
@@ -120,7 +120,7 @@ describe('Orders route', () => {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/orders/${orderId}`)
+          .delete(`/test/orders/${orderId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -128,14 +128,14 @@ describe('Orders route', () => {
       it('Should fail if same orderId exists', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(order);
         chai.expect(createResponse).to.have.status(200);
 
         const createDuplicateResponse = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(order);
         chai.expect(createDuplicateResponse).to.have.status(404);
@@ -145,7 +145,7 @@ describe('Orders route', () => {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/orders/${orderId}`)
+          .delete(`/test/orders/${orderId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -166,7 +166,7 @@ describe('Orders route', () => {
       for (const testCase of testCases) {
         testNonString({
           method: 'post',
-          path: '/orders',
+          path: '/test/orders',
           body: {
             ...order,
             [testCase]: 123,
@@ -177,7 +177,7 @@ describe('Orders route', () => {
 
         testNonEmpty({
           method: 'post',
-          path: '/orders',
+          path: '/test/orders',
           body: {
             ...order,
             [testCase]: '',
@@ -189,7 +189,7 @@ describe('Orders route', () => {
 
       testUnexpectedField({
         method: 'post',
-        path: '/orders',
+        path: '/test/orders',
         body: {
           ...order,
           unexpectedField: 'Unexpected field',
@@ -201,7 +201,7 @@ describe('Orders route', () => {
 
       testUnexpectedField({
         method: 'post',
-        path: '/orders',
+        path: '/test/orders',
         body: {
           ...order,
         },
@@ -214,7 +214,7 @@ describe('Orders route', () => {
 
   describe('GET by user', () => {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get('/orders/user');
+      const res = await chai.request(app).get('/test/orders/user');
       chai.expect(res).to.have.status(403);
     });
 
@@ -227,7 +227,7 @@ describe('Orders route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOrder);
         chai.expect(createResponse).to.have.status(200);
@@ -243,7 +243,7 @@ describe('Orders route', () => {
 
       const res = await chai
         .request(app)
-        .get('/orders/user')
+        .get('/test/orders/user')
         .set({ Authorization: `Bearer ${mockedToken}` });
 
       chai.expect(res).to.have.status(200);
@@ -255,7 +255,7 @@ describe('Orders route', () => {
       for (let i = 0; i < nbrOrders; i++) {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/orders/orderId-number${i}`)
+          .delete(`/test/orders/orderId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       }
@@ -266,7 +266,7 @@ describe('Orders route', () => {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
-        .get('/orders/orderId')
+        .get('/test/orders/orderId')
         .query({ orderId: orderId });
       chai.expect(res).to.have.status(403);
     });
@@ -274,14 +274,14 @@ describe('Orders route', () => {
     it('Should get an order corresponding to orderId', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/orders')
+        .post('/test/orders')
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(order);
       chai.expect(createResponse).to.have.status(200);
 
       const res = await chai
         .request(app)
-        .get('/orders/orderId')
+        .get('/test/orders/orderId')
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ orderId: orderId });
       chai.expect(res).to.have.status(200);
@@ -292,7 +292,7 @@ describe('Orders route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/orders/${orderId}`)
+        .delete(`/test/orders/${orderId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
     });
@@ -300,7 +300,7 @@ describe('Orders route', () => {
     it('Should return an empty string if no order exists', async function () {
       const res = await chai
         .request(app)
-        .get('/orders/orderId')
+        .get('/test/orders/orderId')
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ orderId: orderId });
       chai.expect(res).to.have.status(200);
@@ -315,7 +315,7 @@ describe('Orders route', () => {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
-        .get('/orders/id')
+        .get('/test/orders/id')
         .query({ id: 'mongoDbId' });
       chai.expect(res).to.have.status(403);
     });
@@ -323,14 +323,14 @@ describe('Orders route', () => {
     it('Should return the order with the proper MongoDB id', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/orders')
+        .post('/test/orders')
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(order);
       chai.expect(createResponse).to.have.status(200);
 
       const res = await chai
         .request(app)
-        .get('/orders/id')
+        .get('/test/orders/id')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: createResponse.body.insertedId });
 
@@ -345,7 +345,7 @@ describe('Orders route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/orders/${orderId}`)
+        .delete(`/test/orders/${orderId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
     });
@@ -353,7 +353,7 @@ describe('Orders route', () => {
     it('Should return the order with the proper userId', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/orders')
+        .post('/test/orders')
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(order);
       chai.expect(createResponse).to.have.status(200);
@@ -366,7 +366,7 @@ describe('Orders route', () => {
 
       const res = await chai
         .request(app)
-        .get('/orders/id')
+        .get('/test/orders/id')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: createResponse.body.insertedId });
 
@@ -375,7 +375,7 @@ describe('Orders route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/orders/${orderId}`)
+        .delete(`/test/orders/${orderId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
     });
@@ -383,7 +383,7 @@ describe('Orders route', () => {
     it('Should return an empty object if MongoDB id doesnt exist', async function () {
       const res = await chai
         .request(app)
-        .get('/orders/id')
+        .get('/test/orders/id')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: '111111111111111111111111' });
 
@@ -394,7 +394,9 @@ describe('Orders route', () => {
 
   describe('GET by liquidity provider', () => {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get('/orders/liquidity-provider');
+      const res = await chai
+        .request(app)
+        .get('/test/orders/liquidity-provider');
       chai.expect(res).to.have.status(403);
     });
 
@@ -422,7 +424,7 @@ describe('Orders route', () => {
 
         const newOrder = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOrder);
         chai.expect(newOrder).to.have.status(200);
@@ -430,7 +432,7 @@ describe('Orders route', () => {
 
       const res = await chai
         .request(app)
-        .get('/orders/liquidity-provider')
+        .get('/test/orders/liquidity-provider')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
@@ -448,7 +450,7 @@ describe('Orders route', () => {
 
         const deleteOrder = await chai
           .request(app)
-          .delete(`/orders/orderId-number${i}`)
+          .delete(`/test/orders/orderId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteOrder).to.have.status(200);
       }
@@ -475,7 +477,7 @@ describe('Orders route', () => {
 
         const newOrder = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOrder);
         chai.expect(newOrder).to.have.status(200);
@@ -483,7 +485,7 @@ describe('Orders route', () => {
 
       const res = await chai
         .request(app)
-        .get('/orders/liquidity-provider')
+        .get('/test/orders/liquidity-provider')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
@@ -505,7 +507,7 @@ describe('Orders route', () => {
 
         const deleteOrder = await chai
           .request(app)
-          .delete(`/orders/orderId-number${i}`)
+          .delete(`/test/orders/orderId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteOrder).to.have.status(200);
       }
@@ -533,7 +535,7 @@ describe('Orders route', () => {
 
         const newOrder = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOrder);
         chai.expect(newOrder).to.have.status(200);
@@ -549,7 +551,7 @@ describe('Orders route', () => {
 
       const res = await chai
         .request(app)
-        .get('/orders/liquidity-provider')
+        .get('/test/orders/liquidity-provider')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
@@ -571,7 +573,7 @@ describe('Orders route', () => {
 
         const deleteOrder = await chai
           .request(app)
-          .delete(`/orders/orderId-number${i}`)
+          .delete(`/test/orders/orderId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteOrder).to.have.status(200);
       }
@@ -580,14 +582,14 @@ describe('Orders route', () => {
 
   describe('DELETE order by orderId', () => {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).delete('/orders/myOrderId');
+      const res = await chai.request(app).delete('/test/orders/myOrderId');
       chai.expect(res).to.have.status(403);
     });
 
     it('Should delete one order', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/orders')
+        .post('/test/orders')
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(order);
 
@@ -595,7 +597,7 @@ describe('Orders route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/orders/${orderId}`)
+        .delete(`/test/orders/${orderId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
       chai.expect(deleteResponse.body.acknowledged).to.be.true;
@@ -605,7 +607,7 @@ describe('Orders route', () => {
     it('Should delete the appropriate order', async function () {
       const createResponse = await chai
         .request(app)
-        .post('/orders')
+        .post('/test/orders')
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(order);
 
@@ -618,7 +620,7 @@ describe('Orders route', () => {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/orders/${orderId}`)
+        .delete(`/test/orders/${orderId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
       chai.expect(
@@ -631,7 +633,7 @@ describe('Orders route', () => {
     it('Should return 404 with message if no order found', async function () {
       const res = await chai
         .request(app)
-        .delete('/orders/myOrderId')
+        .delete('/test/orders/myOrderId')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(404);
       chai.expect(res.body).to.deep.equal({ msg: 'No order found' });
@@ -641,7 +643,7 @@ describe('Orders route', () => {
   describe('PUT order as complete', () => {
     describe('Core of the route', () => {
       it('Should return 403 if no token is provided', async function () {
-        const res = await chai.request(app).put('/orders/complete').send({
+        const res = await chai.request(app).put('/test/orders/complete').send({
           orderId: 'myOrderId',
         });
         chai.expect(res).to.have.status(403);
@@ -650,14 +652,14 @@ describe('Orders route', () => {
       it('Should modify one order if the order was previously not completed', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(order);
         chai.expect(createResponse).to.have.status(200);
 
         const res = await chai
           .request(app)
-          .put('/orders/complete')
+          .put('/test/orders/complete')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             orderId: orderId,
@@ -673,7 +675,7 @@ describe('Orders route', () => {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/orders/${orderId}`)
+          .delete(`/test/orders/${orderId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -681,14 +683,14 @@ describe('Orders route', () => {
       it('Should modify no order if the order was previously completed', async function () {
         const createResponse = await chai
           .request(app)
-          .post('/orders')
+          .post('/test/orders')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(order);
         chai.expect(createResponse).to.have.status(200);
 
         const res = await chai
           .request(app)
-          .put('/orders/complete')
+          .put('/test/orders/complete')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             orderId: orderId,
@@ -697,7 +699,7 @@ describe('Orders route', () => {
 
         const res1 = await chai
           .request(app)
-          .put('/orders/complete')
+          .put('/test/orders/complete')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             orderId: orderId,
@@ -713,7 +715,7 @@ describe('Orders route', () => {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/orders/${orderId}`)
+          .delete(`/test/orders/${orderId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -721,7 +723,7 @@ describe('Orders route', () => {
       it('Should fail if no order exists', async function () {
         const res = await chai
           .request(app)
-          .put('/orders/complete')
+          .put('/test/orders/complete')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({
             orderId: orderId,
@@ -734,7 +736,7 @@ describe('Orders route', () => {
     describe('Validators', () => {
       testNonString({
         method: 'put',
-        path: '/orders/complete',
+        path: '/test/orders/complete',
         body: {
           orderId: 123,
         },
@@ -744,7 +746,7 @@ describe('Orders route', () => {
 
       testNonEmpty({
         method: 'put',
-        path: '/orders/complete',
+        path: '/test/orders/complete',
         body: {
           orderId: '',
         },
@@ -754,7 +756,7 @@ describe('Orders route', () => {
 
       testUnexpectedField({
         method: 'put',
-        path: '/orders/complete',
+        path: '/test/orders/complete',
         body: {
           orderId: '123',
           unexpectedField: 'Unexpected field',
@@ -766,7 +768,7 @@ describe('Orders route', () => {
 
       testUnexpectedField({
         method: 'put',
-        path: '/orders/complete',
+        path: '/test/orders/complete',
         body: {
           orderId: '123',
         },

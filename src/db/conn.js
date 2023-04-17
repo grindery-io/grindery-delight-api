@@ -5,15 +5,19 @@ dotenv.config();
 const connectionString = process.env.ATLAS_URI || '';
 const client = new MongoClient(connectionString);
 
-let conn;
-try {
-  conn = await client.connect();
-} catch (e) {
-  console.error(e);
-}
-let db = conn.db(
-  process.env.NODE_ENV === 'test'
-    ? 'grindery-delight-tests'
-    : 'grindery-delight'
-);
-export default db;
+const getDBConnection = async (req) => {
+  let conn;
+  try {
+    conn = await client.connect();
+  } catch (e) {
+    console.error(e);
+  }
+
+  if (req.originalUrl.includes('/test/')) {
+    return conn.db('grindery-delight-tests');
+  }
+
+  return conn.db('grindery-delight');
+};
+
+export default getDBConnection;

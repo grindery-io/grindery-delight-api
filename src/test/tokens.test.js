@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import db from '../db/conn.js';
+import db from '../db/conn-test.js';
 import {
   mockedToken,
   testNonString,
@@ -16,7 +16,7 @@ chai.use(chaiHttp);
 const expect = chai.expect;
 
 const collection = db.collection('tokens');
-const tokensPath = '/tokens';
+const tokensPath = '/test/tokens';
 const token = {
   coinmarketcapId: '4543',
   symbol: 'BNB',
@@ -41,7 +41,7 @@ function modifyTokenField({ field, value }) {
 
     const res = await chai
       .request(app)
-      .put(`/tokens/${createResponse.body.insertedId}`)
+      .put(`/test/tokens/${createResponse.body.insertedId}`)
       .set('Authorization', `Bearer ${mockedToken}`)
       .send({ [field]: value });
     chai.expect(res).to.have.status(200);
@@ -61,7 +61,7 @@ function modifyTokenField({ field, value }) {
 
     const deleteResponse = await chai
       .request(app)
-      .delete(`/tokens/${createResponse.body.insertedId}`)
+      .delete(`/test/tokens/${createResponse.body.insertedId}`)
       .set('Authorization', `Bearer ${mockedToken}`);
     chai.expect(deleteResponse).to.have.status(200);
   });
@@ -90,7 +90,7 @@ describe('Tokens route', async function () {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/tokens/${createResponse.body.insertedId}`)
+          .delete(`/test/tokens/${createResponse.body.insertedId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -110,7 +110,7 @@ describe('Tokens route', async function () {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/tokens/${createResponse.body.insertedId}`)
+          .delete(`/test/tokens/${createResponse.body.insertedId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -135,7 +135,7 @@ describe('Tokens route', async function () {
 
         const deleteResponse = await chai
           .request(app)
-          .delete(`/tokens/${createResponse.body.insertedId}`)
+          .delete(`/test/tokens/${createResponse.body.insertedId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
@@ -182,7 +182,7 @@ describe('Tokens route', async function () {
 
   describe('GET active tokens', () => {
     it('Should return 403 if no token is provided', async function () {
-      const createResponse = await chai.request(app).get('/tokens/active');
+      const createResponse = await chai.request(app).get('/test/tokens/active');
       chai.expect(createResponse).to.have.status(403);
     });
 
@@ -203,7 +203,7 @@ describe('Tokens route', async function () {
 
       const res = await chai
         .request(app)
-        .get('/tokens/active')
+        .get('/test/tokens/active')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('array');
@@ -220,13 +220,13 @@ describe('Tokens route', async function () {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/tokens/${createResponse.body.insertedId}`)
+        .delete(`/test/tokens/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
 
       const deleteResponse1 = await chai
         .request(app)
-        .delete(`/tokens/${createResponse1.body.insertedId}`)
+        .delete(`/test/tokens/${createResponse1.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse1).to.have.status(200);
     });
@@ -234,7 +234,7 @@ describe('Tokens route', async function () {
     it('Should return an empty array if no token available', async function () {
       const res = await chai
         .request(app)
-        .get('/tokens/active')
+        .get('/test/tokens/active')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('array').that.is.empty;
@@ -245,7 +245,7 @@ describe('Tokens route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .get('/tokens/111111111111111111111111');
+        .get('/test/tokens/111111111111111111111111');
       chai.expect(createResponse).to.have.status(403);
     });
 
@@ -259,7 +259,7 @@ describe('Tokens route', async function () {
 
       const res = await chai
         .request(app)
-        .get(`/tokens/${createResponse.body.insertedId}`)
+        .get(`/test/tokens/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai
@@ -270,7 +270,7 @@ describe('Tokens route', async function () {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/tokens/${createResponse.body.insertedId}`)
+        .delete(`/test/tokens/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
     });
@@ -278,7 +278,7 @@ describe('Tokens route', async function () {
     it('Should return an empty object if no token available', async function () {
       const res = await chai
         .request(app)
-        .get('/tokens/111111111111111111111111')
+        .get('/test/tokens/111111111111111111111111')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object').that.is.empty;
@@ -286,7 +286,7 @@ describe('Tokens route', async function () {
 
     testNonMongodbId({
       method: 'get',
-      path: '/tokens/1111111111111111',
+      path: '/test/tokens/1111111111111111',
       body: {},
       query: {},
       field: 'tokenId',
@@ -298,7 +298,7 @@ describe('Tokens route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .put('/tokens/111111111111111111111111');
+          .put('/test/tokens/111111111111111111111111');
         chai.expect(createResponse).to.have.status(403);
       });
 
@@ -340,7 +340,7 @@ describe('Tokens route', async function () {
       it('Should fail if no token found', async function () {
         const res = await chai
           .request(app)
-          .put('/tokens/111111111111111111111111')
+          .put('/test/tokens/111111111111111111111111')
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(404);
         chai.expect(res.body).to.deep.equal({ msg: 'No token found' });
@@ -362,7 +362,7 @@ describe('Tokens route', async function () {
         if (testCase === 'isActive' || testCase === 'isNative') {
           testNonBoolean({
             method: 'put',
-            path: '/tokens/111111111111111111111111',
+            path: '/test/tokens/111111111111111111111111',
             body: {
               [testCase]: 123,
             },
@@ -372,7 +372,7 @@ describe('Tokens route', async function () {
         } else {
           testNonString({
             method: 'put',
-            path: '/tokens/111111111111111111111111',
+            path: '/test/tokens/111111111111111111111111',
             body: {
               [testCase]: 123,
             },
@@ -383,7 +383,7 @@ describe('Tokens route', async function () {
 
         testNonEmpty({
           method: 'put',
-          path: '/tokens/111111111111111111111111',
+          path: '/test/tokens/111111111111111111111111',
           body: {
             ...token,
             [testCase]: '',
@@ -395,7 +395,7 @@ describe('Tokens route', async function () {
 
       testUnexpectedField({
         method: 'put',
-        path: '/tokens/111111111111111111111111',
+        path: '/test/tokens/111111111111111111111111',
         body: {
           unexpectedField: 'unexpectedField',
         },
@@ -406,7 +406,7 @@ describe('Tokens route', async function () {
 
       testUnexpectedField({
         method: 'put',
-        path: '/tokens/111111111111111111111111',
+        path: '/test/tokens/111111111111111111111111',
         body: {},
         query: { unexpectedField: 'unexpectedField' },
         field: 'unexpectedField',
@@ -415,7 +415,7 @@ describe('Tokens route', async function () {
 
       testNonMongodbId({
         method: 'put',
-        path: '/tokens/1111111111111111',
+        path: '/test/tokens/1111111111111111',
         body: {},
         query: {},
         field: 'tokenId',
@@ -427,7 +427,7 @@ describe('Tokens route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .delete('/tokens/111111111111111111111111');
+        .delete('/test/tokens/111111111111111111111111');
       chai.expect(createResponse).to.have.status(403);
     });
 
@@ -441,7 +441,7 @@ describe('Tokens route', async function () {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/tokens/${createResponse.body.insertedId}`)
+        .delete(`/test/tokens/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
       chai
@@ -452,7 +452,7 @@ describe('Tokens route', async function () {
     it('Should fail if no token exists', async function () {
       const deleteResponse = await chai
         .request(app)
-        .delete(`/tokens/111111111111111111111111`)
+        .delete(`/test/tokens/111111111111111111111111`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(404);
       chai.expect(deleteResponse.body).to.deep.equal({ msg: 'No token found' });
@@ -460,7 +460,7 @@ describe('Tokens route', async function () {
 
     testNonMongodbId({
       method: 'delete',
-      path: '/tokens/1111111111111111',
+      path: '/test/tokens/1111111111111111',
       body: {},
       query: {},
       field: 'tokenId',

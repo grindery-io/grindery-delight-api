@@ -1,5 +1,5 @@
 import express from 'express';
-import db from '../db/conn.js';
+import getDBConnection from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {
   createOfferValidator,
@@ -13,11 +13,12 @@ import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
 
 const router = express.Router();
-const collection = db.collection('offers');
+// const collection = db.collection('offers');
 
 /* This is a POST request that creates a new offer. */
 router.post('/', createOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -40,6 +41,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all offers. */
 router.get('/', isRequired, async (req, res) => {
+  const collection = (await getDBConnection(req)).collection('offers');
   res.send(await collection.find({}).toArray()).status(200);
 });
 
@@ -47,6 +49,7 @@ router.get('/', isRequired, async (req, res) => {
 and filter by exchangeChainId, exchangeToken, chainId,token */
 router.get('/search', getOffersValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -70,6 +73,7 @@ router.get('/search', getOffersValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all offers for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
+  const collection = (await getDBConnection(req)).collection('offers');
   res
     .send(await collection.find({ userId: res.locals.userId }).toArray())
     .status(200);
@@ -82,6 +86,7 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
+    const collection = (await getDBConnection(req)).collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -96,6 +101,7 @@ router.get(
 /* This is a GET request that returns an offer by id. */
 router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -114,6 +120,7 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
+    const collection = (await getDBConnection(req)).collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -134,6 +141,7 @@ router.delete(
 /* This is a PUT request that updates an offer by id. */
 router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }

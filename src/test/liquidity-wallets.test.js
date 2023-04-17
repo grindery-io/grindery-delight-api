@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import db from '../db/conn.js';
+import db from '../db/conn-test.js';
 import {
   mockedToken,
   testNonString,
@@ -14,7 +14,7 @@ chai.use(chaiHttp);
 const expect = chai.expect;
 
 const collection = db.collection('liquidity-wallets');
-const liquidityWalletPath = '/liquidity-wallets';
+const liquidityWalletPath = '/test/liquidity-wallets';
 const liquidityWallet = {
   walletAddress: 'myWalletAddress',
   chainId: 'myChainId',
@@ -30,7 +30,6 @@ describe('Liquidity wallets route', async function () {
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(403);
       });
-
       it('Should create a new liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
@@ -40,10 +39,9 @@ describe('Liquidity wallets route', async function () {
         chai.expect(createResponse).to.have.status(201);
         chai.expect(createResponse.body).to.have.property('acknowledged', true);
         chai.expect(createResponse.body).to.have.property('insertedId');
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -51,7 +49,6 @@ describe('Liquidity wallets route', async function () {
           });
         chai.expect(deleteResponse).to.have.status(200);
       });
-
       it('Should create a new liquidity wallet with the proper walletAddress and chainId', async function () {
         const createResponse = await chai
           .request(app)
@@ -59,7 +56,6 @@ describe('Liquidity wallets route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
-
         const wallet = await collection.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         });
@@ -69,10 +65,9 @@ describe('Liquidity wallets route', async function () {
         chai
           .expect(wallet)
           .to.have.property('chainId', liquidityWallet.chainId);
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -80,7 +75,6 @@ describe('Liquidity wallets route', async function () {
           });
         chai.expect(deleteResponse).to.have.status(200);
       });
-
       it('Should create a new liquidity wallet with empty token object', async function () {
         const createResponse = await chai
           .request(app)
@@ -88,17 +82,14 @@ describe('Liquidity wallets route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
-
         const wallet = await collection.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         });
-
         chai.expect(wallet).to.have.property('tokens').that.is.an('object').that
           .is.empty;
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -106,7 +97,6 @@ describe('Liquidity wallets route', async function () {
           });
         chai.expect(deleteResponse).to.have.status(200);
       });
-
       it('Should fail if liquidity wallet already exists', async function () {
         const createResponse = await chai
           .request(app)
@@ -114,7 +104,6 @@ describe('Liquidity wallets route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
-
         const createResponse1 = await chai
           .request(app)
           .post(liquidityWalletPath)
@@ -124,10 +113,9 @@ describe('Liquidity wallets route', async function () {
         chai
           .expect(createResponse1.body)
           .to.deep.equal({ msg: 'This wallet already exists on this chain.' });
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -136,10 +124,8 @@ describe('Liquidity wallets route', async function () {
         chai.expect(deleteResponse).to.have.status(200);
       });
     });
-
     describe('Validators', () => {
       const testCases = ['walletAddress', 'chainId'];
-
       for (const testCase of testCases) {
         testNonString({
           method: 'post',
@@ -151,7 +137,6 @@ describe('Liquidity wallets route', async function () {
           query: {},
           field: testCase,
         });
-
         testNonEmpty({
           method: 'post',
           path: liquidityWalletPath,
@@ -163,7 +148,6 @@ describe('Liquidity wallets route', async function () {
           field: testCase,
         });
       }
-
       testUnexpectedField({
         method: 'post',
         path: liquidityWalletPath,
@@ -175,7 +159,6 @@ describe('Liquidity wallets route', async function () {
         field: 'unexpectedField',
         location: 'body',
       });
-
       testUnexpectedField({
         method: 'post',
         path: liquidityWalletPath,
@@ -186,7 +169,6 @@ describe('Liquidity wallets route', async function () {
       });
     });
   });
-
   describe('GET by chainId', () => {
     describe('Core of the route', () => {
       it('Should return 403 if no token is provided', async function () {
@@ -196,7 +178,6 @@ describe('Liquidity wallets route', async function () {
           .query({ chainId: liquidityWallet.chainId });
         chai.expect(createResponse).to.have.status(403);
       });
-
       it('Should return empty array if no offer available', async function () {
         const res = await chai
           .request(app)
@@ -206,7 +187,6 @@ describe('Liquidity wallets route', async function () {
         chai.expect(res).to.have.status(200);
         chai.expect(res.body).to.be.an('array').that.is.empty;
       });
-
       it('Should return an array of liquidity wallets with the proper chainId', async function () {
         const nbrLiquidityWallet = 1;
         let wallets = [];
@@ -221,13 +201,11 @@ describe('Liquidity wallets route', async function () {
               walletAddress: `${liquidityWallet.walletAddress}-${i}`,
             });
           chai.expect(createResponse).to.have.status(201);
-
           wallets.push(
             await collection.findOne({
               _id: new ObjectId(createResponse.body.insertedId),
             })
           );
-
           if (i === 0) {
             userId = (
               await collection.findOne({
@@ -236,7 +214,6 @@ describe('Liquidity wallets route', async function () {
             ).userId;
           }
         }
-
         const res = await chai
           .request(app)
           .get(liquidityWalletPath)
@@ -247,11 +224,10 @@ describe('Liquidity wallets route', async function () {
         res.body.forEach((wallet) => {
           chai.expect(wallet.chainId).to.equal(liquidityWallet.chainId);
         });
-
         for (let i = 0; i < nbrLiquidityWallet; i++) {
           const deleteResponse = await chai
             .request(app)
-            .delete(`/liquidity-wallets`)
+            .delete(`/test/liquidity-wallets`)
             .set('Authorization', `Bearer ${mockedToken}`)
             .query({
               chainId: liquidityWallet.chainId,
@@ -261,7 +237,6 @@ describe('Liquidity wallets route', async function () {
         }
       });
     });
-
     describe('Validators', () => {
       it('Should return a 400 error if `chainId` is empty', async function () {
         const res = await chai
@@ -276,15 +251,13 @@ describe('Liquidity wallets route', async function () {
       });
     });
   });
-
   describe('GET all liquidity wallets', () => {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .get('/liquidity-wallets/all');
+        .get('/test/liquidity-wallets/all');
       chai.expect(createResponse).to.have.status(403);
     });
-
     it('Should return an array with all the liquidity wallets', async function () {
       const createResponse = await chai
         .request(app)
@@ -292,21 +265,17 @@ describe('Liquidity wallets route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(liquidityWallet);
       chai.expect(createResponse).to.have.status(201);
-
       const userId = (
         await collection.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         })
       ).userId;
-
       const res = await chai
         .request(app)
-        .get('/liquidity-wallets/all')
+        .get('/test/liquidity-wallets/all')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-
       const wallets = await collection.find({ userId: userId }).toArray();
-
       // Check that all objects in the response body have chainId and walletAddress elements that exist in wallets
       res.body.forEach((wallet) => {
         chai.expect(wallet.chainId).to.be.oneOf(wallets.map((w) => w.chainId));
@@ -315,10 +284,9 @@ describe('Liquidity wallets route', async function () {
           .to.be.oneOf(wallets.map((w) => w.walletAddress));
         chai.expect(wallet.userId).to.equal(userId);
       });
-
       const deleteResponse = await chai
         .request(app)
-        .delete(`/liquidity-wallets`)
+        .delete(`/test/liquidity-wallets`)
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({
           chainId: liquidityWallet.chainId,
@@ -327,7 +295,6 @@ describe('Liquidity wallets route', async function () {
       chai.expect(deleteResponse).to.have.status(200);
     });
   });
-
   describe('GET single liquidity wallets', () => {
     describe('Core of the route', () => {
       it('Should return a single liquidity wallet (without walletAddress in the query)', async function () {
@@ -337,16 +304,14 @@ describe('Liquidity wallets route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
-
         const userId = (
           await collection.findOne({
             _id: new ObjectId(createResponse.body.insertedId),
           })
         ).userId;
-
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets/single')
+          .get('/test/liquidity-wallets/single')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({ chainId: liquidityWallet.chainId, userId: userId });
         chai.expect(res).to.have.status(200);
@@ -356,10 +321,9 @@ describe('Liquidity wallets route', async function () {
           .expect(res.body.walletAddress)
           .to.equal(liquidityWallet.walletAddress);
         chai.expect(res.body.chainId).to.equal(liquidityWallet.chainId);
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -367,7 +331,6 @@ describe('Liquidity wallets route', async function () {
           });
         chai.expect(deleteResponse).to.have.status(200);
       });
-
       it('Should return a single liquidity wallet (with walletAddress in the query)', async function () {
         const createResponse = await chai
           .request(app)
@@ -375,16 +338,14 @@ describe('Liquidity wallets route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
-
         const userId = (
           await collection.findOne({
             _id: new ObjectId(createResponse.body.insertedId),
           })
         ).userId;
-
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets/single')
+          .get('/test/liquidity-wallets/single')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -398,10 +359,9 @@ describe('Liquidity wallets route', async function () {
           .expect(res.body.walletAddress)
           .to.equal(liquidityWallet.walletAddress);
         chai.expect(res.body.chainId).to.equal(liquidityWallet.chainId);
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -410,67 +370,59 @@ describe('Liquidity wallets route', async function () {
         chai.expect(deleteResponse).to.have.status(200);
       });
     });
-
     describe('Validators', () => {
       it('Should return a 400 status and an error message when walletAddress is an empty string', async function () {
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets/single')
+          .get('/test/liquidity-wallets/single')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
             userId: 'myUserId',
             walletAddress: '',
           });
-
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array');
         chai.expect(res.body[0].msg).to.equal('must not be empty');
       });
-
       it('Should return a 400 status and an error message when chainId is an empty string', async function () {
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets/single')
+          .get('/test/liquidity-wallets/single')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: '',
             userId: 'myUserId',
             walletAddress: liquidityWallet.walletAddress,
           });
-
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array');
         chai.expect(res.body[0].msg).to.equal('must not be empty');
       });
-
       it('Should return a 400 status and an error message when userId is an empty string', async function () {
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets/single')
+          .get('/test/liquidity-wallets/single')
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
             userId: '',
             walletAddress: liquidityWallet.walletAddress,
           });
-
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array');
         chai.expect(res.body[0].msg).to.equal('must not be empty');
       });
     });
   });
-
   describe('GET liquidity wallet by MongoDbId', () => {
     describe('Core of the route', () => {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .get('/liquidity-wallets/id/myId');
+          .get('/test/liquidity-wallets/id/myId');
         chai.expect(createResponse).to.have.status(403);
       });
-
       it('Should return a single liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
@@ -478,18 +430,15 @@ describe('Liquidity wallets route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
-
         const userId = (
           await collection.findOne({
             _id: new ObjectId(createResponse.body.insertedId),
           })
         ).userId;
-
         const MongoDBId = createResponse.body.insertedId;
-
         const res = await chai
           .request(app)
-          .get(`/liquidity-wallets/id/${MongoDBId}`)
+          .get(`/test/liquidity-wallets/id/${MongoDBId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         chai.expect(res).to.have.status(200);
@@ -500,10 +449,9 @@ describe('Liquidity wallets route', async function () {
           .expect(res.body.walletAddress)
           .to.equal(liquidityWallet.walletAddress);
         chai.expect(res.body.chainId).to.equal(liquidityWallet.chainId);
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -511,22 +459,20 @@ describe('Liquidity wallets route', async function () {
           });
         chai.expect(deleteResponse).to.have.status(200);
       });
-
       it('Should return an empty object if no wallet exists', async function () {
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets/id/111111111111111111111111')
+          .get('/test/liquidity-wallets/id/111111111111111111111111')
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         chai.expect(res.body).to.be.an('object').that.is.empty;
       });
     });
-
     describe('Validator', () => {
       it('Should return a 400 status and an error message if id is not a MongoDbId', async function () {
         const res = await chai
           .request(app)
-          .get('/liquidity-wallets/id/notAValidMongoDbId')
+          .get('/test/liquidity-wallets/id/notAValidMongoDbId')
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array');
@@ -534,7 +480,6 @@ describe('Liquidity wallets route', async function () {
       });
     });
   });
-
   describe('DELETE liquidity wallets', () => {
     describe('Core of the route', () => {
       it('Should return 403 if no token is provided', async function () {
@@ -543,7 +488,6 @@ describe('Liquidity wallets route', async function () {
           .delete(liquidityWalletPath);
         chai.expect(createResponse).to.have.status(403);
       });
-
       it('Should delete one liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
@@ -551,10 +495,9 @@ describe('Liquidity wallets route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -565,18 +508,16 @@ describe('Liquidity wallets route', async function () {
           acknowledged: true,
           deletedCount: 1,
         });
-
         chai.expect(
           await collection.findOne({
             _id: new ObjectId(createResponse.body.insertedId),
           })
         ).to.be.null;
       });
-
       it('Should return a 404 status and an error message if the wallet does not exist', async function () {
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -590,14 +531,12 @@ describe('Liquidity wallets route', async function () {
       });
     });
   });
-
   describe('PUT liquidity wallets', () => {
     describe('Core of the route', () => {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai.request(app).put(liquidityWalletPath);
         chai.expect(createResponse).to.have.status(403);
       });
-
       it('Should modify one liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
@@ -605,7 +544,6 @@ describe('Liquidity wallets route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
-
         const res = await chai
           .request(app)
           .put(liquidityWalletPath)
@@ -623,10 +561,9 @@ describe('Liquidity wallets route', async function () {
           upsertedCount: 0,
           matchedCount: 1,
         });
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -634,7 +571,6 @@ describe('Liquidity wallets route', async function () {
           });
         chai.expect(deleteResponse).to.have.status(200);
       });
-
       it('Should modify token amount of the liquidity wallet', async function () {
         const createResponse = await chai
           .request(app)
@@ -642,7 +578,6 @@ describe('Liquidity wallets route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(201);
-
         const res = await chai
           .request(app)
           .put(liquidityWalletPath)
@@ -657,10 +592,9 @@ describe('Liquidity wallets route', async function () {
           _id: new ObjectId(createResponse.body.insertedId),
         });
         chai.expect(wallet.tokens['USDC']).to.equal('3435');
-
         const deleteResponse = await chai
           .request(app)
-          .delete(`/liquidity-wallets`)
+          .delete(`/test/liquidity-wallets`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .query({
             chainId: liquidityWallet.chainId,
@@ -668,7 +602,6 @@ describe('Liquidity wallets route', async function () {
           });
         chai.expect(deleteResponse).to.have.status(200);
       });
-
       it('Should fail if liquidity wallet doesnt exist', async function () {
         const res = await chai
           .request(app)
@@ -680,13 +613,11 @@ describe('Liquidity wallets route', async function () {
             tokenId: 'USDC',
             amount: '3435',
           });
-
         chai.expect(res).to.have.status(404);
         chai
           .expect(res.body)
           .to.deep.equal({ msg: 'This liquidity wallet does not exist.' });
       });
-
       it('Should fail if walletAddress is not a string', async function () {
         const res = await chai
           .request(app)
@@ -698,7 +629,6 @@ describe('Liquidity wallets route', async function () {
             tokenId: 'USDC',
             amount: '3435',
           });
-
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array').that.deep.includes({
           value: 123,
@@ -707,7 +637,6 @@ describe('Liquidity wallets route', async function () {
           location: 'body',
         });
       });
-
       it('Should fail if walletAddress is an empty string', async function () {
         const res = await chai
           .request(app)
@@ -719,7 +648,6 @@ describe('Liquidity wallets route', async function () {
             tokenId: 'USDC',
             amount: '3435',
           });
-
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array').that.deep.includes({
           value: '',
@@ -728,7 +656,6 @@ describe('Liquidity wallets route', async function () {
           location: 'body',
         });
       });
-
       it('Should return a validation error if chainId is not a string', async function () {
         const res = await chai
           .request(app)
@@ -740,7 +667,6 @@ describe('Liquidity wallets route', async function () {
             tokenId: 'USDC',
             amount: '3435',
           });
-
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array').that.deep.includes({
           value: 123,
@@ -749,7 +675,6 @@ describe('Liquidity wallets route', async function () {
           location: 'body',
         });
       });
-
       it('Should return a validation error if chainId is an empty string', async function () {
         const res = await chai
           .request(app)
@@ -761,7 +686,6 @@ describe('Liquidity wallets route', async function () {
             tokenId: 'USDC',
             amount: '3435',
           });
-
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array').that.deep.includes({
           value: '',
@@ -770,7 +694,6 @@ describe('Liquidity wallets route', async function () {
           location: 'body',
         });
       });
-
       it('Should fail if tokenId is not a string', async function () {
         const res = await chai
           .request(app)
@@ -783,7 +706,6 @@ describe('Liquidity wallets route', async function () {
             tokenId: 123,
             amount: '3435',
           });
-
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array').that.is.not.empty;
         chai
@@ -792,7 +714,6 @@ describe('Liquidity wallets route', async function () {
         chai.expect(res.body[0]).to.have.property('param', 'tokenId');
         chai.expect(res.body[0]).to.have.property('location', 'body');
       });
-
       it('Should fail if tokenId is empty', async function () {
         const res = await chai
           .request(app)
@@ -805,14 +726,12 @@ describe('Liquidity wallets route', async function () {
             tokenId: '',
             amount: '3435',
           });
-
         chai.expect(res).to.have.status(400);
         chai.expect(res.body).to.be.an('array').that.is.not.empty;
         chai.expect(res.body[0]).to.have.property('msg', 'must not be empty');
         chai.expect(res.body[0]).to.have.property('param', 'tokenId');
         chai.expect(res.body[0]).to.have.property('location', 'body');
       });
-
       it('Should return an error if amount is not a string', async function () {
         const res = await chai
           .request(app)
@@ -835,7 +754,6 @@ describe('Liquidity wallets route', async function () {
           },
         ]);
       });
-
       it('Should return an error if amount is an empty string', async function () {
         const res = await chai
           .request(app)
@@ -858,7 +776,6 @@ describe('Liquidity wallets route', async function () {
           },
         ]);
       });
-
       it('Should fail if body contains unexpected field', async function () {
         const res = await chai
           .request(app)
@@ -871,14 +788,12 @@ describe('Liquidity wallets route', async function () {
             amount: '3435',
             unexpectedField: 'someValue',
           });
-
         expect(res).to.have.status(400);
         expect(res.body).to.be.an('array');
         expect(res.body[0].msg).to.equal(
           'The following fields are not allowed in body: unexpectedField'
         );
       });
-
       it('Should fail if unexpected field in query', async function () {
         const res = await chai
           .request(app)
@@ -894,7 +809,6 @@ describe('Liquidity wallets route', async function () {
             tokenId: 'USDC',
             amount: '3435',
           });
-
         expect(res).to.have.status(400);
         expect(res.body).to.be.an('array');
         expect(res.body[0].msg).to.equal(
