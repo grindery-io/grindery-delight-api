@@ -1,5 +1,4 @@
 import express from 'express';
-import db from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {
   getBalanceTokenValidator,
@@ -8,6 +7,7 @@ import {
 import { validateResult } from '../utils/validators-utils.js';
 import { ethers } from 'ethers';
 import { createRequire } from 'node:module';
+import getDBConnection from '../db/conn.js';
 const require = createRequire(import.meta.url);
 
 const ERC20 = require('../abis/erc20.json');
@@ -53,6 +53,9 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
+    const collectionBlockchains = (await getDBConnection(req)).collection(
+      'blockchains'
+    );
     if (validator.length) {
       return res.status(400).send(validator);
     }
