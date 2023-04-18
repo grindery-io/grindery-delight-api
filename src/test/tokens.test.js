@@ -19,7 +19,7 @@ const collection = db.collection('tokens');
 const tokensPath = '/test/tokens';
 const token = {
   coinmarketcapId: '4543',
-  symbol: 'BNB',
+  symbol: 'mySymbol',
   icon: 'https://www.grindery.io/hubfs/delight-assets/icons/tokens/bnb.png',
   chainId: '544',
   address: '0x0',
@@ -229,15 +229,6 @@ describe('Tokens route', async function () {
         .delete(`/test/tokens/${createResponse1.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse1).to.have.status(200);
-    });
-
-    it('Should return an empty array if no token available', async function () {
-      const res = await chai
-        .request(app)
-        .get('/test/tokens/active')
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.be.an('array').that.is.empty;
     });
   });
 

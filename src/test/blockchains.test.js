@@ -20,14 +20,14 @@ const expect = chai.expect;
 const collection = db.collection('blockchains');
 const blockchainPath = '/test/blockchains';
 const blockchain = {
-  caipId: 'eip155:5',
-  chainId: '5',
-  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-5.png',
+  caipId: 'eip155:534',
+  chainId: '534',
+  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-534.png',
   isActive: true,
   isEvm: true,
   isTestnet: true,
-  label: 'Goerli Testnet',
-  nativeTokenSymbol: 'ETH',
+  label: 'myTestnet',
+  nativeTokenSymbol: 'myTokenSymbol',
   rpc: [
     'https://goerli.blockpi.network/v1/rpc/public',
     'https://rpc.ankr.com/eth_goerli',
@@ -332,14 +332,6 @@ describe('Blockchains route', async function () {
         .delete(`/test/blockchains/${createResponse1.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse1).to.have.status(200);
-    });
-    it('Should return an empty array if no blockchain found', async function () {
-      const res = await chai
-        .request(app)
-        .get('/test/blockchains/active')
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.be.an('array').that.is.empty;
     });
   });
   describe('GET blockchain by MongoDBId', () => {

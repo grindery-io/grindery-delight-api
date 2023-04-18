@@ -18,5 +18,6 @@ jobs:
       - run: npm ci
       - run: npm test
         env:
+          CI: true
           ATLAS_URI: ${{ secrets.ATLAS_URI }}
           GRINDERY_NEXUS_REFRESH_TOKEN: ${{ secrets.GRINDERY_NEXUS_REFRESH_TOKEN }}
