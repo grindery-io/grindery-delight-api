@@ -16,7 +16,7 @@ jobs:
           node-version: 16
           cache: 'npm'
       - run: npm ci
-      - run: npm test --exit
+      - run: npm test
         env:
           ATLAS_URI: ${{ secrets.ATLAS_URI }}
           GRINDERY_NEXUS_REFRESH_TOKEN: ${{ secrets.GRINDERY_NEXUS_REFRESH_TOKEN }}

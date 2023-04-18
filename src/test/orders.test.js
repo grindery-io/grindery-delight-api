@@ -414,7 +414,7 @@ describe('Orders route', () => {
 
         const newOffer = await chai
           .request(app)
-          .post('/offers')
+          .post('/test/offers')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(newOffer).to.have.status(200);
@@ -444,7 +444,7 @@ describe('Orders route', () => {
       for (let i = 0; i < nbrOffersOrders; i++) {
         const deleteOffer = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteOffer).to.have.status(200);
 
@@ -467,7 +467,7 @@ describe('Orders route', () => {
 
         const newOffer = await chai
           .request(app)
-          .post('/offers')
+          .post('/test/offers')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(newOffer).to.have.status(200);
@@ -501,7 +501,7 @@ describe('Orders route', () => {
       for (let i = 0; i < nbrOffersOrders; i++) {
         const deleteOffer = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteOffer).to.have.status(200);
 
@@ -525,7 +525,7 @@ describe('Orders route', () => {
 
         const newOffer = await chai
           .request(app)
-          .post('/offers')
+          .post('/test/offers')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         chai.expect(newOffer).to.have.status(200);
@@ -567,7 +567,7 @@ describe('Orders route', () => {
       for (let i = 0; i < nbrOffersOrders; i++) {
         const deleteOffer = await chai
           .request(app)
-          .delete(`/offers/offerId-number${i}`)
+          .delete(`/test/offers/offerId-number${i}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteOffer).to.have.status(200);
 
