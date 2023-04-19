@@ -37,10 +37,12 @@ const blockchain = {
   addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',
   usefulAddresses: [
     {
-      myContract1: 'myAddress1',
+      contract: 'myContract1',
+      address: 'myAddress1',
     },
     {
-      myContract2: 'myAddress2',
+      contract: 'myContract2',
+      address: 'myAddress2',
     },
   ],
 };
@@ -425,10 +427,12 @@ describe('Blockchains route', async function () {
         field: 'usefulAddresses',
         value: [
           {
-            myContract13: 'myAddress3',
+            contract: 'myContract1',
+            address: 'myAddress1',
           },
           {
-            myContract4: 'myAddress4',
+            contract: 'myContract2',
+            address: 'myAddress2',
           },
         ],
       });
