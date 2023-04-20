@@ -234,3 +234,12 @@ export const modifyBlockchainValidator = [
     return true;
   }),
 ];
+
+export const getUsefullAddressByNameValidator = [
+  param('blockchainId')
+    .isMongoId()
+    .withMessage('must be mongodb id')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  query('contract').notEmpty().withMessage('must not be empty'),
+];
