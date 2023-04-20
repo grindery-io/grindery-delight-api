@@ -67,16 +67,6 @@ export const createBlockchainValidator = [
     .withMessage('must be boolean value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('usefulAddresses')
-    .isArray()
-    .custom((usefulAddresses) => {
-      if (usefulAddresses.length === 0) {
-        throw new Error('usefulAddresses should not be empty');
-      }
-      return true;
-    }),
-  body('usefulAddresses.*.contract').notEmpty(),
-  body('usefulAddresses.*.address').notEmpty(),
   body().custom((value, { req }) => {
     validateFields(
       req.body,
@@ -193,17 +183,6 @@ export const modifyBlockchainValidator = [
     .withMessage('must be URL')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('usefulAddresses')
-    .optional()
-    .isArray()
-    .custom((usefulAddresses) => {
-      if (usefulAddresses.length === 0) {
-        throw new Error('usefulAddresses should not be empty');
-      }
-      return true;
-    }),
-  body('usefulAddresses.*.contract').notEmpty(),
-  body('usefulAddresses.*.address').notEmpty(),
   body().custom((value, { req }) => {
     validateFields(
       req.body,

@@ -35,16 +35,6 @@ const blockchain = {
   ],
   transactionExplorerUrl: 'https://goerli.etherscan.io/tx/{hash}',
   addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',
-  usefulAddresses: [
-    {
-      contract: 'myContract1',
-      address: 'myAddress1',
-    },
-    {
-      contract: 'myContract2',
-      address: 'myAddress2',
-    },
-  ],
 };
 
 function modifyBlockchainField({ field, value }) {
@@ -422,19 +412,6 @@ describe('Blockchains route', async function () {
       modifyBlockchainField({
         field: 'addressExplorerUrl',
         value: 'https://new.goerli.etherscan.io/address/{hash}',
-      });
-      modifyBlockchainField({
-        field: 'usefulAddresses',
-        value: [
-          {
-            contract: 'myContract1',
-            address: 'myAddress1',
-          },
-          {
-            contract: 'myContract2',
-            address: 'myAddress2',
-          },
-        ],
       });
       it('Should fail if no blockchain found', async function () {
         const res = await chai

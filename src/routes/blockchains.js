@@ -117,8 +117,6 @@ router.put(
             blockchain.transactionExplorerUrl,
           addressExplorerUrl:
             req.body.addressExplorerUrl ?? blockchain.addressExplorerUrl,
-          usefulAddresses:
-            req.body.usefulAddresses ?? blockchain.usefulAddresses,
         },
       })
     );
