@@ -6,6 +6,8 @@ import {
   createBlockchainValidator,
   getBlockchainByIdValidator,
   modifyBlockchainValidator,
+  getUsefullAddressByNameValidator,
+  modifyUsefullAddressValidator,
 } from '../validators/blockchains.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 
@@ -149,6 +151,123 @@ router.delete(
     } else {
       res.status(404).send({
         msg: 'No blockchain found',
+      });
+    }
+  }
+);
+
+/* This is a post request to usefull address in the blockchain route. It is using the modifyUsefullAddressValidator to
+validate the request body. It is also using the isRequired middleware to check if the user is logged
+in. If the user is not logged in, it will return a 401 error. If the user is logged in, it will
+check if the usefull address already exists. If it does not exist, it will create a new usefull address. If it
+exist, it will update actual the usefull address. */
+router.post(
+  '/useful-address/:blockchainId',
+  modifyUsefullAddressValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    const collection = (await getDBConnection(req)).collection('blockchains');
+    const collectionAdmin = (await getDBConnection(req)).collection('admins');
+
+    if (
+      validator.length ||
+      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+    ) {
+      return res.status(400).send(validator);
+    }
+
+    let blockchain = await collection.findOne({
+      _id: new ObjectId(req.params.blockchainId),
+    });
+
+    if (!blockchain) {
+      res.status(404).send({
+        msg: 'No blockchain found',
+      });
+      return;
+    }
+
+    blockchain = await collection.findOne({
+      _id: new ObjectId(req.params.blockchainId),
+      usefulAddresses: {
+        $elemMatch: { contract: req.body.contract },
+      },
+    });
+
+    if (blockchain) {
+      res.status(200).send(
+        await collection.updateOne(
+          {
+            _id: new ObjectId(req.params.blockchainId),
+            usefulAddresses: {
+              $elemMatch: {
+                contract: req.body.contract,
+                address: { $ne: req.body.address },
+              },
+            },
+          },
+          {
+            $set: {
+              'usefulAddresses.$[elem].address': req.body.address,
+            },
+          },
+          {
+            arrayFilters: [{ 'elem.contract': req.body.contract }],
+          }
+        )
+      );
+    } else {
+      res.status(200).send(
+        await collection.updateOne(
+          { _id: new ObjectId(req.params.blockchainId) },
+          {
+            $addToSet: {
+              usefulAddresses: {
+                contract: req.body.contract,
+                address: req.body.address,
+              },
+            },
+          },
+          {
+            upsert: true,
+          }
+        )
+      );
+    }
+  }
+);
+
+/* This is a delete request to usefull address in the blockchain route. It is using the getUsefullAddressByNameValidator to
+validate the request body. It is also using the isRequired middleware to check if the user is logged
+in. If the user is not logged in, it will return a 401 error. If the user is logged in, it will
+check if the blockchain and usefull address already exists. If it does not exist, it will return a 404 error. If it
+exist, it will delete the usefull address. */
+router.delete(
+  '/useful-address/:blockchainId',
+  getUsefullAddressByNameValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    const collection = (await getDBConnection(req)).collection('blockchains');
+    const collectionAdmin = (await getDBConnection(req)).collection('admins');
+    if (
+      validator.length ||
+      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+    ) {
+      return res.status(400).send(validator);
+    }
+    const response = await collection.updateOne(
+      { _id: new ObjectId(req.params.blockchainId) },
+      { $pull: { usefulAddresses: { contract: req.query.contract } } },
+      false,
+      true
+    );
+    if (response.modifiedCount > 0) {
+      res.send(response).status(200);
+    } else {
+      res.status(404).send({
+        msg: 'No blockchain or usefull address found.',
       });
     }
   }
