@@ -582,6 +582,7 @@ describe('Blockchains route', async function () {
           .post('/test/blockchains/useful-address/1234');
         chai.expect(res).to.have.status(403);
       });
+
       it('Should return 404 if blockchain is not found', async function () {
         const response = await chai
           .request(app)
@@ -595,6 +596,7 @@ describe('Blockchains route', async function () {
           msg: 'No blockchain found',
         });
       });
+
       it('Should create a new useful address with the proper fields', async function () {
         const createResponse1 = await chai
           .request(app)
@@ -606,6 +608,7 @@ describe('Blockchains route', async function () {
           .expect(createResponse1.body)
           .to.have.property('acknowledged', true);
         chai.expect(createResponse1.body).to.have.property('insertedId');
+
         const createResponse2 = await chai
           .request(app)
           .post(
@@ -621,6 +624,7 @@ describe('Blockchains route', async function () {
           upsertedCount: 0,
           matchedCount: 1,
         });
+
         const res = await chai
           .request(app)
           .get(`/test/blockchains/${createResponse1.body.insertedId}`)
@@ -628,12 +632,14 @@ describe('Blockchains route', async function () {
         chai.expect(res).to.have.status(200);
         delete res.body._id;
         chai.expect(res.body.usefulAddresses).to.deep.equal([usefulAddress]);
+
         const deleteResponse = await chai
           .request(app)
           .delete(`/test/blockchains/${createResponse1.body.insertedId}`)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
+
       it('Should update a useful address with the proper fields', async function () {
         const createResponse1 = await chai
           .request(app)
@@ -645,6 +651,7 @@ describe('Blockchains route', async function () {
           .expect(createResponse1.body)
           .to.have.property('acknowledged', true);
         chai.expect(createResponse1.body).to.have.property('insertedId');
+
         const createResponse2 = await chai
           .request(app)
           .post(
@@ -660,6 +667,7 @@ describe('Blockchains route', async function () {
           upsertedCount: 0,
           matchedCount: 1,
         });
+
         const createResponseUpdate = await chai
           .request(app)
           .post(
@@ -678,6 +686,7 @@ describe('Blockchains route', async function () {
           upsertedCount: 0,
           matchedCount: 1,
         });
+
         const res = await chai
           .request(app)
           .get(`/test/blockchains/${createResponse1.body.insertedId}`)

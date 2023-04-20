@@ -213,7 +213,8 @@ describe('Offers route', () => {
         if (
           testCase !== 'title' &&
           testCase !== 'image' &&
-          testCase !== 'amount'
+          testCase !== 'amount' &&
+          testCase !== 'provider'
         ) {
           testNonEmpty({
             method: 'post',

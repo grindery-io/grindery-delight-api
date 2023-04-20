@@ -67,11 +67,7 @@ export const createOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('provider')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  body('provider').isString().withMessage('must be string value'),
   body('title').isString().withMessage('must be string value'),
   body('image').isString().withMessage('must be string value'),
   body('amount').isString().withMessage('must be string value'),
