@@ -582,6 +582,19 @@ describe('Blockchains route', async function () {
           .post('/test/blockchains/useful-address/1234');
         chai.expect(res).to.have.status(403);
       });
+      it('Should return 404 if blockchain is not found', async function () {
+        const response = await chai
+          .request(app)
+          .post(
+            `/test/blockchains/useful-address/644156301cfda3bbf3b8fed8?contract=1111111`
+          )
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(usefulAddress);
+        chai.expect(response).to.have.status(404);
+        chai.expect(response.body).to.deep.equal({
+          msg: 'No blockchain found',
+        });
+      });
       it('Should create a new useful address with the proper fields', async function () {
         const createResponse1 = await chai
           .request(app)
@@ -621,6 +634,68 @@ describe('Blockchains route', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(deleteResponse).to.have.status(200);
       });
+      it('Should update a useful address with the proper fields', async function () {
+        const createResponse1 = await chai
+          .request(app)
+          .post(blockchainPath)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(blockchain);
+        chai.expect(createResponse1).to.have.status(200);
+        chai
+          .expect(createResponse1.body)
+          .to.have.property('acknowledged', true);
+        chai.expect(createResponse1.body).to.have.property('insertedId');
+        const createResponse2 = await chai
+          .request(app)
+          .post(
+            `/test/blockchains/useful-address/${createResponse1.body.insertedId}`
+          )
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(usefulAddress);
+        chai.expect(createResponse2).to.have.status(200);
+        chai.expect(createResponse2.body).to.deep.equal({
+          acknowledged: true,
+          modifiedCount: 1,
+          upsertedId: null,
+          upsertedCount: 0,
+          matchedCount: 1,
+        });
+        const createResponseUpdate = await chai
+          .request(app)
+          .post(
+            `/test/blockchains/useful-address/${createResponse1.body.insertedId}`
+          )
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send({
+            contract: 'myContract1',
+            address: 'myAddress2',
+          });
+        chai.expect(createResponseUpdate).to.have.status(200);
+        chai.expect(createResponseUpdate.body).to.deep.equal({
+          acknowledged: true,
+          modifiedCount: 1,
+          upsertedId: null,
+          upsertedCount: 0,
+          matchedCount: 1,
+        });
+        const res = await chai
+          .request(app)
+          .get(`/test/blockchains/${createResponse1.body.insertedId}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+        delete res.body._id;
+        chai.expect(res.body.usefulAddresses).to.deep.equal([
+          {
+            contract: 'myContract1',
+            address: 'myAddress2',
+          },
+        ]);
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/test/blockchains/${createResponse1.body.insertedId}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      });
     });
   });
   describe('DELETE useful address', () => {
@@ -631,7 +706,32 @@ describe('Blockchains route', async function () {
           .delete('/test/blockchains/useful-address/1234');
         chai.expect(res).to.have.status(403);
       });
-      it('Should return 404 if useful address not found', async function () {
+      it('Should return 404 if useful address is not found', async function () {
+        const createResponse = await chai
+          .request(app)
+          .post(blockchainPath)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(blockchain);
+        chai.expect(createResponse).to.have.status(200);
+        chai.expect(createResponse.body).to.have.property('acknowledged', true);
+        chai.expect(createResponse.body).to.have.property('insertedId');
+        const deleteResponse = await chai
+          .request(app)
+          .delete(
+            `/test/blockchains/useful-address/${createResponse.body.insertedId}?contract=11111111`
+          )
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(404);
+        chai.expect(deleteResponse.body).to.deep.equal({
+          msg: 'No blockchain or usefull address found.',
+        });
+        const deleteResponse2 = await chai
+          .request(app)
+          .delete(`/test/blockchains/${createResponse.body.insertedId}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse2).to.have.status(200);
+      });
+      it('Should return 404 if blockchain is not found', async function () {
         const deleteResponse = await chai
           .request(app)
           .delete(
