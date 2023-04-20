@@ -222,3 +222,21 @@ export const getUsefullAddressByNameValidator = [
     .withMessage('must not be empty'),
   query('contract').notEmpty().withMessage('must not be empty'),
 ];
+
+export const modifyUsefullAddressValidator = [
+  param('blockchainId')
+    .isMongoId()
+    .withMessage('must be mongodb id')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('contract')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('address')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+];
