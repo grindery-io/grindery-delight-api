@@ -156,30 +156,6 @@ router.delete(
   }
 );
 
-/* This is a post request to the blockchain route. It is using the createBlockchainValidator to
-validate the request body. It is also using the isRequired middleware to check if the user is logged
-in. If the user is not logged in, it will return a 401 error. If the user is logged in, it will
-check if the blockchain already exists. If it does not exist, it will create the blockchain. If it
-does exist, it will return a 404 error. */
-router.post('/', createBlockchainValidator, isRequired, async (req, res) => {
-  const validator = validateResult(req, res);
-  const collectionAdmin = (await getDBConnection(req)).collection('admins');
-  const collection = (await getDBConnection(req)).collection('blockchains');
-  if (
-    validator.length ||
-    !(await collectionAdmin.findOne({ userId: res.locals.userId }))
-  ) {
-    return res.status(400).send(validator);
-  }
-  if (!(await collection.findOne({ caipId: req.body.caipId }))) {
-    res.send(await collection.insertOne(req.body)).status(201);
-  } else {
-    res.status(404).send({
-      msg: 'This blockchain already exists.',
-    });
-  }
-});
-
 /* This is a post request to usefull address in the blockchain route. It is using the modifyUsefullAddressValidator to
 validate the request body. It is also using the isRequired middleware to check if the user is logged
 in. If the user is not logged in, it will return a 401 error. If the user is logged in, it will
