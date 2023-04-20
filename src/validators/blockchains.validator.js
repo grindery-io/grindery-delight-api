@@ -62,11 +62,6 @@ export const createBlockchainValidator = [
     .withMessage('must be boolean value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('isActive')
-    .isBoolean()
-    .withMessage('must be boolean value')
-    .notEmpty()
-    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(
       req.body,

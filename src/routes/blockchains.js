@@ -264,7 +264,7 @@ router.delete(
       true
     );
     if (response.modifiedCount > 0) {
-      res.send(response).status(201);
+      res.send(response).status(200);
     } else {
       res.status(404).send({
         msg: 'No blockchain or usefull address found.',
