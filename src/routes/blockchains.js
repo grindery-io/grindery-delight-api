@@ -193,18 +193,21 @@ router.post(
     const validator = validateResult(req, res);
     const collection = (await getDBConnection(req)).collection('blockchains');
     const collectionAdmin = (await getDBConnection(req)).collection('admins');
+
     if (
       validator.length ||
       !(await collectionAdmin.findOne({ userId: res.locals.userId }))
     ) {
       return res.status(400).send(validator);
     }
+
     const blockchain = await collection.findOne({
       _id: new ObjectId(req.params.blockchainId),
       usefulAddresses: {
         $elemMatch: { contract: req.body.contract },
       },
     });
+
     if (blockchain) {
       res.status(200).send(
         await collection.updateOne(

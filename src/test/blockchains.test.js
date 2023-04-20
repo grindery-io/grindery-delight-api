@@ -36,6 +36,10 @@ const blockchain = {
   transactionExplorerUrl: 'https://goerli.etherscan.io/tx/{hash}',
   addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',
 };
+const usefulAddress = {
+  contract: 'myContract1',
+  address: 'myAddress1',
+};
 
 function modifyBlockchainField({ field, value }) {
   it(`PUT /blockchains/blockchainId - ${field} - Should modify ${field}`, async function () {
@@ -568,6 +572,55 @@ describe('Blockchains route', async function () {
       body: {},
       query: {},
       field: 'blockchainId',
+    });
+  });
+  describe('POST useful address', () => {
+    describe('Core of the route', () => {
+      it('Should return 403 if no token is not provided', async function () {
+        const res = await chai
+          .request(app)
+          .post('/test/blockchains/useful-address/1234');
+        chai.expect(res).to.have.status(403);
+      });
+      it('Should create a new useful address with the proper fields', async function () {
+        const createResponse1 = await chai
+          .request(app)
+          .post(blockchainPath)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(blockchain);
+        chai.expect(createResponse1).to.have.status(200);
+        chai
+          .expect(createResponse1.body)
+          .to.have.property('acknowledged', true);
+        chai.expect(createResponse1.body).to.have.property('insertedId');
+        const createResponse2 = await chai
+          .request(app)
+          .post(
+            `/test/blockchains/useful-address/${createResponse1.body.insertedId}`
+          )
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(usefulAddress);
+        chai.expect(createResponse2).to.have.status(200);
+        chai.expect(createResponse2.body).to.deep.equal({
+          acknowledged: true,
+          modifiedCount: 1,
+          upsertedId: null,
+          upsertedCount: 0,
+          matchedCount: 1,
+        });
+        const res = await chai
+          .request(app)
+          .get(`/test/blockchains/${createResponse1.body.insertedId}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+        delete res.body._id;
+        chai.expect(res.body.usefulAddresses).to.deep.equal([usefulAddress]);
+        const deleteResponse = await chai
+          .request(app)
+          .delete(`/test/blockchains/${createResponse1.body.insertedId}`)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(deleteResponse).to.have.status(200);
+      });
     });
   });
 });
