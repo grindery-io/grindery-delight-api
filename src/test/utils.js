@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import chai from 'chai';
 import app from '../index.js';
+import { ObjectId } from 'mongodb';
 
 dotenv.config();
 
@@ -162,4 +163,15 @@ export const testNonMongodbId = ({ method, path, body, query, field }) => {
       )
     ).to.be.true;
   });
+};
+
+export const deleteElementsAfterTest = async (elements) => {
+  for (const element of elements) {
+    const elementDb = await element.collection.findOne({
+      _id: new ObjectId(element.id),
+    });
+    if (elementDb) {
+      await element.collection.deleteOne(elementDb);
+    }
+  }
 };

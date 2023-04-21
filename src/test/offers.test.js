@@ -2,42 +2,68 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
 import db from '../db/conn-test.js';
-import jwt from 'jsonwebtoken';
 import {
   mockedToken,
   testNonString,
   testNonEmpty,
   testNonBoolean,
   testUnexpectedField,
+  deleteElementsAfterTest,
 } from './utils.js';
 import { ObjectId } from 'mongodb';
 
 chai.use(chaiHttp);
 const expect = chai.expect;
 
-const collection = db.collection('offers');
+const collectionOffers = db.collection('offers');
 const offerPath = '/test/offers';
-const offerId =
-  '0x02689c291c6d392ab9c02fc2a459a08cc46cc816b77cec928c86109d37ed2843';
+const offerId = 'myOfferId';
 const offer = {
-  chainId: '97',
+  chainId: '97777',
   min: '0.02',
   max: '1',
   tokenId: '45',
   token: 'BNB',
   tokenAddress: '0x0',
-  hash: '0x56ee9a0e1063631dbdb5f2b8c6946aecf9a765a9470f023e3a8afb8fbf86d7a4',
+  hash: 'myHash',
   exchangeRate: '1',
   exchangeToken: 'ETH',
   exchangeChainId: '5',
   estimatedTime: '123',
-  provider: '0x795beefD41337BB83903788949c8AC2D559A44a3',
+  provider: 'myProvider',
   offerId: offerId,
   isActive: true,
   title: '',
   image: '',
   amount: '',
 };
+const toDeleteDb = [];
+
+/**
+ * This function creates a base offer by sending a POST request to a specified path with authorization
+ * and expects a 200 status code and certain properties in the response.
+ * @param offer - The `offer` parameter is an object that contains the data for creating a new offer.
+ * It is being sent as the request body in the POST request to the `offerPath` endpoint.
+ */
+async function createBaseOffer(offer) {
+  const res = await chai
+    .request(app)
+    .post(offerPath)
+    .set('Authorization', `Bearer ${mockedToken}`)
+    .send(offer);
+  toDeleteDb.push({
+    collection: collectionOffers,
+    id: res.body.insertedId,
+  });
+  chai.expect(res).to.have.status(200);
+  chai.expect(res.body).to.have.property('acknowledged').that.is.true;
+  chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
+}
+
+afterEach(async function () {
+  await deleteElementsAfterTest(toDeleteDb);
+  toDeleteDb.length = 0;
+});
 
 describe('Offers route', () => {
   describe('POST new offer', () => {
@@ -51,31 +77,11 @@ describe('Offers route', () => {
       });
 
       it('Should POST a new offer if all fields are completed and no existing offer', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
-        chai.expect(createResponse.body).to.have.property('acknowledged').that
-          .is.true;
-        chai.expect(createResponse.body).to.have.property('insertedId').that.is
-          .not.empty;
-
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/${offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
+        await createBaseOffer(offer);
       });
 
       it('Should POST a new offer if all fields are completed and no existing offer (with correct fields)', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const getOffer = await chai
           .request(app)
@@ -105,21 +111,10 @@ describe('Offers route', () => {
         chai.expect(getOffer.body.title).to.equal(offer.title);
         chai.expect(getOffer.body.image).to.equal(offer.image);
         chai.expect(getOffer.body.amount).to.equal(offer.amount);
-
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/${offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
       });
 
       it('Should fail if same offerId exists', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const createDuplicateResponse = await chai
           .request(app)
@@ -130,12 +125,6 @@ describe('Offers route', () => {
         chai
           .expect(createDuplicateResponse.body.msg)
           .to.be.equal('This offer already exists.');
-
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/${offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
       });
     });
 
@@ -176,6 +165,7 @@ describe('Offers route', () => {
         chai.expect(res.body[0].msg).to.equal('min must be less than max');
       });
 
+      // Test scenarios for validators
       const testCases = [
         'chainId',
         'min',
@@ -273,7 +263,7 @@ describe('Offers route', () => {
 
     it('Should return an array with the correct MongoDB elements', async function () {
       // Transform each item in mongoData
-      const formattedData = (await collection.find({}).toArray()).map(
+      const formattedData = (await collectionOffers.find({}).toArray()).map(
         (item) => {
           // Return a new object with the formatted fields
           return {
@@ -308,18 +298,12 @@ describe('Offers route', () => {
 
     it('Should return an array of active offers', async function () {
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 0;
+      const nbrOffers = 1;
       for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(customOffer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(customOffer);
       }
 
       const query = {
@@ -342,30 +326,16 @@ describe('Offers route', () => {
       for (const offer of res.body) {
         chai.expect(offer.isActive).to.be.true;
       }
-
-      for (let i = 0; i < nbrOffers; i++) {
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/offerId-number${i}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
-      }
     });
 
     it('Should return only offers with proper exchangeChainId', async function () {
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 0;
+      const nbrOffers = 1;
       for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(customOffer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(customOffer);
       }
 
       const query = {
@@ -387,30 +357,16 @@ describe('Offers route', () => {
       for (const offer of res.body) {
         chai.expect(offer.exchangeChainId).to.equal(offer.exchangeChainId);
       }
-
-      for (let i = 0; i < nbrOffers; i++) {
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/offerId-number${i}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
-      }
     });
 
     it('Should return only offers with proper exchangeToken', async function () {
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 0;
+      const nbrOffers = 1;
       for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(customOffer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(customOffer);
       }
 
       const query = {
@@ -432,30 +388,16 @@ describe('Offers route', () => {
       for (const offer of res.body) {
         chai.expect(offer.exchangeToken).to.equal(offer.exchangeToken);
       }
-
-      for (let i = 0; i < nbrOffers; i++) {
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/offerId-number${i}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
-      }
     });
 
     it('Should return only offers with proper chainId', async function () {
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 0;
+      const nbrOffers = 1;
       for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(customOffer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(customOffer);
       }
 
       const query = {
@@ -477,30 +419,16 @@ describe('Offers route', () => {
       for (const offer of res.body) {
         chai.expect(offer.chainId).to.equal(offer.chainId);
       }
-
-      for (let i = 0; i < nbrOffers; i++) {
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/offerId-number${i}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
-      }
     });
 
     it('Should return only offers with proper token', async function () {
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 0;
+      const nbrOffers = 1;
       for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(customOffer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(customOffer);
       }
 
       const query = {
@@ -522,30 +450,16 @@ describe('Offers route', () => {
       for (const offer of res.body) {
         chai.expect(offer.token).to.equal(offer.token);
       }
-
-      for (let i = 0; i < nbrOffers; i++) {
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/offerId-number${i}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
-      }
     });
 
     it('Should return only offers with min less than depositAmount/exchangeRate', async function () {
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 0;
+      const nbrOffers = 1;
       for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(customOffer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(customOffer);
       }
 
       const query = {
@@ -568,30 +482,16 @@ describe('Offers route', () => {
         const rateAmount = query.depositAmount / offer.exchangeRate;
         chai.expect(Number(offer.min)).to.be.at.most(rateAmount);
       }
-
-      for (let i = 0; i < nbrOffers; i++) {
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/offerId-number${i}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
-      }
     });
 
     it('Should return only offers with max greater than depositAmount/exchangeRate', async function () {
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
-      const nbrOffers = 0;
+      const nbrOffers = 1;
       for (let i = 0; i < nbrOffers; i++) {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(customOffer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(customOffer);
       }
 
       const query = {
@@ -613,14 +513,6 @@ describe('Offers route', () => {
       for (const offer of res.body) {
         const rateAmount = query.depositAmount / offer.exchangeRate;
         chai.expect(Number(offer.max)).to.be.at.least(rateAmount);
-      }
-
-      for (let i = 0; i < nbrOffers; i++) {
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/offerId-number${i}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
       }
     });
 
@@ -660,12 +552,15 @@ describe('Offers route', () => {
           .post(offerPath)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
-
+        toDeleteDb.push({
+          collection: collectionOffers,
+          id: createResponse.body.insertedId,
+        });
         chai.expect(createResponse).to.have.status(200);
 
         if (i === 0) {
           userId = (
-            await collection.findOne({
+            await collectionOffers.findOne({
               _id: new ObjectId(createResponse.body.insertedId),
             })
           ).userId;
@@ -682,14 +577,6 @@ describe('Offers route', () => {
       for (const offer of res.body) {
         chai.expect(offer.userId).to.equal(userId);
       }
-
-      for (let i = 0; i < nbrOffers; i++) {
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/offers/offerId-number${i}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
-      }
     });
   });
 
@@ -703,12 +590,7 @@ describe('Offers route', () => {
     });
 
     it('Should return the offer with the proper offerId', async function () {
-      const createResponse = await chai
-        .request(app)
-        .post(offerPath)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(offer);
-      chai.expect(createResponse).to.have.status(200);
+      await createBaseOffer(offer);
 
       const res = await chai
         .request(app)
@@ -719,12 +601,6 @@ describe('Offers route', () => {
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
       chai.expect(res.body.offerId).to.equal(offer.offerId);
-
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/test/offers/${offer.offerId}`)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(deleteResponse).to.have.status(200);
     });
 
     it('Should return an empty object if offerId doesnt exist', async function () {
@@ -754,6 +630,10 @@ describe('Offers route', () => {
         .post(offerPath)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
+      toDeleteDb.push({
+        collection: collectionOffers,
+        id: createResponse.body.insertedId,
+      });
       chai.expect(createResponse).to.have.status(200);
 
       const res = await chai
@@ -769,12 +649,6 @@ describe('Offers route', () => {
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
       chai.expect(res.body).to.deep.equal(offer);
-
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/test/offers/${offerId}`)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(deleteResponse).to.have.status(200);
     });
 
     it('Should return the offer with the proper userId', async function () {
@@ -783,10 +657,14 @@ describe('Offers route', () => {
         .post(offerPath)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
+      toDeleteDb.push({
+        collection: collectionOffers,
+        id: createResponse.body.insertedId,
+      });
       chai.expect(createResponse).to.have.status(200);
 
       const userId = (
-        await collection.findOne({
+        await collectionOffers.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         })
       ).userId;
@@ -799,12 +677,6 @@ describe('Offers route', () => {
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.userId).to.equal(userId);
-
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/test/offers/${offerId}`)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(deleteResponse).to.have.status(200);
     });
 
     it('Should return an empty object if MongoDB id doesnt exist', async function () {
@@ -826,12 +698,7 @@ describe('Offers route', () => {
     });
 
     it('Should delete one offer', async function () {
-      const createResponse = await chai
-        .request(app)
-        .post(offerPath)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(offer);
-      chai.expect(createResponse).to.have.status(200);
+      await createBaseOffer(offer);
 
       const deleteResponse = await chai
         .request(app)
@@ -849,10 +716,14 @@ describe('Offers route', () => {
         .post(offerPath)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
+      toDeleteDb.push({
+        collection: collectionOffers,
+        id: createResponse.body.insertedId,
+      });
       chai.expect(createResponse).to.have.status(200);
 
       chai.expect(
-        await collection.findOne({
+        await collectionOffers.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         })
       ).to.not.be.empty;
@@ -865,7 +736,7 @@ describe('Offers route', () => {
       chai.expect(deleteResponse).to.have.status(200);
 
       chai.expect(
-        await collection.findOne({
+        await collectionOffers.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         })
       ).to.be.null;
@@ -884,24 +755,11 @@ describe('Offers route', () => {
   describe('PUT offer by offerId', () => {
     describe('Modify an offer', () => {
       it('Should return 403 if no token is provided', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
-
         const modifyOffer = await chai
           .request(app)
           .put(`/test/offers/${offer.offerId}`)
           .send({ chainId: '232323' });
-
         chai.expect(modifyOffer).to.have.status(403);
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should return 404 if offer doesnt exist', async function () {
@@ -910,18 +768,12 @@ describe('Offers route', () => {
           .put('/test/offers/myFalseOfferId')
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ chainId: '232323' });
-
         chai.expect(modifyOffer).to.have.status(404);
         chai.expect(modifyOffer.body).to.deep.equal({ msg: 'No offer found' });
       });
 
       it('Should modify only one offer', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifyOffer = await chai
           .request(app)
@@ -929,7 +781,7 @@ describe('Offers route', () => {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ chainId: '232323' });
 
-        chai.expect(createResponse).to.have.status(200);
+        chai.expect(modifyOffer).to.have.status(200);
         chai.expect(modifyOffer.body).to.deep.equal({
           acknowledged: true,
           modifiedCount: 1,
@@ -937,20 +789,10 @@ describe('Offers route', () => {
           upsertedCount: 0,
           matchedCount: 1,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify all offer fields', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           chainId: '76',
@@ -975,7 +817,6 @@ describe('Offers route', () => {
           .put(`/test/offers/${offer.offerId}`)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(modifiedOffer);
-
         chai.expect(modifyOffer).to.have.status(200);
 
         const getOffer = await chai
@@ -994,20 +835,10 @@ describe('Offers route', () => {
           hash: offer.hash,
           offerId: offer.offerId,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify only the chainId field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           chainId: '76',
@@ -1036,20 +867,10 @@ describe('Offers route', () => {
           ...offer,
           ...modifiedOffer,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify only min field of an offer', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           min: '10',
@@ -1078,20 +899,10 @@ describe('Offers route', () => {
           ...offer,
           min: modifiedOffer.min,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify only max field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           max: '500',
@@ -1120,20 +931,10 @@ describe('Offers route', () => {
           ...offer,
           max: modifiedOffer.max,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify only tokenId field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           tokenId: 'new-token-id',
@@ -1162,20 +963,10 @@ describe('Offers route', () => {
           ...offer,
           tokenId: modifiedOffer.tokenId,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify only the token field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           token: 'modified-token',
@@ -1204,20 +995,10 @@ describe('Offers route', () => {
           ...offer,
           token: modifiedOffer.token,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify only tokenAddress field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           tokenAddress: '0x1234567890123456789012345678901234567890',
@@ -1246,20 +1027,10 @@ describe('Offers route', () => {
           ...offer,
           tokenAddress: modifiedOffer.tokenAddress,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify isActive field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           isActive: false,
@@ -1288,20 +1059,10 @@ describe('Offers route', () => {
           ...offer,
           isActive: modifiedOffer.isActive,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify the exchangeRate field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           exchangeRate: '3',
@@ -1330,20 +1091,10 @@ describe('Offers route', () => {
           ...offer,
           exchangeRate: modifiedOffer.exchangeRate,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify the exchangeToken field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           exchangeToken: 'modified-exchange-token',
@@ -1372,20 +1123,10 @@ describe('Offers route', () => {
           ...offer,
           exchangeToken: modifiedOffer.exchangeToken,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify the exchangeChainId field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           exchangeChainId: 'modified-exchange-chain-id',
@@ -1414,20 +1155,10 @@ describe('Offers route', () => {
           ...offer,
           exchangeChainId: modifiedOffer.exchangeChainId,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify only estimatedTime field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           estimatedTime: 'modified-estimated-time',
@@ -1456,20 +1187,10 @@ describe('Offers route', () => {
           ...offer,
           estimatedTime: modifiedOffer.estimatedTime,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify only provider field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           provider: 'new-provider',
@@ -1498,20 +1219,10 @@ describe('Offers route', () => {
           ...offer,
           provider: modifiedOffer.provider,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify the title field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           title: 'Modified Offer Title',
@@ -1540,20 +1251,10 @@ describe('Offers route', () => {
           ...offer,
           title: modifiedOffer.title,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify only the image field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           image: 'modified-image',
@@ -1582,20 +1283,10 @@ describe('Offers route', () => {
           ...offer,
           image: modifiedOffer.image,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
 
       it('Should modify the amount field', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(offerPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(offer);
-        chai.expect(createResponse).to.have.status(200);
+        await createBaseOffer(offer);
 
         const modifiedOffer = {
           amount: '2',
@@ -1624,11 +1315,6 @@ describe('Offers route', () => {
           ...offer,
           amount: modifiedOffer.amount,
         });
-
-        await chai
-          .request(app)
-          .delete(`/test/offers/${offer.offerId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
       });
     });
 
