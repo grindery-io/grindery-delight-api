@@ -7,18 +7,42 @@ import {
   testNonString,
   testNonEmpty,
   testUnexpectedField,
+  deleteElementsAfterTest,
 } from './utils.js';
 import { ObjectId } from 'mongodb';
 
 chai.use(chaiHttp);
 const expect = chai.expect;
 
-const collection = db.collection('liquidity-wallets');
+const collectionLiquidityWallet = db.collection('liquidity-wallets');
 const liquidityWalletPath = '/test/liquidity-wallets';
 const liquidityWallet = {
   walletAddress: 'myWalletAddress',
   chainId: 'myChainId',
 };
+const toDeleteDb = [];
+
+async function createBaseLiquidityWallet(liquidityWallet) {
+  const res = await chai
+    .request(app)
+    .post(liquidityWalletPath)
+    .set('Authorization', `Bearer ${mockedToken}`)
+    .send(liquidityWallet);
+  toDeleteDb.push({
+    collection: collectionLiquidityWallet,
+    id: res.body.insertedId,
+  });
+  chai.expect(res).to.have.status(201);
+  chai.expect(res.body).to.have.property('acknowledged').that.is.true;
+  chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
+
+  return res;
+}
+
+afterEach(async function () {
+  await deleteElementsAfterTest(toDeleteDb);
+  toDeleteDb.length = 0;
+});
 
 describe('Liquidity wallets route', async function () {
   describe('POST new liquidity wallet', () => {
@@ -30,33 +54,14 @@ describe('Liquidity wallets route', async function () {
           .send(liquidityWallet);
         chai.expect(createResponse).to.have.status(403);
       });
+
       it('Should create a new liquidity wallet', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
-        chai.expect(createResponse.body).to.have.property('acknowledged', true);
-        chai.expect(createResponse.body).to.have.property('insertedId');
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/liquidity-wallets`)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .query({
-            chainId: liquidityWallet.chainId,
-            walletAddress: liquidityWallet.walletAddress,
-          });
-        chai.expect(deleteResponse).to.have.status(200);
+        await createBaseLiquidityWallet(liquidityWallet);
       });
       it('Should create a new liquidity wallet with the proper walletAddress and chainId', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
-        const wallet = await collection.findOne({
+        const createResponse = await createBaseLiquidityWallet(liquidityWallet);
+
+        const wallet = await collectionLiquidityWallet.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         });
         chai
@@ -76,13 +81,9 @@ describe('Liquidity wallets route', async function () {
         chai.expect(deleteResponse).to.have.status(200);
       });
       it('Should create a new liquidity wallet with empty token object', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
-        const wallet = await collection.findOne({
+        const createResponse = await createBaseLiquidityWallet(liquidityWallet);
+
+        const wallet = await collectionLiquidityWallet.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         });
         chai.expect(wallet).to.have.property('tokens').that.is.an('object').that
@@ -98,12 +99,8 @@ describe('Liquidity wallets route', async function () {
         chai.expect(deleteResponse).to.have.status(200);
       });
       it('Should fail if liquidity wallet already exists', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
+        await createBaseLiquidityWallet(liquidityWallet);
+
         const createResponse1 = await chai
           .request(app)
           .post(liquidityWalletPath)
@@ -192,23 +189,19 @@ describe('Liquidity wallets route', async function () {
         let wallets = [];
         let userId = '';
         for (let i = 0; i < nbrLiquidityWallet; i++) {
-          const createResponse = await chai
-            .request(app)
-            .post(liquidityWalletPath)
-            .set('Authorization', `Bearer ${mockedToken}`)
-            .send({
-              chainId: liquidityWallet.chainId,
-              walletAddress: `${liquidityWallet.walletAddress}-${i}`,
-            });
-          chai.expect(createResponse).to.have.status(201);
+          const createResponse = await createBaseLiquidityWallet({
+            chainId: liquidityWallet.chainId,
+            walletAddress: `${liquidityWallet.walletAddress}-${i}`,
+          });
+
           wallets.push(
-            await collection.findOne({
+            await collectionLiquidityWallet.findOne({
               _id: new ObjectId(createResponse.body.insertedId),
             })
           );
           if (i === 0) {
             userId = (
-              await collection.findOne({
+              await collectionLiquidityWallet.findOne({
                 _id: new ObjectId(createResponse.body.insertedId),
               })
             ).userId;
@@ -259,14 +252,10 @@ describe('Liquidity wallets route', async function () {
       chai.expect(createResponse).to.have.status(403);
     });
     it('Should return an array with all the liquidity wallets', async function () {
-      const createResponse = await chai
-        .request(app)
-        .post(liquidityWalletPath)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(liquidityWallet);
-      chai.expect(createResponse).to.have.status(201);
+      const createResponse = await createBaseLiquidityWallet(liquidityWallet);
+
       const userId = (
-        await collection.findOne({
+        await collectionLiquidityWallet.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         })
       ).userId;
@@ -275,7 +264,9 @@ describe('Liquidity wallets route', async function () {
         .get('/test/liquidity-wallets/all')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      const wallets = await collection.find({ userId: userId }).toArray();
+      const wallets = await collectionLiquidityWallet
+        .find({ userId: userId })
+        .toArray();
       // Check that all objects in the response body have chainId and walletAddress elements that exist in wallets
       res.body.forEach((wallet) => {
         chai.expect(wallet.chainId).to.be.oneOf(wallets.map((w) => w.chainId));
@@ -298,14 +289,10 @@ describe('Liquidity wallets route', async function () {
   describe('GET single liquidity wallets', () => {
     describe('Core of the route', () => {
       it('Should return a single liquidity wallet (without walletAddress in the query)', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
+        const createResponse = await createBaseLiquidityWallet(liquidityWallet);
+
         const userId = (
-          await collection.findOne({
+          await collectionLiquidityWallet.findOne({
             _id: new ObjectId(createResponse.body.insertedId),
           })
         ).userId;
@@ -332,14 +319,10 @@ describe('Liquidity wallets route', async function () {
         chai.expect(deleteResponse).to.have.status(200);
       });
       it('Should return a single liquidity wallet (with walletAddress in the query)', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
+        const createResponse = await createBaseLiquidityWallet(liquidityWallet);
+
         const userId = (
-          await collection.findOne({
+          await collectionLiquidityWallet.findOne({
             _id: new ObjectId(createResponse.body.insertedId),
           })
         ).userId;
@@ -424,14 +407,10 @@ describe('Liquidity wallets route', async function () {
         chai.expect(createResponse).to.have.status(403);
       });
       it('Should return a single liquidity wallet', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
+        const createResponse = await createBaseLiquidityWallet(liquidityWallet);
+
         const userId = (
-          await collection.findOne({
+          await collectionLiquidityWallet.findOne({
             _id: new ObjectId(createResponse.body.insertedId),
           })
         ).userId;
@@ -489,12 +468,8 @@ describe('Liquidity wallets route', async function () {
         chai.expect(createResponse).to.have.status(403);
       });
       it('Should delete one liquidity wallet', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
+        const createResponse = await createBaseLiquidityWallet(liquidityWallet);
+
         const deleteResponse = await chai
           .request(app)
           .delete(`/test/liquidity-wallets`)
@@ -509,7 +484,7 @@ describe('Liquidity wallets route', async function () {
           deletedCount: 1,
         });
         chai.expect(
-          await collection.findOne({
+          await collectionLiquidityWallet.findOne({
             _id: new ObjectId(createResponse.body.insertedId),
           })
         ).to.be.null;
@@ -538,12 +513,8 @@ describe('Liquidity wallets route', async function () {
         chai.expect(createResponse).to.have.status(403);
       });
       it('Should modify one liquidity wallet', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
+        await createBaseLiquidityWallet(liquidityWallet);
+
         const res = await chai
           .request(app)
           .put(liquidityWalletPath)
@@ -572,12 +543,7 @@ describe('Liquidity wallets route', async function () {
         chai.expect(deleteResponse).to.have.status(200);
       });
       it('Should modify token amount of the liquidity wallet', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(liquidityWalletPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(liquidityWallet);
-        chai.expect(createResponse).to.have.status(201);
+        const createResponse = await createBaseLiquidityWallet(liquidityWallet);
         const res = await chai
           .request(app)
           .put(liquidityWalletPath)
@@ -588,7 +554,7 @@ describe('Liquidity wallets route', async function () {
             amount: '3435',
           });
         chai.expect(res).to.have.status(201);
-        const wallet = await collection.findOne({
+        const wallet = await collectionLiquidityWallet.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         });
         chai.expect(wallet.tokens['USDC']).to.equal('3435');

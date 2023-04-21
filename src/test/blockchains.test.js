@@ -121,6 +121,7 @@ describe('Blockchains route', async function () {
       it('Should create a new blockchain', async function () {
         await createBaseBlockchain(blockchain);
       });
+
       it('Should create a new blockchain with the proper fields', async function () {
         const createResponse = await createBaseBlockchain(blockchain);
 
