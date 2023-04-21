@@ -1,10 +1,9 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import { mockedToken } from './utils.js';
+import { mockedToken } from './utils/utils.js';
 
 chai.use(chaiHttp);
-const expect = chai.expect;
 
 describe('Admins route', () => {
   it('Should return 403 if no token is provided', async function () {

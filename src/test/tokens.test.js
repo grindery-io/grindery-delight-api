@@ -1,7 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import db from '../db/conn-test.js';
 import {
   mockedToken,
   testNonString,
@@ -12,29 +11,24 @@ import {
   deleteElementsAfterTest,
 } from './utils/utils.js';
 import { ObjectId } from 'mongodb';
+import {
+  collectionTokens,
+  pathTokens,
+  token,
+  toDeleteDb,
+} from './utils/variables.js';
 
 chai.use(chaiHttp);
-const expect = chai.expect;
 
-const collectionTokens = db.collection('tokens');
-const tokensPath = '/test/tokens';
-const token = {
-  coinmarketcapId: '4543',
-  symbol: 'mySymbol',
-  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/tokens/bnb.png',
-  chainId: '544',
-  address: '0x0',
-  isNative: false,
-  isActive: false,
-};
-const toDeleteDb = [];
-
+/**
+ * The function modifies a token field and tests the modification using Chai and MongoDB.
+ */
 function modifyTokenField({ field, value }) {
   it(`PUT /tokens/tokenId - ${field} - Should modify ${field}`, async function () {
     const customToken = { ...token, isNative: false, isActive: false };
     const createResponse = await chai
       .request(app)
-      .post(tokensPath)
+      .post(pathTokens)
       .set('Authorization', `Bearer ${mockedToken}`)
       .send(customToken);
     chai.expect(createResponse).to.have.status(201);
@@ -69,10 +63,19 @@ function modifyTokenField({ field, value }) {
   });
 }
 
+/**
+ * This function creates a base token in a database and returns the response.
+ * @param token - The `token` parameter is an object that will be sent as the request body in the POST
+ * request to the `pathTokens` endpoint. It is used to create a new token in the database.
+ * @returns the response object from the POST request made to the `pathTokens` endpoint with the
+ * provided `token` data. The response object is also being stored in an array `toDeleteDb` for later
+ * cleanup. The function is also performing some assertions on the response object using the Chai
+ * library.
+ */
 async function createBaseToken(token) {
   const res = await chai
     .request(app)
-    .post(tokensPath)
+    .post(pathTokens)
     .set('Authorization', `Bearer ${mockedToken}`)
     .send(token);
   toDeleteDb.push({
@@ -96,7 +99,7 @@ describe('Tokens route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .post(tokensPath)
+          .post(pathTokens)
           .send(token);
         chai.expect(createResponse).to.have.status(403);
       });
@@ -120,7 +123,7 @@ describe('Tokens route', async function () {
 
         const createResponse1 = await chai
           .request(app)
-          .post(tokensPath)
+          .post(pathTokens)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(token);
         chai.expect(createResponse1).to.have.status(404);
@@ -145,7 +148,7 @@ describe('Tokens route', async function () {
         if (testCase !== 'isNative' && testCase !== 'isActive') {
           testNonString({
             method: 'post',
-            path: tokensPath,
+            path: pathTokens,
             body: {
               ...token,
               [testCase]: 123,
@@ -157,7 +160,7 @@ describe('Tokens route', async function () {
 
         testNonEmpty({
           method: 'post',
-          path: tokensPath,
+          path: pathTokens,
           body: {
             ...token,
             [testCase]: '',

@@ -1,27 +1,30 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import db from '../db/conn-test.js';
 import {
   mockedToken,
   testNonString,
   testNonEmpty,
   testUnexpectedField,
   deleteElementsAfterTest,
-} from './utils.js';
+} from './utils/utils.js';
 import { ObjectId } from 'mongodb';
+import {
+  collectionLiquidityWallet,
+  liquidityWalletPath,
+  liquidityWallet,
+  toDeleteDb,
+} from './utils/variables.js';
 
 chai.use(chaiHttp);
-const expect = chai.expect;
 
-const collectionLiquidityWallet = db.collection('liquidity-wallets');
-const liquidityWalletPath = '/test/liquidity-wallets';
-const liquidityWallet = {
-  walletAddress: 'myWalletAddress',
-  chainId: 'myChainId',
-};
-const toDeleteDb = [];
-
+/**
+ * This function creates a base liquidity wallet and returns the response.
+ * @param liquidityWallet - It is an object that contains the data for creating a new liquidity wallet.
+ * The specific properties and values of this object depend on the requirements of the application.
+ * @returns The function `createBaseLiquidityWallet` is returning the response object `res` from the
+ * Chai request.
+ */
 async function createBaseLiquidityWallet(liquidityWallet) {
   const res = await chai
     .request(app)
@@ -754,11 +757,13 @@ describe('Liquidity wallets route', async function () {
             amount: '3435',
             unexpectedField: 'someValue',
           });
-        expect(res).to.have.status(400);
-        expect(res.body).to.be.an('array');
-        expect(res.body[0].msg).to.equal(
-          'The following fields are not allowed in body: unexpectedField'
-        );
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai
+          .expect(res.body[0].msg)
+          .to.equal(
+            'The following fields are not allowed in body: unexpectedField'
+          );
       });
       it('Should fail if unexpected field in query', async function () {
         const res = await chai
@@ -775,11 +780,13 @@ describe('Liquidity wallets route', async function () {
             tokenId: 'USDC',
             amount: '3435',
           });
-        expect(res).to.have.status(400);
-        expect(res.body).to.be.an('array');
-        expect(res.body[0].msg).to.equal(
-          'The following fields are not allowed in query: unexpectedField'
-        );
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.be.an('array');
+        chai
+          .expect(res.body[0].msg)
+          .to.equal(
+            'The following fields are not allowed in query: unexpectedField'
+          );
       });
     });
   });

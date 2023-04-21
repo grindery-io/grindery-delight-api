@@ -6,6 +6,14 @@ import { ObjectId } from 'mongodb';
 
 dotenv.config();
 
+/**
+ * The function retrieves an access token using a refresh token and returns it, or returns null if
+ * there is an error.
+ * @returns The `getAccessToken` function is returning a Promise that resolves to the `access_token`
+ * value from the response data of a POST request to the specified URL. If there is an error, it will
+ * return `null`. The `mockedToken` variable is assigned the resolved value of the Promise returned by
+ * `getAccessToken` using the `await` keyword.
+ */
 async function getAccessToken() {
   try {
     const res = await axios.post(
@@ -29,6 +37,10 @@ async function getAccessToken() {
 
 export const mockedToken = await getAccessToken();
 
+/**
+ * This is a test function that checks if a specific field in a request is not a string and returns an
+ * error message.
+ */
 export const testNonString = ({ method, path, body, query, field }) => {
   it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not a string`, async function () {
     const res = await chai
@@ -47,6 +59,10 @@ export const testNonString = ({ method, path, body, query, field }) => {
   });
 };
 
+/**
+ * This is a test function that checks if a given field is a boolean value and returns an error message
+ * if it is not.
+ */
 export const testNonBoolean = ({ method, path, body, query, field }) => {
   it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not a boolean`, async function () {
     const res = await chai
@@ -65,6 +81,10 @@ export const testNonBoolean = ({ method, path, body, query, field }) => {
   });
 };
 
+/**
+ * This is a test function that checks if a specific field in a request is empty and expects a 400
+ * status code and an error message.
+ */
 export const testNonEmpty = ({ method, path, body, query, field }) => {
   it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is empty`, async function () {
     const res = await chai
@@ -83,6 +103,10 @@ export const testNonEmpty = ({ method, path, body, query, field }) => {
   });
 };
 
+/**
+ * This is a test function that checks if there is an unexpected field in a request and returns an
+ * error message.
+ */
 export const testUnexpectedField = ({
   method,
   path,
@@ -110,6 +134,9 @@ export const testUnexpectedField = ({
   });
 };
 
+/**
+ * This function tests if a given field is in CAIP-2 format and returns an error if it is not.
+ */
 export const testNonCaipId = ({ method, path, body, query, field }) => {
   it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not caipId format`, async function () {
     const res = await chai
@@ -131,6 +158,9 @@ export const testNonCaipId = ({ method, path, body, query, field }) => {
   });
 };
 
+/**
+ * This is a test function that checks if a given field is a valid URL.
+ */
 export const testNonURL = ({ method, path, body, query, field }) => {
   it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not URL`, async function () {
     const res = await chai
@@ -147,6 +177,9 @@ export const testNonURL = ({ method, path, body, query, field }) => {
   });
 };
 
+/**
+ * This function tests if a given field is a MongoDB ID and returns an error if it is not.
+ */
 export const testNonMongodbId = ({ method, path, body, query, field }) => {
   it(`${method.toUpperCase()} ${path} - ${field} - Should fail if ${field} is not MongoDBId`, async function () {
     const res = await chai
@@ -165,6 +198,13 @@ export const testNonMongodbId = ({ method, path, body, query, field }) => {
   });
 };
 
+/**
+ * This function deletes elements from a collection in a database based on their IDs.
+ * @param elements - The `elements` parameter is an array of objects that represent MongoDB documents.
+ * Each object has two properties: `collection`, which is a reference to the MongoDB collection where
+ * the document is stored, and `id`, which is the ID of the document to be deleted. The function loops
+ * through each element in
+ */
 export const deleteElementsAfterTest = async (elements) => {
   for (const element of elements) {
     const elementDb = await element.collection.findOne({

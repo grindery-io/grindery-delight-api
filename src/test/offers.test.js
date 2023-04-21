@@ -1,7 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import db from '../db/conn-test.js';
 import {
   mockedToken,
   testNonString,
@@ -11,44 +10,25 @@ import {
   deleteElementsAfterTest,
 } from './utils/utils.js';
 import { ObjectId } from 'mongodb';
+import {
+  collectionOffers,
+  pathOffers,
+  offer,
+  toDeleteDb,
+} from './utils/variables.js';
 
 chai.use(chaiHttp);
-const expect = chai.expect;
-
-const collectionOffers = db.collection('offers');
-const offerPath = '/test/offers';
-const offerId = 'myOfferId';
-const offer = {
-  chainId: '97777',
-  min: '0.02',
-  max: '1',
-  tokenId: '45',
-  token: 'BNB',
-  tokenAddress: '0x0',
-  hash: 'myHash',
-  exchangeRate: '1',
-  exchangeToken: 'ETH',
-  exchangeChainId: '5',
-  estimatedTime: '123',
-  provider: 'myProvider',
-  offerId: offerId,
-  isActive: true,
-  title: '',
-  image: '',
-  amount: '',
-};
-const toDeleteDb = [];
 
 /**
  * This function creates a base offer by sending a POST request to a specified path with authorization
  * and expects a 200 status code and certain properties in the response.
  * @param offer - The `offer` parameter is an object that contains the data for creating a new offer.
- * It is being sent as the request body in the POST request to the `offerPath` endpoint.
+ * It is being sent as the request body in the POST request to the `pathOffers` endpoint.
  */
 async function createBaseOffer(offer) {
   const res = await chai
     .request(app)
-    .post(offerPath)
+    .post(pathOffers)
     .set('Authorization', `Bearer ${mockedToken}`)
     .send(offer);
   toDeleteDb.push({
@@ -71,7 +51,7 @@ describe('Offers route', () => {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
-          .post(offerPath)
+          .post(pathOffers)
           .send(offer);
         chai.expect(createResponse).to.have.status(403);
       });
@@ -86,7 +66,7 @@ describe('Offers route', () => {
         const getOffer = await chai
           .request(app)
           .get('/test/offers/offerId')
-          .query({ offerId: offerId })
+          .query({ offerId: offer.offerId })
           .set('Authorization', `Bearer ${mockedToken}`);
 
         // Assertions
@@ -118,7 +98,7 @@ describe('Offers route', () => {
 
         const createDuplicateResponse = await chai
           .request(app)
-          .post(offerPath)
+          .post(pathOffers)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(offer);
         chai.expect(createDuplicateResponse).to.have.status(404);
@@ -153,7 +133,7 @@ describe('Offers route', () => {
         // Make a request to create the offer with invalid data
         const res = await chai
           .request(app)
-          .post(offerPath)
+          .post(pathOffers)
           .set({ Authorization: `Bearer ${mockedToken}` })
           .send(invalidOffer);
 
@@ -190,7 +170,7 @@ describe('Offers route', () => {
         if (testCase !== 'isActive') {
           testNonString({
             method: 'post',
-            path: offerPath,
+            path: pathOffers,
             body: {
               ...offer,
               [testCase]: 123,
@@ -208,7 +188,7 @@ describe('Offers route', () => {
         ) {
           testNonEmpty({
             method: 'post',
-            path: offerPath,
+            path: pathOffers,
             body: {
               ...offer,
               [testCase]: '',
@@ -221,7 +201,7 @@ describe('Offers route', () => {
 
       testNonBoolean({
         method: 'post',
-        path: offerPath,
+        path: pathOffers,
         body: {
           ...offer,
           isActive: 123,
@@ -232,7 +212,7 @@ describe('Offers route', () => {
 
       testUnexpectedField({
         method: 'post',
-        path: offerPath,
+        path: pathOffers,
         body: {
           ...offer,
           unexpectedField: 'Unexpected field',
@@ -244,7 +224,7 @@ describe('Offers route', () => {
 
       testUnexpectedField({
         method: 'post',
-        path: offerPath,
+        path: pathOffers,
         body: {
           ...offer,
         },
@@ -257,7 +237,7 @@ describe('Offers route', () => {
 
   describe('GET all offers', () => {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get(offerPath);
+      const res = await chai.request(app).get(pathOffers);
       chai.expect(res).to.have.status(403);
     });
 
@@ -276,7 +256,7 @@ describe('Offers route', () => {
 
       const res = await chai
         .request(app)
-        .get(offerPath)
+        .get(pathOffers)
         .set({ Authorization: `Bearer ${mockedToken}` });
 
       chai.expect(res).to.have.status(200);
@@ -530,7 +510,7 @@ describe('Offers route', () => {
         });
 
       chai.expect(res).to.have.status(200);
-      expect(res.body).to.be.an('array').that.is.empty;
+      chai.expect(res.body).to.be.an('array').that.is.empty;
     });
   });
 
@@ -549,7 +529,7 @@ describe('Offers route', () => {
 
         const createResponse = await chai
           .request(app)
-          .post(offerPath)
+          .post(pathOffers)
           .set('Authorization', `Bearer ${mockedToken}`)
           .send(customOffer);
         toDeleteDb.push({
@@ -627,7 +607,7 @@ describe('Offers route', () => {
     it('Should return the offer with the proper MongoDB id', async function () {
       const createResponse = await chai
         .request(app)
-        .post(offerPath)
+        .post(pathOffers)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
       toDeleteDb.push({
@@ -654,7 +634,7 @@ describe('Offers route', () => {
     it('Should return the offer with the proper userId', async function () {
       const createResponse = await chai
         .request(app)
-        .post(offerPath)
+        .post(pathOffers)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
       toDeleteDb.push({
@@ -713,7 +693,7 @@ describe('Offers route', () => {
     it('Should delete the appropriate offer', async function () {
       const createResponse = await chai
         .request(app)
-        .post(offerPath)
+        .post(pathOffers)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(offer);
       toDeleteDb.push({
