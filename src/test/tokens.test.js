@@ -9,13 +9,14 @@ import {
   testUnexpectedField,
   testNonBoolean,
   testNonMongodbId,
-} from './utils.js';
+  deleteElementsAfterTest,
+} from './utils/utils.js';
 import { ObjectId } from 'mongodb';
 
 chai.use(chaiHttp);
 const expect = chai.expect;
 
-const collection = db.collection('tokens');
+const collectionTokens = db.collection('tokens');
 const tokensPath = '/test/tokens';
 const token = {
   coinmarketcapId: '4543',
@@ -26,6 +27,7 @@ const token = {
   isNative: false,
   isActive: false,
 };
+const toDeleteDb = [];
 
 function modifyTokenField({ field, value }) {
   it(`PUT /tokens/tokenId - ${field} - Should modify ${field}`, async function () {
@@ -52,7 +54,7 @@ function modifyTokenField({ field, value }) {
       upsertedCount: 0,
       matchedCount: 1,
     });
-    const tokenDB = await collection.findOne({
+    const tokenDB = await collectionTokens.findOne({
       _id: new ObjectId(createResponse.body.insertedId),
     });
 
@@ -67,6 +69,27 @@ function modifyTokenField({ field, value }) {
   });
 }
 
+async function createBaseToken(token) {
+  const res = await chai
+    .request(app)
+    .post(tokensPath)
+    .set('Authorization', `Bearer ${mockedToken}`)
+    .send(token);
+  toDeleteDb.push({
+    collection: collectionTokens,
+    id: res.body.insertedId,
+  });
+  chai.expect(res).to.have.status(201);
+  chai.expect(res.body).to.have.property('acknowledged').that.is.true;
+  chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
+  return res;
+}
+
+afterEach(async function () {
+  await deleteElementsAfterTest(toDeleteDb);
+  toDeleteDb.length = 0;
+});
+
 describe('Tokens route', async function () {
   describe('POST new token', () => {
     describe('Core of the route', () => {
@@ -79,49 +102,21 @@ describe('Tokens route', async function () {
       });
 
       it('Should create new token', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(tokensPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(token);
-        chai.expect(createResponse).to.have.status(201);
-        chai.expect(createResponse.body).to.have.property('acknowledged', true);
-        chai.expect(createResponse.body).to.have.property('insertedId');
-
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/tokens/${createResponse.body.insertedId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
+        await createBaseToken(token);
       });
 
       it('Should create new token with the appropriate elements', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(tokensPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(token);
-        chai.expect(createResponse).to.have.status(201);
-        const tokenDB = await collection.findOne({
+        const createResponse = await createBaseToken(token);
+
+        const tokenDB = await collectionTokens.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         });
         delete tokenDB._id;
         chai.expect(tokenDB).to.deep.equal(token);
-
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/tokens/${createResponse.body.insertedId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
       });
 
       it('Should fail if token already exists', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(tokensPath)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(token);
-        chai.expect(createResponse).to.have.status(201);
+        const createResponse = await createBaseToken(token);
 
         const createResponse1 = await chai
           .request(app)
@@ -132,12 +127,6 @@ describe('Tokens route', async function () {
         chai
           .expect(createResponse1.body)
           .to.deep.equal({ msg: 'This token already exists.' });
-
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/test/tokens/${createResponse.body.insertedId}`)
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(deleteResponse).to.have.status(200);
       });
     });
 
@@ -187,19 +176,12 @@ describe('Tokens route', async function () {
     });
 
     it('Should return all active tokens', async function () {
-      const createResponse = await chai
-        .request(app)
-        .post(tokensPath)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(token);
-      chai.expect(createResponse).to.have.status(201);
-
-      const createResponse1 = await chai
-        .request(app)
-        .post(tokensPath)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send({ ...token, chainId: 'newChainId', address: 'newAddress' });
-      chai.expect(createResponse1).to.have.status(201);
+      await createBaseToken(token);
+      await createBaseToken({
+        ...token,
+        chainId: 'newChainId',
+        address: 'newAddress',
+      });
 
       const res = await chai
         .request(app)
@@ -207,7 +189,7 @@ describe('Tokens route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('array');
-      const expectedArray = await collection
+      const expectedArray = await collectionTokens
         .find({
           isActive: true,
         })
@@ -217,18 +199,6 @@ describe('Tokens route', async function () {
       });
       chai.expect(res.body).to.deep.equal(expectedArray);
       chai.expect(res.body.every((obj) => obj.isActive === true)).to.be.true;
-
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/test/tokens/${createResponse.body.insertedId}`)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(deleteResponse).to.have.status(200);
-
-      const deleteResponse1 = await chai
-        .request(app)
-        .delete(`/test/tokens/${createResponse1.body.insertedId}`)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(deleteResponse1).to.have.status(200);
     });
   });
 
@@ -241,12 +211,7 @@ describe('Tokens route', async function () {
     });
 
     it('Should get the adequate token', async function () {
-      const createResponse = await chai
-        .request(app)
-        .post(tokensPath)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(token);
-      chai.expect(createResponse).to.have.status(201);
+      const createResponse = await createBaseToken(token);
 
       const res = await chai
         .request(app)
@@ -258,12 +223,6 @@ describe('Tokens route', async function () {
         .to.equal(createResponse.body.insertedId);
       delete res.body._id;
       chai.expect(res.body).to.deep.equal(token);
-
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/test/tokens/${createResponse.body.insertedId}`)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(deleteResponse).to.have.status(200);
     });
 
     it('Should return an empty object if no token available', async function () {
@@ -423,12 +382,7 @@ describe('Tokens route', async function () {
     });
 
     it('Should delete one token', async function () {
-      const createResponse = await chai
-        .request(app)
-        .post(tokensPath)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(token);
-      chai.expect(createResponse).to.have.status(201);
+      const createResponse = await createBaseToken(token);
 
       const deleteResponse = await chai
         .request(app)

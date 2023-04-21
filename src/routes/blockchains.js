@@ -177,18 +177,17 @@ router.post(
       return res.status(400).send(validator);
     }
 
-    let blockchain = await collection.findOne({
-      _id: new ObjectId(req.params.blockchainId),
-    });
-
-    if (!blockchain) {
+    if (
+      !(await collection.findOne({
+        _id: new ObjectId(req.params.blockchainId),
+      }))
+    ) {
       res.status(404).send({
         msg: 'No blockchain found',
       });
-      return;
     }
 
-    blockchain = await collection.findOne({
+    const blockchain = await collection.findOne({
       _id: new ObjectId(req.params.blockchainId),
       usefulAddresses: {
         $elemMatch: { contract: req.body.contract },

@@ -12,7 +12,7 @@ import {
   testNonBoolean,
   testNonMongodbId,
   deleteElementsAfterTest,
-} from './utils.js';
+} from './utils/utils.js';
 import { ObjectId } from 'mongodb';
 
 chai.use(chaiHttp);
