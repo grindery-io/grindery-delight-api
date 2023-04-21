@@ -62,7 +62,7 @@ router.put(
     const wallet = await collection.findOne({
       chainId: req.body.chainId,
       walletAddress: req.body.walletAddress,
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     });
     if (wallet) {
       res.status(201).send(
@@ -91,7 +91,10 @@ router.get('/', getLiquidityWalletValidator, isRequired, async (req, res) => {
     .status(200)
     .send(
       await collection
-        .find({ chainId: req.query.chainId, userId: res.locals.userId })
+        .find({
+          chainId: req.query.chainId,
+          userId: { $regex: res.locals.userId, $options: 'i' },
+        })
         .toArray()
     );
 });
@@ -107,7 +110,11 @@ router.get('/all', isRequired, async (req, res) => {
   }
   res
     .status(200)
-    .send(await collection.find({ userId: res.locals.userId }).toArray());
+    .send(
+      await collection
+        .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+        .toArray()
+    );
 });
 
 router.get('/single', getSingleLiquidityWalletValidator, async (req, res) => {
@@ -141,7 +148,7 @@ router.get('/id/:id', getWalletByIdValidator, isRequired, async (req, res) => {
   res.status(200).send(
     await collection.findOne({
       _id: new ObjectId(req.params.id),
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     })
   );
 });
@@ -162,7 +169,7 @@ router.delete(
     const wallet = await collection.findOne({
       walletAddress: req.query.walletAddress,
       chainId: req.query.chainId,
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     });
     if (wallet) {
       res.status(200).send(await collection.deleteOne(wallet));

@@ -18,7 +18,9 @@ router.post('/', createTokenValidator, isRequired, async (req, res) => {
   const collectionAdmin = (await getDBConnection(req)).collection('admins');
   if (
     validator.length ||
-    !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+    !(await collectionAdmin.findOne({
+      userId: { $regex: res.locals.userId, $options: 'i' },
+    }))
   ) {
     return res.status(400).send(validator);
   }
@@ -72,7 +74,9 @@ router.put('/:tokenId', modifyTokenValidator, isRequired, async (req, res) => {
   const collectionAdmin = (await getDBConnection(req)).collection('admins');
   if (
     validator.length ||
-    !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+    !(await collectionAdmin.findOne({
+      userId: { $regex: res.locals.userId, $options: 'i' },
+    }))
   ) {
     return res.status(400).send(validator);
   }
@@ -110,7 +114,9 @@ router.delete(
     const collectionAdmin = (await getDBConnection(req)).collection('admins');
     if (
       validator.length ||
-      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+      !(await collectionAdmin.findOne({
+        userId: { $regex: res.locals.userId, $options: 'i' },
+      }))
     ) {
       return res.status(400).send(validator);
     }

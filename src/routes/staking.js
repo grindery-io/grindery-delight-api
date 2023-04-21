@@ -27,7 +27,7 @@ router.post('/', createStakingValidator, isRequired, async (req, res) => {
   if (
     !(await collection.findOne({
       chainId: req.body.chainId,
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     }))
   ) {
     let newDocument = req.body;
@@ -96,17 +96,15 @@ router.get('/user', isRequired, async (req, res) => {
   const collection = (await getDBConnection(req)).collection('staking');
   if (
     await collection.findOne({
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     })
   ) {
-    res
-      .status(200)
-      .send(
-        await db
-          .collection('staking')
-          .find({ userId: res.locals.userId })
-          .toArray()
-      );
+    res.status(200).send(
+      await db
+        .collection('staking')
+        .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+        .toArray()
+    );
   } else {
     res.status(404).send({
       msg: 'No staking found for this user.',
@@ -129,7 +127,7 @@ router.get('/:stakeId', getStakeByIdValidator, isRequired, async (req, res) => {
   }
   const result = await collection.findOne({
     _id: new ObjectId(req.params.stakeId),
-    userId: res.locals.userId,
+    userId: { $regex: res.locals.userId, $options: 'i' },
   });
   if (result) {
     res.status(200).send(result);
@@ -154,7 +152,7 @@ router.delete('/', deleteStakeValidator, isRequired, async (req, res) => {
   }
   const stake = await collection.findOne({
     chainId: req.query.chainId,
-    userId: res.locals.userId,
+    userId: { $regex: res.locals.userId, $options: 'i' },
   });
   if (stake) {
     res.status(200).send(await collection.deleteOne(stake));

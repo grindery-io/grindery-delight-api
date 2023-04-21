@@ -24,7 +24,9 @@ router.post('/', createBlockchainValidator, isRequired, async (req, res) => {
   const collection = (await getDBConnection(req)).collection('blockchains');
   if (
     validator.length ||
-    !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+    !(await collectionAdmin.findOne({
+      userId: { $regex: res.locals.userId, $options: 'i' },
+    }))
   ) {
     return res.status(400).send(validator);
   }
@@ -88,7 +90,9 @@ router.put(
     const validator = validateResult(req, res);
     const collectionAdmin = (await getDBConnection(req)).collection('admins');
     const collection = (await getDBConnection(req)).collection('blockchains');
-    const user = await collectionAdmin.findOne({ userId: res.locals.userId });
+    const user = await collectionAdmin.findOne({
+      userId: { $regex: res.locals.userId, $options: 'i' },
+    });
     if (validator.length || !user) {
       return res.status(400).send(validator);
     }
@@ -139,7 +143,9 @@ router.delete(
     const collectionAdmin = (await getDBConnection(req)).collection('admins');
     if (
       validator.length ||
-      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+      !(await collectionAdmin.findOne({
+        userId: { $regex: res.locals.userId, $options: 'i' },
+      }))
     ) {
       return res.status(400).send(validator);
     }
@@ -172,7 +178,9 @@ router.post(
 
     if (
       validator.length ||
-      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+      !(await collectionAdmin.findOne({
+        userId: { $regex: res.locals.userId, $options: 'i' },
+      }))
     ) {
       return res.status(400).send(validator);
     }
@@ -252,7 +260,9 @@ router.delete(
     const collectionAdmin = (await getDBConnection(req)).collection('admins');
     if (
       validator.length ||
-      !(await collectionAdmin.findOne({ userId: res.locals.userId }))
+      !(await collectionAdmin.findOne({
+        userId: { $regex: res.locals.userId, $options: 'i' },
+      }))
     ) {
       return res.status(400).send(validator);
     }

@@ -31,7 +31,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   if (
     !(await collection.findOne({
       offerId: req.body.offerId,
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     }))
   ) {
     let newDocument = req.body;
@@ -89,7 +89,11 @@ router.get('/search', getOffersValidator, isRequired, async (req, res) => {
 router.get('/user', isRequired, async (req, res) => {
   const collection = (await getDBConnection(req)).collection('offers');
   res
-    .send(await collection.find({ userId: res.locals.userId }).toArray())
+    .send(
+      await collection
+        .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+        .toArray()
+    )
     .status(200);
 });
 
@@ -122,7 +126,7 @@ router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   res.status(200).send(
     await collection.findOne({
       _id: new ObjectId(req.query.id),
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     })
   );
 });
@@ -140,7 +144,7 @@ router.delete(
     }
     const offer = await collection.findOne({
       offerId: req.params.offerId,
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     });
     if (offer) {
       res.status(200).send(await collection.deleteOne(offer));
@@ -161,7 +165,7 @@ router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
   }
   const offer = await collection.findOne({
     offerId: req.params.offerId,
-    userId: res.locals.userId,
+    userId: { $regex: res.locals.userId, $options: 'i' },
   });
   if (offer) {
     res.status(200).send(

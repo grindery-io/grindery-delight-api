@@ -41,7 +41,11 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
 router.get('/user', isRequired, async (req, res) => {
   const collection = (await getDBConnection(req)).collection('orders');
   res
-    .send(await collection.find({ userId: res.locals.userId }).toArray())
+    .send(
+      await collection
+        .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+        .toArray()
+    )
     .status(200);
 });
 
@@ -55,7 +59,7 @@ router.get(
     res
       .send(
         await collection.findOne({
-          userId: res.locals.userId,
+          userId: { $regex: res.locals.userId, $options: 'i' },
           orderId: req.query.orderId,
         })
       )
@@ -69,7 +73,7 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
   res
     .send(
       await collection.findOne({
-        userId: res.locals.userId,
+        userId: { $regex: res.locals.userId, $options: 'i' },
         _id: new ObjectId(req.query.id),
       })
     )
@@ -82,7 +86,7 @@ router.get('/liquidity-provider', isRequired, async (req, res) => {
   let result = [];
   const activeOffersForUser = await collectionOffer
     .find({
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
       isActive: true,
     })
     .toArray();
@@ -114,7 +118,7 @@ router.put(
     }
     const order = await collection.findOne({
       orderId: req.body.orderId,
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     });
     if (order) {
       res.status(200).send(
@@ -144,7 +148,7 @@ router.delete(
     }
     const order = await collection.findOne({
       orderId: req.params.orderId,
-      userId: res.locals.userId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
     });
     if (order) {
       res.status(200).send(await collection.deleteOne(order));
