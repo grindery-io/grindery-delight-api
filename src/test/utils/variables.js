@@ -61,6 +61,10 @@ export const blockchain = {
   ],
   transactionExplorerUrl: 'https://goerli.etherscan.io/tx/{hash}',
   addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',
+  usefulAddresses: {
+    myUsefulAddress1: 'myAddress1',
+    myUsefulAddress2: 'myAddress2',
+  },
 };
 
 export const usefulAddress = {

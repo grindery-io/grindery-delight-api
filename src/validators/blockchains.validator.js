@@ -62,6 +62,17 @@ export const createBlockchainValidator = [
     .withMessage('must be boolean value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body('usefulAddresses')
+    .isObject()
+    .custom((value, { req }) => {
+      const keys = Object.keys(value);
+      for (const key of keys) {
+        if (typeof value[key] !== 'string') {
+          throw new Error(`usefulAddresses.${key} must be a string value`);
+        }
+      }
+      return true;
+    }),
   body().custom((value, { req }) => {
     validateFields(
       req.body,
@@ -215,7 +226,11 @@ export const getUsefullAddressByNameValidator = [
     .withMessage('must be mongodb id')
     .notEmpty()
     .withMessage('must not be empty'),
-  query('contract').notEmpty().withMessage('must not be empty'),
+  body('contract')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
 ];
 
 export const modifyUsefullAddressValidator = [
