@@ -96,8 +96,9 @@ afterEach(async function () {
 describe('Tokens route', async function () {
   // Retry all tests in this suite up to 4 times
   this.retries(4);
-  describe('POST new token', () => {
-    describe('Core of the route', () => {
+
+  describe('POST new token', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
@@ -135,7 +136,7 @@ describe('Tokens route', async function () {
       });
     });
 
-    describe('Validators', () => {
+    describe('Validators', async function () {
       const testCases = [
         'coinmarketcapId',
         'symbol',
@@ -174,7 +175,7 @@ describe('Tokens route', async function () {
     });
   });
 
-  describe('GET active tokens', () => {
+  describe('GET active tokens', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai.request(app).get('/test/tokens/active');
       chai.expect(createResponse).to.have.status(403);
@@ -207,7 +208,7 @@ describe('Tokens route', async function () {
     });
   });
 
-  describe('GET by MongoDBId', () => {
+  describe('GET by MongoDBId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
@@ -248,8 +249,8 @@ describe('Tokens route', async function () {
     });
   });
 
-  describe('PUT by MongoDBId', () => {
-    describe('Core of the route', () => {
+  describe('PUT by MongoDBId', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
@@ -302,7 +303,7 @@ describe('Tokens route', async function () {
       });
     });
 
-    describe('Validators', () => {
+    describe('Validators', async function () {
       const testCases = [
         'coinmarketcapId',
         'symbol',
@@ -378,7 +379,7 @@ describe('Tokens route', async function () {
     });
   });
 
-  describe('DELETE by MongoDBId', () => {
+  describe('DELETE by MongoDBId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)

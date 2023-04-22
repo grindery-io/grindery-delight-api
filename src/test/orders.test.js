@@ -45,11 +45,12 @@ afterEach(async function () {
   toDeleteDb.length = 0;
 });
 
-describe('Orders route', () => {
+describe('Orders route', async function () {
   // Retry all tests in this suite up to 4 times
   this.retries(4);
-  describe('POST new order', () => {
-    describe('Route core', () => {
+
+  describe('POST new order', async function () {
+    describe('Route core', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
@@ -120,7 +121,7 @@ describe('Orders route', () => {
       });
     });
 
-    describe('Validators', () => {
+    describe('Validators', async function () {
       const testCases = [
         'orderId',
         'amountTokenDeposit',
@@ -181,7 +182,7 @@ describe('Orders route', () => {
     });
   });
 
-  describe('GET by user', () => {
+  describe('GET by user', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get('/test/orders/user');
       chai.expect(res).to.have.status(403);
@@ -221,7 +222,7 @@ describe('Orders route', () => {
     });
   });
 
-  describe('GET by orderId', () => {
+  describe('GET by orderId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -263,7 +264,7 @@ describe('Orders route', () => {
     });
   });
 
-  describe('GET by MongoDbId', () => {
+  describe('GET by MongoDbId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -342,7 +343,7 @@ describe('Orders route', () => {
     });
   });
 
-  describe('GET by liquidity provider', () => {
+  describe('GET by liquidity provider', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -479,7 +480,7 @@ describe('Orders route', () => {
     });
   });
 
-  describe('DELETE order by orderId', () => {
+  describe('DELETE order by orderId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).delete('/test/orders/myOrderId');
       chai.expect(res).to.have.status(403);
@@ -536,8 +537,8 @@ describe('Orders route', () => {
     });
   });
 
-  describe('PUT order as complete', () => {
-    describe('Core of the route', () => {
+  describe('PUT order as complete', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const res = await chai.request(app).put('/test/orders/complete').send({
           orderId: 'myOrderId',
@@ -615,7 +616,7 @@ describe('Orders route', () => {
       });
     });
 
-    describe('Validators', () => {
+    describe('Validators', async function () {
       testNonString({
         method: 'put',
         path: '/test/orders/complete',

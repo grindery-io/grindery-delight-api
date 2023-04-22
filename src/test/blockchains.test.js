@@ -102,8 +102,9 @@ afterEach(async function () {
 describe('Blockchains route', async function () {
   // Retry all tests in this suite up to 4 times
   this.retries(4);
-  describe('POST new blockchain', () => {
-    describe('Core of the route', () => {
+
+  describe('POST new blockchain', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
@@ -137,7 +138,7 @@ describe('Blockchains route', async function () {
           .to.deep.equal({ msg: 'This blockchain already exists.' });
       });
     });
-    describe('Validators', () => {
+    describe('Validators', async function () {
       it('Should fail if rpc is not an array', async function () {
         // Make a request to create the offer with invalid data
         const res = await chai
@@ -268,7 +269,7 @@ describe('Blockchains route', async function () {
       });
     });
   });
-  describe('GET active blockchains', () => {
+  describe('GET active blockchains', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get('/test/blockchains/active');
       chai.expect(res).to.have.status(403);
@@ -298,7 +299,7 @@ describe('Blockchains route', async function () {
       chai.expect(res.body.every((obj) => obj.isActive === true)).to.be.true;
     });
   });
-  describe('GET blockchain by MongoDBId', () => {
+  describe('GET blockchain by MongoDBId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get('/test/blockchains/1234');
       chai.expect(res).to.have.status(403);
@@ -331,8 +332,8 @@ describe('Blockchains route', async function () {
       field: 'blockchainId',
     });
   });
-  describe('PUT blockchain', () => {
-    describe('Core of the route', () => {
+  describe('PUT blockchain', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const res = await chai.request(app).put('/test/blockchains/1234');
         chai.expect(res).to.have.status(403);
@@ -376,7 +377,7 @@ describe('Blockchains route', async function () {
         chai.expect(res.body).to.deep.equal({ msg: 'No blockchain found' });
       });
     });
-    describe('Validators', () => {
+    describe('Validators', async function () {
       it('PUT /blockchains/11111111111111111111 - rpc - Should fail if rpc is not an array', async function () {
         // Make a request to create the offer with invalid data
         const res = await chai
@@ -486,7 +487,7 @@ describe('Blockchains route', async function () {
       }
     });
   });
-  describe('DELETE blockchain', () => {
+  describe('DELETE blockchain', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -528,8 +529,8 @@ describe('Blockchains route', async function () {
       field: 'blockchainId',
     });
   });
-  describe('POST useful address', () => {
-    describe('Core of the route', () => {
+  describe('POST useful address', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is not provided', async function () {
         const res = await chai
           .request(app)
@@ -607,7 +608,7 @@ describe('Blockchains route', async function () {
         });
       });
     });
-    describe('Validators', () => {
+    describe('Validators', async function () {
       const testCases = ['contract', 'address'];
       for (const testCase of testCases) {
         testNonString({
@@ -633,8 +634,8 @@ describe('Blockchains route', async function () {
       }
     });
   });
-  describe('DELETE useful address', () => {
-    describe('Core of the route', () => {
+  describe('DELETE useful address', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is not provided', async function () {
         const res = await chai
           .request(app)
@@ -684,7 +685,7 @@ describe('Blockchains route', async function () {
       });
     });
 
-    describe('Validators', () => {
+    describe('Validators', async function () {
       testNonString({
         method: 'delete',
         path: '/test/blockchains/useful-address/111111111111111111111111',

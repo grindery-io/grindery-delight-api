@@ -50,8 +50,9 @@ afterEach(async function () {
 describe('Liquidity wallets route', async function () {
   // Retry all tests in this suite up to 4 times
   this.retries(4);
-  describe('POST new liquidity wallet', () => {
-    describe('Core of the route', () => {
+
+  describe('POST new liquidity wallet', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
@@ -126,7 +127,7 @@ describe('Liquidity wallets route', async function () {
         chai.expect(deleteResponse).to.have.status(200);
       });
     });
-    describe('Validators', () => {
+    describe('Validators', async function () {
       const testCases = ['walletAddress', 'chainId'];
       for (const testCase of testCases) {
         testNonString({
@@ -171,8 +172,8 @@ describe('Liquidity wallets route', async function () {
       });
     });
   });
-  describe('GET by chainId', () => {
-    describe('Core of the route', () => {
+  describe('GET by chainId', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
@@ -235,7 +236,7 @@ describe('Liquidity wallets route', async function () {
         }
       });
     });
-    describe('Validators', () => {
+    describe('Validators', async function () {
       it('Should return a 400 error if `chainId` is empty', async function () {
         const res = await chai
           .request(app)
@@ -249,7 +250,7 @@ describe('Liquidity wallets route', async function () {
       });
     });
   });
-  describe('GET all liquidity wallets', () => {
+  describe('GET all liquidity wallets', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
@@ -291,8 +292,8 @@ describe('Liquidity wallets route', async function () {
       chai.expect(deleteResponse).to.have.status(200);
     });
   });
-  describe('GET single liquidity wallets', () => {
-    describe('Core of the route', () => {
+  describe('GET single liquidity wallets', async function () {
+    describe('Core of the route', async function () {
       it('Should return a single liquidity wallet (without walletAddress in the query)', async function () {
         const createResponse = await createBaseLiquidityWallet(liquidityWallet);
 
@@ -358,7 +359,7 @@ describe('Liquidity wallets route', async function () {
         chai.expect(deleteResponse).to.have.status(200);
       });
     });
-    describe('Validators', () => {
+    describe('Validators', async function () {
       it('Should return a 400 status and an error message when walletAddress is an empty string', async function () {
         const res = await chai
           .request(app)
@@ -403,8 +404,8 @@ describe('Liquidity wallets route', async function () {
       });
     });
   });
-  describe('GET liquidity wallet by MongoDbId', () => {
-    describe('Core of the route', () => {
+  describe('GET liquidity wallet by MongoDbId', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
@@ -452,7 +453,7 @@ describe('Liquidity wallets route', async function () {
         chai.expect(res.body).to.be.an('object').that.is.empty;
       });
     });
-    describe('Validator', () => {
+    describe('Validator', async function () {
       it('Should return a 400 status and an error message if id is not a MongoDbId', async function () {
         const res = await chai
           .request(app)
@@ -464,8 +465,8 @@ describe('Liquidity wallets route', async function () {
       });
     });
   });
-  describe('DELETE liquidity wallets', () => {
-    describe('Core of the route', () => {
+  describe('DELETE liquidity wallets', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
@@ -511,8 +512,8 @@ describe('Liquidity wallets route', async function () {
       });
     });
   });
-  describe('PUT liquidity wallets', () => {
-    describe('Core of the route', () => {
+  describe('PUT liquidity wallets', async function () {
+    describe('Core of the route', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai.request(app).put(liquidityWalletPath);
         chai.expect(createResponse).to.have.status(403);

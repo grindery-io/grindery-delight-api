@@ -45,11 +45,12 @@ afterEach(async function () {
   toDeleteDb.length = 0;
 });
 
-describe('Offers route', () => {
+describe('Offers route', async function () {
   // Retry all tests in this suite up to 4 times
   this.retries(4);
-  describe('POST new offer', () => {
-    describe('Route core', () => {
+
+  describe('POST new offer', async function () {
+    describe('Route core', async function () {
       it('Should return 403 if no token is provided', async function () {
         const createResponse = await chai
           .request(app)
@@ -110,7 +111,7 @@ describe('Offers route', () => {
       });
     });
 
-    describe('Validators', () => {
+    describe('Validators', async function () {
       it('Should fail validation if min is greater than max', async function () {
         const invalidOffer = {
           chainId: '1',
@@ -237,7 +238,7 @@ describe('Offers route', () => {
     });
   });
 
-  describe('GET all offers', () => {
+  describe('GET all offers', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get(pathOffers);
       chai.expect(res).to.have.status(403);
@@ -266,7 +267,7 @@ describe('Offers route', () => {
     });
   });
 
-  describe('GET all active offers with filters', () => {
+  describe('GET all active offers with filters', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get('/test/offers/search').query({
         exchangeChainId: offer.exchangeChainId,
@@ -516,7 +517,7 @@ describe('Offers route', () => {
     });
   });
 
-  describe('GET all offers for a user', () => {
+  describe('GET all offers for a user', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get('/test/offers/user');
       chai.expect(res).to.have.status(403);
@@ -562,7 +563,7 @@ describe('Offers route', () => {
     });
   });
 
-  describe('GET offer by offerId', () => {
+  describe('GET offer by offerId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -597,7 +598,7 @@ describe('Offers route', () => {
     });
   });
 
-  describe('GET offer by MongoDB id', () => {
+  describe('GET offer by MongoDB id', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -673,7 +674,7 @@ describe('Offers route', () => {
     });
   });
 
-  describe('DELETE offer by offerId', () => {
+  describe('DELETE offer by offerId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).delete('/test/offers/myOfferId');
       chai.expect(res).to.have.status(403);
@@ -734,8 +735,8 @@ describe('Offers route', () => {
     });
   });
 
-  describe('PUT offer by offerId', () => {
-    describe('Modify an offer', () => {
+  describe('PUT offer by offerId', async function () {
+    describe('Modify an offer', async function () {
       it('Should return 403 if no token is provided', async function () {
         const modifyOffer = await chai
           .request(app)
@@ -1300,7 +1301,7 @@ describe('Offers route', () => {
       });
     });
 
-    describe('Validators', () => {
+    describe('Validators', async function () {
       const testCases = [
         'chainId',
         'min',
