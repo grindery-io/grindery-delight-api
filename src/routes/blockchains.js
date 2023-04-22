@@ -13,11 +13,12 @@ import { validateResult } from '../utils/validators-utils.js';
 
 const router = express.Router();
 
-/* This is a post request to the blockchain route. It is using the createBlockchainValidator to
-validate the request body. It is also using the isRequired middleware to check if the user is logged
-in. If the user is not logged in, it will return a 401 error. If the user is logged in, it will
-check if the blockchain already exists. If it does not exist, it will create the blockchain. If it
-does exist, it will return a 404 error. */
+/* This is a POST request to create a new blockchain. It is using the `createBlockchainValidator` and
+`isRequired` middleware to validate the request body and check if the user is logged in. It first
+checks if there are any validation errors or if the user is not an admin. If there are errors or the
+user is not an admin, it returns a 400 error. If the blockchain with the same `caipId` already
+exists, it returns a 404 error. Otherwise, it inserts the new blockchain into the database and
+returns a 201 status code. */
 router.post('/', createBlockchainValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   const collectionAdmin = (await getDBConnection(req)).collection('admins');
@@ -82,6 +83,12 @@ router.get(
   }
 );
 
+/* This is a PUT request to modify an existing blockchain. It is using the `modifyBlockchainValidator`
+and `isRequired` middleware to validate the request body and check if the user is logged in. It
+first checks if there are any validation errors or if the user is not an admin. If there are errors
+or the user is not an admin, it returns a 400 error. If the blockchain with the specified
+`blockchainId` does not exist, it returns a 404 error. Otherwise, it updates the blockchain with the
+new values provided in the request body and returns a 200 status code. */
 router.put(
   '/:blockchainId',
   modifyBlockchainValidator,
@@ -167,7 +174,7 @@ validate the request body. It is also using the isRequired middleware to check i
 in. If the user is not logged in, it will return a 401 error. If the user is logged in, it will
 check if the usefull address already exists. If it does not exist, it will create a new usefull address. If it
 exist, it will update actual the usefull address. */
-router.post(
+router.put(
   '/useful-address/:blockchainId',
   modifyUsefullAddressValidator,
   isRequired,
@@ -185,63 +192,21 @@ router.post(
       return res.status(400).send(validator);
     }
 
-    if (
-      !(await collection.findOne({
-        _id: new ObjectId(req.params.blockchainId),
-      }))
-    ) {
+    const blockchain = await collection.findOne({
+      _id: new ObjectId(req.params.blockchainId),
+    });
+
+    if (!blockchain) {
       res.status(404).send({
         msg: 'No blockchain found',
       });
     }
 
-    const blockchain = await collection.findOne({
-      _id: new ObjectId(req.params.blockchainId),
-      usefulAddresses: {
-        $elemMatch: { contract: req.body.contract },
-      },
-    });
-
-    if (blockchain) {
-      res.status(200).send(
-        await collection.updateOne(
-          {
-            _id: new ObjectId(req.params.blockchainId),
-            usefulAddresses: {
-              $elemMatch: {
-                contract: req.body.contract,
-                address: { $ne: req.body.address },
-              },
-            },
-          },
-          {
-            $set: {
-              'usefulAddresses.$[elem].address': req.body.address,
-            },
-          },
-          {
-            arrayFilters: [{ 'elem.contract': req.body.contract }],
-          }
-        )
-      );
-    } else {
-      res.status(200).send(
-        await collection.updateOne(
-          { _id: new ObjectId(req.params.blockchainId) },
-          {
-            $addToSet: {
-              usefulAddresses: {
-                contract: req.body.contract,
-                address: req.body.address,
-              },
-            },
-          },
-          {
-            upsert: true,
-          }
-        )
-      );
-    }
+    res.status(200).send(
+      await collection.updateOne(blockchain, {
+        $set: { [`usefulAddresses.${req.body.contract}`]: req.body.address },
+      })
+    );
   }
 );
 
@@ -266,19 +231,26 @@ router.delete(
     ) {
       return res.status(400).send(validator);
     }
-    const response = await collection.updateOne(
-      { _id: new ObjectId(req.params.blockchainId) },
-      { $pull: { usefulAddresses: { contract: req.query.contract } } },
-      false,
-      true
-    );
-    if (response.modifiedCount > 0) {
-      res.send(response).status(200);
-    } else {
+
+    const blockchain = await collection.findOne({
+      _id: new ObjectId(req.params.blockchainId),
+      [`usefulAddresses.${req.body.contract}`]: { $exists: true },
+    });
+
+    if (!blockchain) {
       res.status(404).send({
-        msg: 'No blockchain or usefull address found.',
+        msg: 'No blockchain found or contract doesnt exist',
       });
     }
+
+    res
+      .status(200)
+      .send(
+        await collection.updateOne(
+          { _id: new ObjectId(req.params.blockchainId) },
+          { $unset: { [`usefulAddresses.${req.body.contract}`]: 1 } }
+        )
+      );
   }
 );
 
