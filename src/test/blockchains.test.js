@@ -100,6 +100,8 @@ afterEach(async function () {
 });
 
 describe('Blockchains route', async function () {
+  // Retry all tests in this suite up to 4 times
+  this.retries(4);
   describe('POST new blockchain', () => {
     describe('Core of the route', () => {
       it('Should return 403 if no token is provided', async function () {

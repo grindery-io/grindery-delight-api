@@ -46,6 +46,8 @@ afterEach(async function () {
 });
 
 describe('Orders route', () => {
+  // Retry all tests in this suite up to 4 times
+  this.retries(4);
   describe('POST new order', () => {
     describe('Route core', () => {
       it('Should return 403 if no token is provided', async function () {

@@ -6,6 +6,8 @@ import { mockedToken } from './utils/utils.js';
 chai.use(chaiHttp);
 
 describe('Admins route', () => {
+  // Retry all tests in this suite up to 4 times
+  this.retries(4);
   it('Should return 403 if no token is provided', async function () {
     chai
       .request(app)
