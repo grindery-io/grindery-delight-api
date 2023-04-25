@@ -1,5 +1,4 @@
 import express from 'express';
-import getDBConnection from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import { createUserInfoValidator } from '../validators/g-sheets.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
@@ -10,13 +9,7 @@ const router = express.Router();
 /* Creating a new entry to save email, wallet addres and offer id from user. */
 router.post('/', createUserInfoValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collectionAdmin = (await getDBConnection(req)).collection('admins');
-  if (
-    validator.length ||
-    !(await collectionAdmin.findOne({
-      userId: { $regex: res.locals.userId, $options: 'i' },
-    }))
-  ) {
+  if (validator.length) {
     return res.status(400).send(validator);
   }
   const auth = await getAuthToken();
