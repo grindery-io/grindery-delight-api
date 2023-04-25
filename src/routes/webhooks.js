@@ -28,7 +28,7 @@ router.put(
       return res.status(200).send(
         await collection.updateOne(offer, {
           $set: {
-            max: req.body._maxPriceLimit ? req.body._maxPriceLimit : offer.min,
+            max: req.body._upperLimitFn ? req.body._upperLimitFn : offer.min,
           },
         })
       );
@@ -55,7 +55,7 @@ router.put(
       return res.status(200).send(
         await collection.updateOne(offer, {
           $set: {
-            min: req.body._minPriceLimit ? req.body._minPriceLimit : offer.min,
+            min: req.body._lowerLimitFn ? req.body._lowerLimitFn : offer.min,
           },
         })
       );

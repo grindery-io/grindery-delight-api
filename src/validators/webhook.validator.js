@@ -17,7 +17,7 @@ export const updateMaxPriceOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_maxPriceLimit')
+  body('_upperLimitFn')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -29,7 +29,7 @@ export const updateMaxPriceOfferValidator = [
         '_grinderyChainId',
         '_grinderyTransactionHash',
         '_idOffer',
-        '_maxPriceLimit',
+        '_upperLimitFn',
       ],
       'body'
     );
@@ -61,7 +61,7 @@ export const updateMinPriceOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_minPriceLimit')
+  body('_lowerLimitFn')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -73,7 +73,7 @@ export const updateMinPriceOfferValidator = [
         '_grinderyChainId',
         '_grinderyTransactionHash',
         '_idOffer',
-        '_minPriceLimit',
+        '_lowerLimitFn',
       ],
       'body'
     );
