@@ -16,7 +16,7 @@ router.post('/', createUserInfoValidator, isRequired, async (req, res) => {
   const spreadSheet = await getSpreadSheet(auth);
   const spreadsheetTitle = spreadSheet.data.sheets[0].properties.title;
   await appendData(auth, spreadsheetTitle, req);
-  res.status(201).send(null);
+  res.status(201).send();
 });
 
 const getAuthToken = async () => {
@@ -49,7 +49,14 @@ const appendData = async (auth, spreadsheetTitle, req) => {
     range: spreadsheetTitle,
     valueInputOption: 'USER_ENTERED',
     resource: {
-      values: [[req.body.email, req.body.walletAddress, req.body.orderId]],
+      values: [
+        [
+          req.body.email,
+          req.body.walletAddress,
+          req.body.orderId,
+          new Date().toString(),
+        ],
+      ],
     },
   });
 };
