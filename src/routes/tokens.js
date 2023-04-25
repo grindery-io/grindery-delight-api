@@ -38,7 +38,7 @@ router.post('/', createTokenValidator, isRequired, async (req, res) => {
 });
 
 /* This is a route that is used to get all active tokens. */
-router.get('/active', isRequired, async (req, res) => {
+router.get('/active', async (req, res) => {
   const validator = validateResult(req, res);
   const collection = (await getDBConnection(req)).collection('tokens');
   if (validator.length) {

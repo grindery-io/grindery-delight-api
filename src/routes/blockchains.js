@@ -45,7 +45,7 @@ validate the request body. It is also using the isRequired middleware to check i
 in. If the user is not logged in, it will return a 401 error. If the user is logged in, it will
 check if the blockchain already exists. If it does not exist, it will create the blockchain. If it
 does exist, it will return a 404 error. */
-router.get('/active', isRequired, async (req, res) => {
+router.get('/active', async (req, res) => {
   const validator = validateResult(req, res);
   const collection = (await getDBConnection(req)).collection('blockchains');
   if (validator.length) {
