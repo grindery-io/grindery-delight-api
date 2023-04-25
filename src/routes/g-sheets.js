@@ -56,7 +56,7 @@ const appendData = async (auth, spreadsheetTitle, req) => {
     range: spreadsheetTitle,
     valueInputOption: 'USER_ENTERED',
     resource: {
-      values: [[req.body.email, req.body.walletAddress, req.body.offerId]],
+      values: [[req.body.email, req.body.walletAddress, req.body.orderId]],
     },
   });
 };

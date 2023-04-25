@@ -12,13 +12,13 @@ export const createUserInfoValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('offerId')
+  body('orderId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
   body().custom((value, { req }) => {
-    validateFields(req.body, ['email', 'walletAddress', 'offerId'], 'body');
+    validateFields(req.body, ['email', 'walletAddress', 'orderId'], 'body');
     return true;
   }),
   query().custom((value, { req }) => {
