@@ -8,6 +8,7 @@ import {
 } from '../validators/webhook.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import getDBConnection from '../db/conn.js';
+import webhooks from 'node-webhooks';
 
 const router = express.Router();
 
@@ -18,23 +19,23 @@ router.put(
   async (req, res) => {
     const validator = validateResult(req, res);
     const collection = (await getDBConnection(req)).collection('offers');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }
     const offer = await collection.findOne({
       offerId: req.body._idOffer,
     });
-    if (offer)
-      return res.status(200).send(
-        await collection.updateOne(offer, {
-          $set: {
-            max: req.body._upperLimitFn ? req.body._upperLimitFn : offer.min,
-          },
-        })
-      );
-    res.status(400).send({
-      msg: 'Not found.',
-    });
+    if (offer) {
+      const response = await collection.updateOne(offer, {
+        $set: {
+          max: req.body._upperLimitFn ? req.body._upperLimitFn : offer.min,
+        },
+      });
+      if (response.modifiedCount > 0)
+        trigger('offer', { offerId: req.body._idOffer });
+      return res.status(200).send(response);
+    }
   }
 );
 
@@ -51,14 +52,16 @@ router.put(
     const offer = await collection.findOne({
       offerId: req.body._idOffer,
     });
-    if (offer)
-      return res.status(200).send(
-        await collection.updateOne(offer, {
-          $set: {
-            min: req.body._lowerLimitFn ? req.body._lowerLimitFn : offer.min,
-          },
-        })
-      );
+    if (offer) {
+      const response = await collection.updateOne(offer, {
+        $set: {
+          min: req.body._lowerLimitFn ? req.body._lowerLimitFn : offer.min,
+        },
+      });
+      if (response.modifiedCount > 0)
+        trigger('offer', { offerId: req.body._idOffer });
+      return res.status(200).send(response);
+    }
     res.status(400).send({
       msg: 'Not found.',
     });
@@ -75,14 +78,16 @@ router.put('/offer/token', updateTokenOfferValidator, async (req, res) => {
   const offer = await collection.findOne({
     offerId: req.body._idOffer,
   });
-  if (offer)
-    return res.status(200).send(
-      await collection.updateOne(offer, {
-        $set: {
-          tokenAddress: req.body._token ? req.body._token : offer.tokenAddress,
-        },
-      })
-    );
+  if (offer) {
+    const response = await collection.updateOne(offer, {
+      $set: {
+        tokenAddress: req.body._token ? req.body._token : offer.tokenAddress,
+      },
+    });
+    if (response.modifiedCount > 0)
+      trigger('offer', { offerId: req.body._idOffer });
+    return res.status(200).send(response);
+  }
   res.status(400).send({
     msg: 'Not found.',
   });
@@ -98,14 +103,16 @@ router.put('/offer/chain', updateChainIdOfferValidator, async (req, res) => {
   const offer = await collection.findOne({
     offerId: req.body._idOffer,
   });
-  if (offer)
-    return res.status(200).send(
-      await collection.updateOne(offer, {
-        $set: {
-          chainId: req.body._chainId ? req.body._chainId : offer.chainId,
-        },
-      })
-    );
+  if (offer) {
+    const response = await collection.updateOne(offer, {
+      $set: {
+        chainId: req.body._chainId ? req.body._chainId : offer.chainId,
+      },
+    });
+    if (response.modifiedCount > 0)
+      trigger('offer', { offerId: req.body._idOffer });
+    return res.status(200).send(response);
+  }
   res.status(400).send({
     msg: 'Not found.',
   });
@@ -121,20 +128,38 @@ router.put('/offer/status', updateStatusOfferValidator, async (req, res) => {
   const offer = await collection.findOne({
     offerId: req.body._idOffer,
   });
-  if (offer)
-    return res.status(200).send(
-      await collection.updateOne(offer, {
-        $set: {
-          isActive:
-            req.body._isActive === undefined
-              ? offer.isActive
-              : req.body._isActive,
-        },
-      })
-    );
+  if (offer) {
+    const response = await collection.updateOne(offer, {
+      $set: {
+        isActive:
+          req.body._isActive === undefined
+            ? offer.isActive
+            : req.body._isActive,
+      },
+    });
+    if (response.modifiedCount > 0)
+      trigger('offer', { offerId: req.body._idOffer });
+    return res.status(200).send(response);
+  }
   res.status(404).send({
     msg: 'Not found.',
   });
 });
+
+const registerHooks = () => {
+  return new webhooks({
+    db: {
+      callback_hook: [process.env.GRINDERY_MERCARI_CLIENT],
+    },
+  });
+};
+
+const hooks = registerHooks();
+
+const trigger = (topic, data) =>
+  hooks.trigger('callback_hook', {
+    msg: topic,
+    data: data,
+  });
 
 export default router;
