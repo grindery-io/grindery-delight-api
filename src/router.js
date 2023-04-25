@@ -8,7 +8,7 @@ import blockchains from './routes/blockchains.js';
 import tokens from './routes/tokens.js';
 import admins from './routes/admins.js';
 import view_blockchains from './routes/view-blockchains.js';
-import webhook from './routes/webhook.js';
+import webhooks from './routes/webhooks.js';
 
 const router = Router();
 
@@ -21,6 +21,6 @@ router.use('/blockchains', blockchains);
 router.use('/tokens', tokens);
 router.use('/admins', admins);
 router.use('/view-blockchains', view_blockchains);
-router.use('/webhook', webhook);
+router.use('/webhooks', webhooks);
 
 export default router;
