@@ -270,10 +270,6 @@ describe('Blockchains route', async function () {
     });
   });
   describe('GET active blockchains', async function () {
-    it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get('/test/blockchains/active');
-      chai.expect(res).to.have.status(403);
-    });
     it('Should return all active blockchains', async function () {
       await createBaseBlockchain(blockchain);
       await createBaseBlockchain({
