@@ -239,11 +239,6 @@ describe('Offers route', async function () {
   });
 
   describe('GET all offers', async function () {
-    it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get(pathOffers);
-      chai.expect(res).to.have.status(403);
-    });
-
     it('Should return an array with the correct MongoDB elements', async function () {
       // Transform each item in mongoData
       const formattedData = (await collectionOffers.find({}).toArray()).map(
@@ -268,17 +263,6 @@ describe('Offers route', async function () {
   });
 
   describe('GET all active offers with filters', async function () {
-    it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get('/test/offers/search').query({
-        exchangeChainId: offer.exchangeChainId,
-        exchangeToken: offer.exchangeToken,
-        chainId: offer.chainId,
-        token: offer.token,
-        depositAmount: '1',
-      });
-      chai.expect(res).to.have.status(403);
-    });
-
     it('Should return an array of active offers', async function () {
       const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
       const nbrOffers = 1;

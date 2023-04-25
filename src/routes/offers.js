@@ -54,14 +54,14 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 });
 
 /* This is a GET request that returns all offers. */
-router.get('/', isRequired, async (req, res) => {
+router.get('/', async (req, res) => {
   const collection = (await getDBConnection(req)).collection('offers');
   res.send(await collection.find({}).toArray()).status(200);
 });
 
 /* This is a GET request that returns all activated offers
 and filter by exchangeChainId, exchangeToken, chainId,token */
-router.get('/search', getOffersValidator, isRequired, async (req, res) => {
+router.get('/search', getOffersValidator, async (req, res) => {
   const validator = validateResult(req, res);
   const collection = (await getDBConnection(req)).collection('offers');
   if (validator.length) {
