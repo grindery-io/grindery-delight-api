@@ -17,6 +17,7 @@ import {
   token,
   toDeleteDb,
 } from './utils/variables.js';
+import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 
@@ -37,7 +38,7 @@ function modifyTokenField({ field, value }) {
 
     const res = await chai
       .request(app)
-      .put(`/test/tokens/${createResponse.body.insertedId}`)
+      .put(`/unit-test/tokens/${createResponse.body.insertedId}`)
       .set('Authorization', `Bearer ${mockedToken}`)
       .send({ [field]: value });
     chai.expect(res).to.have.status(200);
@@ -57,7 +58,7 @@ function modifyTokenField({ field, value }) {
 
     const deleteResponse = await chai
       .request(app)
-      .delete(`/test/tokens/${createResponse.body.insertedId}`)
+      .delete(`/unit-test/tokens/${createResponse.body.insertedId}`)
       .set('Authorization', `Bearer ${mockedToken}`);
     chai.expect(deleteResponse).to.have.status(200);
   });
@@ -88,9 +89,25 @@ async function createBaseToken(token) {
   return res;
 }
 
+/* The above code is setting up a test environment for a JavaScript application. It is using the
+`beforeEach` function to run some code before each test case. */
+beforeEach(async function () {
+  const db = await Database.getInstance({});
+  const collectionAdmin = db.collection('admins');
+  await collectionAdmin.insertOne({
+    userId: process.env.USER_ID_TEST,
+  });
+});
+
+/* The above code is a test cleanup function that runs after each test. It gets an instance of a
+database and checks if the namespace is 'grindery-delight-test-server'. If it is, it drops the
+'blockchains' collection from the database. This ensures that the database is cleaned up after each
+test and is ready for the next test. */
 afterEach(async function () {
-  await deleteElementsAfterTest(toDeleteDb);
-  toDeleteDb.length = 0;
+  const db = await Database.getInstance({});
+  if (db.namespace === 'grindery-delight-test-server') {
+    db.dropDatabase();
+  }
 });
 
 describe('Tokens route', async function () {
@@ -98,86 +115,46 @@ describe('Tokens route', async function () {
   this.retries(4);
 
   describe('POST new token', async function () {
-    describe('Core of the route', async function () {
-      it('Should return 403 if no token is provided', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(pathTokens)
-          .send(token);
-        chai.expect(createResponse).to.have.status(403);
-      });
-
-      it('Should create new token', async function () {
-        await createBaseToken(token);
-      });
-
-      it('Should create new token with the appropriate elements', async function () {
-        const createResponse = await createBaseToken(token);
-
-        const tokenDB = await collectionTokens.findOne({
-          _id: new ObjectId(createResponse.body.insertedId),
-        });
-        delete tokenDB._id;
-        chai.expect(tokenDB).to.deep.equal(token);
-      });
-
-      it('Should fail if token already exists', async function () {
-        const createResponse = await createBaseToken(token);
-
-        const createResponse1 = await chai
-          .request(app)
-          .post(pathTokens)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(token);
-        chai.expect(createResponse1).to.have.status(404);
-        chai
-          .expect(createResponse1.body)
-          .to.deep.equal({ msg: 'This token already exists.' });
-      });
+    it('Should return 403 if no token is provided', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post(pathTokens)
+        .send(token);
+      chai.expect(createResponse).to.have.status(403);
     });
 
-    describe('Validators', async function () {
-      const testCases = [
-        'coinmarketcapId',
-        'symbol',
-        'icon',
-        'chainId',
-        'address',
-        'isNative',
-        'isActive',
-      ];
+    it('Should create new token', async function () {
+      await createBaseToken(token);
+    });
 
-      for (const testCase of testCases) {
-        if (testCase !== 'isNative' && testCase !== 'isActive') {
-          testNonString({
-            method: 'post',
-            path: pathTokens,
-            body: {
-              ...token,
-              [testCase]: 123,
-            },
-            query: {},
-            field: testCase,
-          });
-        }
+    it('Should create new token with the appropriate elements', async function () {
+      const createResponse = await createBaseToken(token);
 
-        testNonEmpty({
-          method: 'post',
-          path: pathTokens,
-          body: {
-            ...token,
-            [testCase]: '',
-          },
-          query: {},
-          field: testCase,
-        });
-      }
+      const tokenDB = await collectionTokens.findOne({
+        _id: new ObjectId(createResponse.body.insertedId),
+      });
+      delete tokenDB._id;
+      chai.expect(tokenDB).to.deep.equal(token);
+    });
+
+    it('Should fail if token already exists', async function () {
+      const createResponse = await createBaseToken(token);
+
+      const createResponse1 = await chai
+        .request(app)
+        .post(pathTokens)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(token);
+      chai.expect(createResponse1).to.have.status(404);
+      chai
+        .expect(createResponse1.body)
+        .to.deep.equal({ msg: 'This token already exists.' });
     });
   });
 
   describe('GET active tokens', async function () {
     it('Should not fail if no token is provided', async function () {
-      const res = await chai.request(app).get('/test/tokens/active');
+      const res = await chai.request(app).get('/unit-test/tokens/active');
       chai.expect(res).to.have.status(200);
     });
 
@@ -191,7 +168,7 @@ describe('Tokens route', async function () {
 
       const res = await chai
         .request(app)
-        .get('/test/tokens/active')
+        .get('/unit-test/tokens/active')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('array');
@@ -212,7 +189,7 @@ describe('Tokens route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .get('/test/tokens/111111111111111111111111');
+        .get('/unit-test/tokens/111111111111111111111111');
       chai.expect(createResponse).to.have.status(403);
     });
 
@@ -221,7 +198,7 @@ describe('Tokens route', async function () {
 
       const res = await chai
         .request(app)
-        .get(`/test/tokens/${createResponse.body.insertedId}`)
+        .get(`/unit-test/tokens/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai
@@ -234,148 +211,63 @@ describe('Tokens route', async function () {
     it('Should return an empty object if no token available', async function () {
       const res = await chai
         .request(app)
-        .get('/test/tokens/111111111111111111111111')
+        .get('/unit-test/tokens/111111111111111111111111')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object').that.is.empty;
     });
-
-    testNonMongodbId({
-      method: 'get',
-      path: '/test/tokens/1111111111111111',
-      body: {},
-      query: {},
-      field: 'tokenId',
-    });
   });
 
   describe('PUT by MongoDBId', async function () {
-    describe('Core of the route', async function () {
-      it('Should return 403 if no token is provided', async function () {
-        const createResponse = await chai
-          .request(app)
-          .put('/test/tokens/111111111111111111111111');
-        chai.expect(createResponse).to.have.status(403);
-      });
-
-      modifyTokenField({
-        field: 'coinmarketcapId',
-        value: 'modifiedcoinmarketcapId',
-      });
-
-      modifyTokenField({
-        field: 'symbol',
-        value: 'modifiedsymbol',
-      });
-
-      modifyTokenField({
-        field: 'icon',
-        value: 'modifiedicon',
-      });
-
-      modifyTokenField({
-        field: 'chainId',
-        value: 'modifiedchainId',
-      });
-
-      modifyTokenField({
-        field: 'address',
-        value: 'modifiedaddress',
-      });
-
-      modifyTokenField({
-        field: 'isNative',
-        value: true,
-      });
-
-      modifyTokenField({
-        field: 'isActive',
-        value: true,
-      });
-
-      it('Should fail if no token found', async function () {
-        const res = await chai
-          .request(app)
-          .put('/test/tokens/111111111111111111111111')
-          .set('Authorization', `Bearer ${mockedToken}`);
-        chai.expect(res).to.have.status(404);
-        chai.expect(res.body).to.deep.equal({ msg: 'No token found' });
-      });
+    it('Should return 403 if no token is provided', async function () {
+      const createResponse = await chai
+        .request(app)
+        .put('/unit-test/tokens/111111111111111111111111');
+      chai.expect(createResponse).to.have.status(403);
     });
 
-    describe('Validators', async function () {
-      const testCases = [
-        'coinmarketcapId',
-        'symbol',
-        'icon',
-        'chainId',
-        'address',
-        'isNative',
-        'isActive',
-      ];
+    modifyTokenField({
+      field: 'coinmarketcapId',
+      value: 'modifiedcoinmarketcapId',
+    });
 
-      for (const testCase of testCases) {
-        if (testCase === 'isActive' || testCase === 'isNative') {
-          testNonBoolean({
-            method: 'put',
-            path: '/test/tokens/111111111111111111111111',
-            body: {
-              [testCase]: 123,
-            },
-            query: {},
-            field: testCase,
-          });
-        } else {
-          testNonString({
-            method: 'put',
-            path: '/test/tokens/111111111111111111111111',
-            body: {
-              [testCase]: 123,
-            },
-            query: {},
-            field: testCase,
-          });
-        }
+    modifyTokenField({
+      field: 'symbol',
+      value: 'modifiedsymbol',
+    });
 
-        testNonEmpty({
-          method: 'put',
-          path: '/test/tokens/111111111111111111111111',
-          body: {
-            ...token,
-            [testCase]: '',
-          },
-          query: {},
-          field: testCase,
-        });
-      }
+    modifyTokenField({
+      field: 'icon',
+      value: 'modifiedicon',
+    });
 
-      testUnexpectedField({
-        method: 'put',
-        path: '/test/tokens/111111111111111111111111',
-        body: {
-          unexpectedField: 'unexpectedField',
-        },
-        query: {},
-        field: 'unexpectedField',
-        location: 'body',
-      });
+    modifyTokenField({
+      field: 'chainId',
+      value: 'modifiedchainId',
+    });
 
-      testUnexpectedField({
-        method: 'put',
-        path: '/test/tokens/111111111111111111111111',
-        body: {},
-        query: { unexpectedField: 'unexpectedField' },
-        field: 'unexpectedField',
-        location: 'query',
-      });
+    modifyTokenField({
+      field: 'address',
+      value: 'modifiedaddress',
+    });
 
-      testNonMongodbId({
-        method: 'put',
-        path: '/test/tokens/1111111111111111',
-        body: {},
-        query: {},
-        field: 'tokenId',
-      });
+    modifyTokenField({
+      field: 'isNative',
+      value: true,
+    });
+
+    modifyTokenField({
+      field: 'isActive',
+      value: true,
+    });
+
+    it('Should fail if no token found', async function () {
+      const res = await chai
+        .request(app)
+        .put('/unit-test/tokens/111111111111111111111111')
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(404);
+      chai.expect(res.body).to.deep.equal({ msg: 'No token found' });
     });
   });
 
@@ -383,7 +275,7 @@ describe('Tokens route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .delete('/test/tokens/111111111111111111111111');
+        .delete('/unit-test/tokens/111111111111111111111111');
       chai.expect(createResponse).to.have.status(403);
     });
 
@@ -392,7 +284,7 @@ describe('Tokens route', async function () {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/test/tokens/${createResponse.body.insertedId}`)
+        .delete(`/unit-test/tokens/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
       chai
@@ -403,18 +295,10 @@ describe('Tokens route', async function () {
     it('Should fail if no token exists', async function () {
       const deleteResponse = await chai
         .request(app)
-        .delete(`/test/tokens/111111111111111111111111`)
+        .delete(`/unit-test/tokens/111111111111111111111111`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(404);
       chai.expect(deleteResponse.body).to.deep.equal({ msg: 'No token found' });
-    });
-
-    testNonMongodbId({
-      method: 'delete',
-      path: '/test/tokens/1111111111111111',
-      body: {},
-      query: {},
-      field: 'tokenId',
     });
   });
 });

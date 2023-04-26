@@ -183,7 +183,7 @@ describe('Blockchains route - Validators', async function () {
   describe('GET blockchain by MongoDBId', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/test/blockchains/1111111111111111',
+      path: '/unit-test/blockchains/1111111111111111',
       body: {},
       query: {},
       field: 'blockchainId',
@@ -195,7 +195,7 @@ describe('Blockchains route - Validators', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
-        .put('/test/blockchains/11111111111111111111')
+        .put('/unit-test/blockchains/11111111111111111111')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .send({ rpc: 'notAnArray' });
       // Assertions
@@ -212,7 +212,7 @@ describe('Blockchains route - Validators', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
-        .put('/test/blockchains/11111111111111111111')
+        .put('/unit-test/blockchains/11111111111111111111')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .send({ rpc: ['notAnURL', 123] });
       // Assertions
@@ -240,7 +240,7 @@ describe('Blockchains route - Validators', async function () {
       if (testCase == 'caipId') {
         testNonCaipId({
           method: 'put',
-          path: '/test/blockchains/11111111111111111111',
+          path: '/unit-test/blockchains/11111111111111111111',
           body: {
             ...blockchain,
             [testCase]: 123,
@@ -254,7 +254,7 @@ describe('Blockchains route - Validators', async function () {
       ) {
         testNonURL({
           method: 'put',
-          path: '/test/blockchains/11111111111111111111',
+          path: '/unit-test/blockchains/11111111111111111111',
           body: {
             ...blockchain,
             [testCase]: 123,
@@ -269,7 +269,7 @@ describe('Blockchains route - Validators', async function () {
       ) {
         testNonBoolean({
           method: 'put',
-          path: '/test/blockchains/11111111111111111111',
+          path: '/unit-test/blockchains/11111111111111111111',
           body: {
             ...blockchain,
             [testCase]: 123,
@@ -280,7 +280,7 @@ describe('Blockchains route - Validators', async function () {
       } else if (testCase !== 'rpc') {
         testNonString({
           method: 'put',
-          path: '/test/blockchains/11111111111111111111',
+          path: '/unit-test/blockchains/11111111111111111111',
           body: {
             ...blockchain,
             [testCase]: 123,
@@ -292,7 +292,7 @@ describe('Blockchains route - Validators', async function () {
 
       testNonEmpty({
         method: 'put',
-        path: '/test/blockchains/11111111111111111111',
+        path: '/unit-test/blockchains/11111111111111111111',
         body: {
           ...blockchain,
           [testCase]: '',
@@ -306,7 +306,7 @@ describe('Blockchains route - Validators', async function () {
   describe('DELETE blockchain', async function () {
     testNonMongodbId({
       method: 'delete',
-      path: '/test/blockchains/1111111111111111',
+      path: '/unit-test/blockchains/1111111111111111',
       body: {},
       query: {},
       field: 'blockchainId',
@@ -319,7 +319,7 @@ describe('Blockchains route - Validators', async function () {
     for (const testCase of testCases) {
       testNonString({
         method: 'put',
-        path: '/test/blockchains/useful-address/111111111111111111111111',
+        path: '/unit-test/blockchains/useful-address/111111111111111111111111',
         body: {
           ...usefulAddress,
           [testCase]: 123,
@@ -329,7 +329,7 @@ describe('Blockchains route - Validators', async function () {
       });
       testNonEmpty({
         method: 'put',
-        path: '/test/blockchains/useful-address/111111111111111111111111',
+        path: '/unit-test/blockchains/useful-address/111111111111111111111111',
         body: {
           ...usefulAddress,
           [testCase]: '',
@@ -342,7 +342,7 @@ describe('Blockchains route - Validators', async function () {
   describe('DELETE useful address', async function () {
     testNonString({
       method: 'delete',
-      path: '/test/blockchains/useful-address/111111111111111111111111',
+      path: '/unit-test/blockchains/useful-address/111111111111111111111111',
       body: { contract: 123 },
       query: {},
       field: 'contract',
@@ -350,7 +350,7 @@ describe('Blockchains route - Validators', async function () {
 
     testNonEmpty({
       method: 'delete',
-      path: '/test/blockchains/useful-address/111111111111111111111111',
+      path: '/unit-test/blockchains/useful-address/111111111111111111111111',
       body: { contract: '' },
       query: {},
       field: 'contract',

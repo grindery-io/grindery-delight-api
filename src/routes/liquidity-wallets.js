@@ -1,5 +1,5 @@
 import express from 'express';
-import getDBConnection, { Database } from '../db/conn.js';
+import { Database } from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
 import {

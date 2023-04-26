@@ -1,5 +1,5 @@
 import express from 'express';
-import getDBConnection from '../db/conn.js';
+import { Database } from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
 import {
@@ -14,8 +14,9 @@ const router = express.Router();
 /* Creating a new token. */
 router.post('/', createTokenValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('tokens');
-  const collectionAdmin = (await getDBConnection(req)).collection('admins');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('tokens');
+  const collectionAdmin = db.collection('admins');
   if (
     validator.length ||
     !(await collectionAdmin.findOne({
@@ -40,7 +41,9 @@ router.post('/', createTokenValidator, isRequired, async (req, res) => {
 /* This is a route that is used to get all active tokens. */
 router.get('/active', async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('tokens');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('tokens');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -56,7 +59,9 @@ router.get('/active', async (req, res) => {
 /* This is a route that is used to get a token by its id. */
 router.get('/:tokenId', getTokenByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('tokens');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('tokens');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -70,8 +75,10 @@ router.get('/:tokenId', getTokenByIdValidator, isRequired, async (req, res) => {
 /* This is a route that is used to modify a token by its id. */
 router.put('/:tokenId', modifyTokenValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('tokens');
-  const collectionAdmin = (await getDBConnection(req)).collection('admins');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('tokens');
+  const collectionAdmin = db.collection('admins');
+
   if (
     validator.length ||
     !(await collectionAdmin.findOne({
@@ -110,8 +117,10 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('tokens');
-    const collectionAdmin = (await getDBConnection(req)).collection('admins');
+    const db = await Database.getInstance(req);
+    const collection = db.collection('tokens');
+    const collectionAdmin = db.collection('admins');
+
     if (
       validator.length ||
       !(await collectionAdmin.findOne({

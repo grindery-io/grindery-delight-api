@@ -143,7 +143,7 @@ describe('Offers route - Validators', async function () {
     for (const testCase of Object.keys(searchActiveOfferValidator)) {
       testNonString({
         method: 'get',
-        path: '/test/offers/search',
+        path: '/unit-test/offers/search',
         body: {},
         query: { ...searchActiveOfferValidator, [testCase]: [123, 123] },
         field: testCase,
@@ -151,7 +151,7 @@ describe('Offers route - Validators', async function () {
 
       testNonEmpty({
         method: 'get',
-        path: '/test/offers/search',
+        path: '/unit-test/offers/search',
         body: {},
         query: { ...searchActiveOfferValidator, [testCase]: '' },
         field: testCase,
@@ -162,7 +162,7 @@ describe('Offers route - Validators', async function () {
   describe('GET offer by offerId', async function () {
     testNonString({
       method: 'get',
-      path: '/test/offers/offerId',
+      path: '/unit-test/offers/offerId',
       body: {},
       query: { offerId: [123, 123] },
       field: 'offerId',
@@ -170,7 +170,7 @@ describe('Offers route - Validators', async function () {
 
     testNonEmpty({
       method: 'get',
-      path: '/test/offers/offerId',
+      path: '/unit-test/offers/offerId',
       body: {},
       query: { offerId: '' },
       field: 'offerId',
@@ -180,7 +180,7 @@ describe('Offers route - Validators', async function () {
   describe('GET offer by MongoDB id', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/test/offers/id',
+      path: '/unit-test/offers/id',
       body: {},
       query: { id: 'nonMongodbId' },
       field: 'id',
@@ -192,7 +192,7 @@ describe('Offers route - Validators', async function () {
       if (testCase !== 'isActive') {
         testNonString({
           method: 'put',
-          path: '/test/offers/1234',
+          path: '/unit-test/offers/1234',
           body: {
             [testCase]: 123,
           },
@@ -208,7 +208,7 @@ describe('Offers route - Validators', async function () {
       ) {
         testNonEmpty({
           method: 'put',
-          path: '/test/offers/1234',
+          path: '/unit-test/offers/1234',
           body: {
             [testCase]: '',
           },
@@ -220,7 +220,7 @@ describe('Offers route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/test/offers/1234',
+      path: '/unit-test/offers/1234',
       body: {
         unexpectedField: 'Unexpected field',
       },
@@ -231,7 +231,7 @@ describe('Offers route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/test/offers/1234',
+      path: '/unit-test/offers/1234',
       body: {
         chainId: '3434',
       },

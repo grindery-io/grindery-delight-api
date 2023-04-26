@@ -123,4 +123,7 @@ app.use('/', router);
 // Mount test router to root
 app.use('/test/', router);
 
+// Mount unit test router to root
+app.use('/unit-test/', router);
+
 export default app;

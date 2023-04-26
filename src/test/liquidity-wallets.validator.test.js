@@ -4,6 +4,7 @@ import {
   testNonString,
   testNonEmpty,
   testUnexpectedField,
+  testNonMongodbId,
 } from './utils/utils.js';
 import {
   liquidityWalletPath,
@@ -96,7 +97,7 @@ describe('Liquidity wallets route - Validators', async function () {
     for (const testCase of testCases) {
       testNonString({
         method: 'get',
-        path: '/test/liquidity-wallets/single',
+        path: '/unit-test/liquidity-wallets/single',
         body: {},
         query: {
           ...modifySingleLiquidityWallet,
@@ -107,7 +108,7 @@ describe('Liquidity wallets route - Validators', async function () {
 
       testNonEmpty({
         method: 'get',
-        path: '/test/liquidity-wallets/single',
+        path: '/unit-test/liquidity-wallets/single',
         body: {},
         query: {
           ...modifySingleLiquidityWallet,
@@ -121,7 +122,7 @@ describe('Liquidity wallets route - Validators', async function () {
   describe('GET liquidity wallet by MongoDbId', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/test/liquidity-wallets/id/notAValidMongoDbId',
+      path: '/unit-test/liquidity-wallets/id/notAValidMongoDbId',
       body: {},
       query: {},
       field: 'id',

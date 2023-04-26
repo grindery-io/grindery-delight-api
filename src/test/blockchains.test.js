@@ -33,7 +33,7 @@ function modifyBlockchainField({ field, value }) {
     // Send a PUT request to update the blockchain with the specified field and value
     const res = await chai
       .request(app)
-      .put(`/test/blockchains/${createResponse.body.insertedId}`)
+      .put(`/unit-test/blockchains/${createResponse.body.insertedId}`)
       .set('Authorization', `Bearer ${mockedToken}`)
       .send({ [field]: value });
 
@@ -123,7 +123,7 @@ describe('Blockchains route', async function () {
       const createResponse = await createBaseBlockchain(blockchain);
       const res = await chai
         .request(app)
-        .get(`/test/blockchains/${createResponse.body.insertedId}`)
+        .get(`/unit-test/blockchains/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       delete res.body._id;
@@ -152,7 +152,7 @@ describe('Blockchains route', async function () {
         caipId: 'eip155:45',
         isActive: false,
       });
-      const res = await chai.request(app).get('/test/blockchains/active');
+      const res = await chai.request(app).get('/unit-test/blockchains/active');
       chai.expect(res).to.have.status(200);
     });
 
@@ -165,7 +165,7 @@ describe('Blockchains route', async function () {
       });
       const res = await chai
         .request(app)
-        .get('/test/blockchains/active')
+        .get('/unit-test/blockchains/active')
         .set('Authorization', `Bearer ${mockedToken}`);
 
       chai.expect(res).to.have.status(200);
@@ -185,7 +185,7 @@ describe('Blockchains route', async function () {
 
   describe('GET blockchain by MongoDBId', async function () {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).get('/test/blockchains/1234');
+      const res = await chai.request(app).get('/unit-test/blockchains/1234');
       chai.expect(res).to.have.status(403);
     });
 
@@ -193,7 +193,7 @@ describe('Blockchains route', async function () {
       const createResponse = await createBaseBlockchain(blockchain);
       const res = await chai
         .request(app)
-        .get(`/test/blockchains/${createResponse.body.insertedId}`)
+        .get(`/unit-test/blockchains/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
@@ -204,7 +204,7 @@ describe('Blockchains route', async function () {
     it('Should return null if no blockchain found', async function () {
       const res = await chai
         .request(app)
-        .get('/test/blockchains/111111111111111111111111')
+        .get('/unit-test/blockchains/111111111111111111111111')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object').that.is.empty;
@@ -213,7 +213,7 @@ describe('Blockchains route', async function () {
 
   describe('PUT blockchain', async function () {
     it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).put('/test/blockchains/1234');
+      const res = await chai.request(app).put('/unit-test/blockchains/1234');
       chai.expect(res).to.have.status(403);
     });
 
@@ -251,7 +251,7 @@ describe('Blockchains route', async function () {
     it('Should fail if no blockchain found', async function () {
       const res = await chai
         .request(app)
-        .put('/test/blockchains/111111111111111111111111')
+        .put('/unit-test/blockchains/111111111111111111111111')
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(404);
       chai.expect(res.body).to.deep.equal({ msg: 'No blockchain found' });
@@ -262,7 +262,7 @@ describe('Blockchains route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
-        .delete('/test/blockchains/11111111111111111111');
+        .delete('/unit-test/blockchains/11111111111111111111');
       chai.expect(res).to.have.status(403);
     });
     it('Should delete one blockchain', async function () {
@@ -277,7 +277,7 @@ describe('Blockchains route', async function () {
       chai.expect(createResponse.body).to.have.property('insertedId');
       const deleteResponse = await chai
         .request(app)
-        .delete(`/test/blockchains/${createResponse.body.insertedId}`)
+        .delete(`/unit-test/blockchains/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
       chai
@@ -295,14 +295,14 @@ describe('Blockchains route', async function () {
     it('Should return 403 if no token is not provided', async function () {
       const res = await chai
         .request(app)
-        .put('/test/blockchains/useful-address/1234');
+        .put('/unit-test/blockchains/useful-address/1234');
       chai.expect(res).to.have.status(403);
     });
 
     it('Should return 404 if blockchain is not found', async function () {
       const response = await chai
         .request(app)
-        .put(`/test/blockchains/useful-address/111111111111111111111111`)
+        .put(`/unit-test/blockchains/useful-address/111111111111111111111111`)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(usefulAddress);
       chai.expect(response).to.have.status(404);
@@ -316,7 +316,7 @@ describe('Blockchains route', async function () {
       const newUsefulAddress = await chai
         .request(app)
         .put(
-          `/test/blockchains/useful-address/${createResponse.body.insertedId}`
+          `/unit-test/blockchains/useful-address/${createResponse.body.insertedId}`
         )
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(usefulAddress);
@@ -330,7 +330,7 @@ describe('Blockchains route', async function () {
       });
       const res = await chai
         .request(app)
-        .get(`/test/blockchains/${createResponse.body.insertedId}`)
+        .get(`/unit-test/blockchains/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       delete res.body._id;
@@ -345,7 +345,7 @@ describe('Blockchains route', async function () {
       const updateUsefulAddress = await chai
         .request(app)
         .put(
-          `/test/blockchains/useful-address/${createResponse.body.insertedId}`
+          `/unit-test/blockchains/useful-address/${createResponse.body.insertedId}`
         )
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
@@ -362,7 +362,7 @@ describe('Blockchains route', async function () {
       });
       const res = await chai
         .request(app)
-        .get(`/test/blockchains/${createResponse.body.insertedId}`)
+        .get(`/unit-test/blockchains/${createResponse.body.insertedId}`)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       delete res.body._id;
@@ -377,7 +377,7 @@ describe('Blockchains route', async function () {
     it('Should return 403 if no token is not provided', async function () {
       const res = await chai
         .request(app)
-        .delete('/test/blockchains/useful-address/1234');
+        .delete('/unit-test/blockchains/useful-address/1234');
       chai.expect(res).to.have.status(403);
     });
 
@@ -387,7 +387,7 @@ describe('Blockchains route', async function () {
       const deleteResponse = await chai
         .request(app)
         .delete(
-          `/test/blockchains/useful-address/${createResponse.body.insertedId}`
+          `/unit-test/blockchains/useful-address/${createResponse.body.insertedId}`
         )
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ contract: usefulAddress.contract });
@@ -400,7 +400,9 @@ describe('Blockchains route', async function () {
     it('Should return 404 if blockchain is not found', async function () {
       const deleteResponse = await chai
         .request(app)
-        .delete('/test/blockchains/useful-address/111111111111111111111111')
+        .delete(
+          '/unit-test/blockchains/useful-address/111111111111111111111111'
+        )
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ contract: blockchain.usefulAddresses.myUsefulAddress1 });
       chai.expect(deleteResponse).to.have.status(404);
@@ -415,7 +417,7 @@ describe('Blockchains route', async function () {
       const deleteResponse = await chai
         .request(app)
         .delete(
-          `/test/blockchains/useful-address/${createResponse.body.insertedId}`
+          `/unit-test/blockchains/useful-address/${createResponse.body.insertedId}`
         )
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ contract: Object.keys(blockchain.usefulAddresses)[0] });

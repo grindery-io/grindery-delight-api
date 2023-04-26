@@ -12,11 +12,11 @@ export const collectionTokens = dbTests.collection('tokens');
 export const collectionLiquidityWallet =
   dbTests.collection('liquidity-wallets');
 
-export const pathBlockchains = '/test/blockchains';
-export const pathOrders = '/test/orders';
-export const pathTokens = '/test/tokens';
-export const pathOffers = '/test/offers';
-export const liquidityWalletPath = '/test/liquidity-wallets';
+export const pathBlockchains = '/unit-test/blockchains';
+export const pathOrders = '/unit-test/orders';
+export const pathTokens = '/unit-test/tokens';
+export const pathOffers = '/unit-test/offers';
+export const liquidityWalletPath = '/unit-test/liquidity-wallets';
 
 export const order = {
   amountTokenDeposit: '0.34',
