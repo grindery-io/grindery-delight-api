@@ -344,13 +344,6 @@ describe('Orders route', async function () {
   });
 
   describe('GET by liquidity provider', async function () {
-    it('Should return 403 if no token is provided', async function () {
-      const res = await chai
-        .request(app)
-        .get('/test/orders/liquidity-provider');
-      chai.expect(res).to.have.status(403);
-    });
-
     it('Should show only orders with existing offerId in the offers collection', async function () {
       const customOffer = { ...offer };
       const customOrder = { ...order };
@@ -388,6 +381,13 @@ describe('Orders route', async function () {
 
       chai.expect(offerIds.every((offerId) => customOfferIds.includes(offerId)))
         .to.be.true;
+    });
+
+    it('Should return 403 if no token is provided', async function () {
+      const res = await chai
+        .request(app)
+        .get('/test/orders/liquidity-provider');
+      chai.expect(res).to.have.status(403);
     });
 
     it('Should show only orders corresponding to active offers', async function () {
