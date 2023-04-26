@@ -132,14 +132,34 @@ export const getOfferByIdValidator = [
 ];
 
 export const getOffersValidator = [
-  query('exchangeChainId').notEmpty().withMessage('must not be empty'),
-  query('exchangeToken').notEmpty().withMessage('must not be empty'),
-  query('chainId').notEmpty().withMessage('must not be empty'),
-  query('token').notEmpty().withMessage('must not be empty'),
+  query('exchangeChainId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  query('exchangeToken')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  query('chainId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  query('token')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
 ];
 
 export const deleteOfferValidator = [
-  param('offerId').notEmpty().withMessage('must not be empty'),
+  param('offerId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
 ];
 
 export const updateOfferValidator = [
