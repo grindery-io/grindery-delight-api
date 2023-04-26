@@ -98,7 +98,7 @@ test and is ready for the next test. */
 afterEach(async function () {
   const db = await Database.getInstance({});
   if (db.namespace === 'grindery-delight-test-server') {
-    db.collection('blockchains').drop();
+    db.dropDatabase();
   }
 });
 
@@ -216,6 +216,7 @@ describe('Blockchains route', async function () {
       const res = await chai.request(app).put('/test/blockchains/1234');
       chai.expect(res).to.have.status(403);
     });
+
     modifyBlockchainField({ field: 'chainId', value: 'modifiedChainId' });
     modifyBlockchainField({ field: 'caipId', value: 'eip155:343' });
     modifyBlockchainField({ field: 'label', value: 'newLabel' });
@@ -246,6 +247,7 @@ describe('Blockchains route', async function () {
       field: 'addressExplorerUrl',
       value: 'https://new.goerli.etherscan.io/address/{hash}',
     });
+
     it('Should fail if no blockchain found', async function () {
       const res = await chai
         .request(app)

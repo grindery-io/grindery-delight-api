@@ -37,7 +37,7 @@ test and is ready for the next test. */
 afterEach(async function () {
   const db = await Database.getInstance({});
   if (db.namespace === 'grindery-delight-test-server') {
-    db.collection('blockchains').drop();
+    db.dropDatabase();
   }
 });
 

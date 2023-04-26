@@ -3,14 +3,14 @@ import { Database } from '../../db/conn.js';
 
 export const toDeleteDb = [];
 
-export const collectionOrders = db.collection('orders');
-export const collectionOffers = db.collection('offers');
-// export const collectionBlockchains = db.collection('blockchains');
-export const collectionBlockchains = (
-  await Database.getInstance({})
-).collection('blockchains');
-export const collectionTokens = db.collection('tokens');
-export const collectionLiquidityWallet = db.collection('liquidity-wallets');
+const dbTests = await Database.getInstance({});
+
+export const collectionOrders = dbTests.collection('orders');
+export const collectionOffers = dbTests.collection('offers');
+export const collectionBlockchains = dbTests.collection('blockchains');
+export const collectionTokens = dbTests.collection('tokens');
+export const collectionLiquidityWallet =
+  dbTests.collection('liquidity-wallets');
 
 export const pathBlockchains = '/test/blockchains';
 export const pathOrders = '/test/orders';
@@ -89,4 +89,16 @@ export const token = {
 export const liquidityWallet = {
   walletAddress: 'myWalletAddress',
   chainId: 'myChainId',
+};
+
+export const modifySingleLiquidityWallet = {
+  chainId: 'myNewChainId',
+  userId: 'myNewUserId',
+};
+
+export const updateTokenLiquidityWallet = {
+  walletAddress: 'myNewWalletAddress',
+  chainId: 'myNewChainId',
+  tokenId: 'myNewTokenId',
+  amount: '2121212',
 };
