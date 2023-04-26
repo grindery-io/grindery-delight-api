@@ -176,6 +176,11 @@ describe('Tokens route', async function () {
   });
 
   describe('GET active tokens', async function () {
+    it('Should not fail if no token is provided', async function () {
+      const res = await chai.request(app).get('/test/tokens/active');
+      chai.expect(res).to.have.status(200);
+    });
+
     it('Should return all active tokens', async function () {
       await createBaseToken(token);
       await createBaseToken({

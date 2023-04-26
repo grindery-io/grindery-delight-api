@@ -270,6 +270,17 @@ describe('Blockchains route', async function () {
     });
   });
   describe('GET active blockchains', async function () {
+    it('Should not fail if no token is provided', async function () {
+      await createBaseBlockchain(blockchain);
+      await createBaseBlockchain({
+        ...blockchain,
+        caipId: 'eip155:45',
+        isActive: false,
+      });
+      const res = await chai.request(app).get('/test/blockchains/active');
+      chai.expect(res).to.have.status(200);
+    });
+
     it('Should return all active blockchains', async function () {
       await createBaseBlockchain(blockchain);
       await createBaseBlockchain({
