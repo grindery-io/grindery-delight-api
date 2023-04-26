@@ -1,10 +1,14 @@
 import db from '../../db/conn-test.js';
+import { Database } from '../../db/conn.js';
 
 export const toDeleteDb = [];
 
 export const collectionOrders = db.collection('orders');
 export const collectionOffers = db.collection('offers');
-export const collectionBlockchains = db.collection('blockchains');
+// export const collectionBlockchains = db.collection('blockchains');
+export const collectionBlockchains = (
+  await Database.getInstance({})
+).collection('blockchains');
 export const collectionTokens = db.collection('tokens');
 export const collectionLiquidityWallet = db.collection('liquidity-wallets');
 
