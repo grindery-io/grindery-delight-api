@@ -1,5 +1,5 @@
 import express from 'express';
-import getDBConnection from '../db/conn.js';
+import { Database } from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {
   createOfferValidator,
@@ -18,7 +18,9 @@ const router = express.Router();
 /* This is a POST request that creates a new offer. */
 router.post('/', createOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   if (validator.length) {
     console.log(
       'Offer creation - Validation failed - userId',
@@ -55,7 +57,8 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all offers. */
 router.get('/', async (req, res) => {
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
   res.send(await collection.find({}).toArray()).status(200);
 });
 
@@ -63,7 +66,9 @@ router.get('/', async (req, res) => {
 and filter by exchangeChainId, exchangeToken, chainId,token */
 router.get('/search', getOffersValidator, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -87,7 +92,9 @@ router.get('/search', getOffersValidator, async (req, res) => {
 
 /* This is a GET request that returns all offers for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   res
     .send(
       await collection
@@ -104,7 +111,9 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('offers');
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -119,7 +128,9 @@ router.get(
 /* This is a GET request that returns an offer by id. */
 router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -138,7 +149,9 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('offers');
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -159,7 +172,9 @@ router.delete(
 /* This is a PUT request that updates an offer by id. */
 router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }

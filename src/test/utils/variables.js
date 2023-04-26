@@ -49,6 +49,30 @@ export const offer = {
   amount: '',
 };
 
+export const modifyOfferValidator = {
+  chainId: '97',
+  min: '0.02',
+  max: '1',
+  tokenId: '45',
+  token: 'BNB',
+  tokenAddress: '0x0',
+  exchangeRate: '1',
+  exchangeChainId: '5',
+  estimatedTime: '123',
+  provider: '0x795beefD41337BB83903788949c8AC2D559A44a3',
+  isActive: true,
+  title: '',
+  image: '',
+  amount: '',
+};
+
+export const searchActiveOfferValidator = {
+  exchangeChainId: 'myExchangeChainId',
+  exchangeToken: 'myExchangeToken',
+  chainId: 'myChainId',
+  token: 'myToken',
+};
+
 export const blockchain = {
   caipId: 'eip155:534',
   chainId: '534',
