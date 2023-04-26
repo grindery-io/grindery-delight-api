@@ -1,5 +1,5 @@
 import express, { query } from 'express';
-import getDBConnection from '../db/conn.js';
+import { Database } from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {
   createOrderValidator,
@@ -16,7 +16,9 @@ const router = express.Router();
 /* This is a POST request that creates a new order. */
 router.post('/', createOrderValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('orders');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('orders');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -39,7 +41,9 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all orders for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
-  const collection = (await getDBConnection(req)).collection('orders');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('orders');
+
   res
     .send(
       await collection
@@ -55,7 +59,14 @@ router.get(
   getOrderByOrderIdValidator,
   isRequired,
   async (req, res) => {
-    const collection = (await getDBConnection(req)).collection('orders');
+    const db = await Database.getInstance(req);
+    const collection = db.collection('orders');
+    const validator = validateResult(req, res);
+
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+
     res
       .send(
         await collection.findOne({
@@ -69,7 +80,14 @@ router.get(
 
 /* This is a GET request that returns a order for a specific user by the order id. */
 router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
-  const collection = (await getDBConnection(req)).collection('orders');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('orders');
+  const validator = validateResult(req, res);
+
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+
   res
     .send(
       await collection.findOne({
@@ -81,8 +99,10 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
 });
 
 router.get('/liquidity-provider', isRequired, async (req, res) => {
-  const collection = (await getDBConnection(req)).collection('orders');
-  const collectionOffer = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('orders');
+  const collectionOffer = db.collection('offers');
+
   let result = [];
   const activeOffersForUser = await collectionOffer
     .find({
@@ -112,7 +132,9 @@ router.put(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('orders');
+    const db = await Database.getInstance(req);
+    const collection = db.collection('orders');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -142,7 +164,9 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('orders');
+    const db = await Database.getInstance(req);
+    const collection = db.collection('orders');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }

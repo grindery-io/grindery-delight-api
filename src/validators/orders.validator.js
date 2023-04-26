@@ -106,5 +106,9 @@ export const setOrderStatusValidator = [
 ];
 
 export const deleteOrderValidator = [
-  param('orderId').notEmpty().withMessage('must not be empty'),
+  param('orderId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
 ];

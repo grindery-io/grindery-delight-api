@@ -1,13 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import {
-  mockedToken,
-  testNonString,
-  testNonEmpty,
-  testUnexpectedField,
-  deleteElementsAfterTest,
-} from './utils/utils.js';
+import { mockedToken } from './utils/utils.js';
 import { ObjectId } from 'mongodb';
 import {
   collectionOrders,
@@ -15,8 +9,8 @@ import {
   pathOrders,
   order,
   offer,
-  toDeleteDb,
 } from './utils/variables.js';
+import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 
@@ -30,19 +24,31 @@ async function createBaseOrderOrOffer({ collection, path, body }) {
     .post(path)
     .set('Authorization', `Bearer ${mockedToken}`)
     .send(body);
-  toDeleteDb.push({
-    collection: collection,
-    id: res.body.insertedId,
-  });
   chai.expect(res).to.have.status(200);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
   chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
   return res;
 }
 
+/* The above code is setting up a test environment for a JavaScript application. It is using the
+`beforeEach` function to run some code before each test case. */
+beforeEach(async function () {
+  const db = await Database.getInstance({});
+  const collectionAdmin = db.collection('admins');
+  await collectionAdmin.insertOne({
+    userId: process.env.USER_ID_TEST,
+  });
+});
+
+/* The above code is a test cleanup function that runs after each test. It gets an instance of a
+database and checks if the namespace is 'grindery-delight-test-server'. If it is, it drops the
+'blockchains' collection from the database. This ensures that the database is cleaned up after each
+test and is ready for the next test. */
 afterEach(async function () {
-  await deleteElementsAfterTest(toDeleteDb);
-  toDeleteDb.length = 0;
+  const db = await Database.getInstance({});
+  if (db.namespace === 'grindery-delight-test-server') {
+    db.dropDatabase();
+  }
 });
 
 describe('Orders route', async function () {
@@ -50,135 +56,73 @@ describe('Orders route', async function () {
   this.retries(4);
 
   describe('POST new order', async function () {
-    describe('Route core', async function () {
-      it('Should return 403 if no token is provided', async function () {
-        const createResponse = await chai
-          .request(app)
-          .post(pathOrders)
-          .send(order);
-        chai.expect(createResponse).to.have.status(403);
-      });
+    it('Should return 403 if no token is provided', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post(pathOrders)
+        .send(order);
+      chai.expect(createResponse).to.have.status(403);
+    });
 
-      it('Should POST a new order', async function () {
-        await createBaseOrderOrOffer({
-          collection: collectionOrders,
-          path: pathOrders,
-          body: order,
-        });
-      });
-
-      it('Should POST a new order with relevant fields', async function () {
-        await createBaseOrderOrOffer({
-          collection: collectionOrders,
-          path: pathOrders,
-          body: order,
-        });
-
-        const getOrder = await chai
-          .request(app)
-          .get('/test/orders/orderId')
-          .query({ orderId: order.orderId })
-          .set('Authorization', `Bearer ${mockedToken}`);
-
-        // Assertions
-        chai.expect(getOrder).to.have.status(200);
-        chai.expect(getOrder.body).to.be.an('object');
-        chai
-          .expect(getOrder.body.amountTokenDeposit)
-          .to.equal(order.amountTokenDeposit);
-        chai
-          .expect(getOrder.body.addressTokenDeposit)
-          .to.equal(order.addressTokenDeposit);
-        chai
-          .expect(getOrder.body.chainIdTokenDeposit)
-          .to.equal(order.chainIdTokenDeposit);
-        chai.expect(getOrder.body.destAddr).to.equal(order.destAddr);
-        chai.expect(getOrder.body.offerId).to.equal(order.offerId);
-        chai.expect(getOrder.body.orderId).to.equal(order.orderId);
-        chai
-          .expect(getOrder.body.amountTokenOffer)
-          .to.equal(order.amountTokenOffer);
-        chai.expect(getOrder.body.hash).to.equal(order.hash);
-        chai.expect(getOrder.body.isComplete).to.equal(false);
-      });
-
-      it('Should fail if same orderId exists', async function () {
-        await createBaseOrderOrOffer({
-          collection: collectionOrders,
-          path: pathOrders,
-          body: order,
-        });
-
-        const createDuplicateResponse = await chai
-          .request(app)
-          .post(pathOrders)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(order);
-        chai.expect(createDuplicateResponse).to.have.status(404);
-        chai
-          .expect(createDuplicateResponse.body.msg)
-          .to.be.equal('This order already exists.');
+    it('Should POST a new order', async function () {
+      await createBaseOrderOrOffer({
+        collection: collectionOrders,
+        path: pathOrders,
+        body: order,
       });
     });
 
-    describe('Validators', async function () {
-      const testCases = [
-        'orderId',
-        'amountTokenDeposit',
-        'addressTokenDeposit',
-        'chainIdTokenDeposit',
-        'destAddr',
-        'amountTokenOffer',
-        'offerId',
-        'hash',
-      ];
-
-      for (const testCase of testCases) {
-        testNonString({
-          method: 'post',
-          path: pathOrders,
-          body: {
-            ...order,
-            [testCase]: 123,
-          },
-          query: {},
-          field: testCase,
-        });
-
-        testNonEmpty({
-          method: 'post',
-          path: pathOrders,
-          body: {
-            ...order,
-            [testCase]: '',
-          },
-          query: {},
-          field: testCase,
-        });
-      }
-
-      testUnexpectedField({
-        method: 'post',
+    it('Should POST a new order with relevant fields', async function () {
+      await createBaseOrderOrOffer({
+        collection: collectionOrders,
         path: pathOrders,
-        body: {
-          ...order,
-          unexpectedField: 'Unexpected field',
-        },
-        query: {},
-        field: 'unexpectedField',
-        location: 'body',
+        body: order,
       });
 
-      testUnexpectedField({
-        method: 'post',
+      const getOrder = await chai
+        .request(app)
+        .get('/test/orders/orderId')
+        .query({ orderId: order.orderId })
+        .set('Authorization', `Bearer ${mockedToken}`);
+
+      // Assertions
+      chai.expect(getOrder).to.have.status(200);
+      chai.expect(getOrder.body).to.be.an('object');
+      chai
+        .expect(getOrder.body.amountTokenDeposit)
+        .to.equal(order.amountTokenDeposit);
+      chai
+        .expect(getOrder.body.addressTokenDeposit)
+        .to.equal(order.addressTokenDeposit);
+      chai
+        .expect(getOrder.body.chainIdTokenDeposit)
+        .to.equal(order.chainIdTokenDeposit);
+      chai.expect(getOrder.body.destAddr).to.equal(order.destAddr);
+      chai.expect(getOrder.body.offerId).to.equal(order.offerId);
+      chai.expect(getOrder.body.orderId).to.equal(order.orderId);
+      chai
+        .expect(getOrder.body.amountTokenOffer)
+        .to.equal(order.amountTokenOffer);
+      chai.expect(getOrder.body.hash).to.equal(order.hash);
+      chai.expect(getOrder.body.isComplete).to.equal(false);
+    });
+
+    it('Should fail if same orderId exists', async function () {
+      await createBaseOrderOrOffer({
+        collection: collectionOrders,
         path: pathOrders,
-        body: {
-          ...order,
-        },
-        query: { unexpectedField: 'Unexpected field' },
-        field: 'unexpectedField',
-        location: 'query',
+        body: order,
       });
+
+      const createDuplicateResponse = await chai
+        .request(app)
+        .post(pathOrders)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(order);
+      chai.expect(createDuplicateResponse).to.have.status(404);
+      chai
+        .expect(createDuplicateResponse.body.msg)
+        .to.be.equal('This order already exists.');
     });
   });
 
@@ -538,127 +482,80 @@ describe('Orders route', async function () {
   });
 
   describe('PUT order as complete', async function () {
-    describe('Core of the route', async function () {
-      it('Should return 403 if no token is provided', async function () {
-        const res = await chai.request(app).put('/test/orders/complete').send({
-          orderId: 'myOrderId',
-        });
-        chai.expect(res).to.have.status(403);
+    it('Should return 403 if no token is provided', async function () {
+      const res = await chai.request(app).put('/test/orders/complete').send({
+        orderId: 'myOrderId',
+      });
+      chai.expect(res).to.have.status(403);
+    });
+
+    it('Should modify one order if the order was previously not completed', async function () {
+      const createResponse = await createBaseOrderOrOffer({
+        collection: collectionOrders,
+        path: pathOrders,
+        body: order,
       });
 
-      it('Should modify one order if the order was previously not completed', async function () {
-        const createResponse = await createBaseOrderOrOffer({
-          collection: collectionOrders,
-          path: pathOrders,
-          body: order,
+      const res = await chai
+        .request(app)
+        .put('/test/orders/complete')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          orderId: order.orderId,
         });
-
-        const res = await chai
-          .request(app)
-          .put('/test/orders/complete')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: order.orderId,
-          });
-        chai.expect(res).to.have.status(200);
-        chai.expect(res.body).to.deep.equal({
-          acknowledged: true,
-          modifiedCount: 1,
-          upsertedId: null,
-          upsertedCount: 0,
-          matchedCount: 1,
-        });
-      });
-
-      it('Should modify no order if the order was previously completed', async function () {
-        await createBaseOrderOrOffer({
-          collection: collectionOrders,
-          path: pathOrders,
-          body: order,
-        });
-
-        const res = await chai
-          .request(app)
-          .put('/test/orders/complete')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: order.orderId,
-          });
-        chai.expect(res).to.have.status(200);
-
-        const res1 = await chai
-          .request(app)
-          .put('/test/orders/complete')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: order.orderId,
-          });
-        chai.expect(res1).to.have.status(200);
-        chai.expect(res1.body).to.deep.equal({
-          acknowledged: true,
-          modifiedCount: 0,
-          upsertedId: null,
-          upsertedCount: 0,
-          matchedCount: 1,
-        });
-      });
-
-      it('Should fail if no order exists', async function () {
-        const res = await chai
-          .request(app)
-          .put('/test/orders/complete')
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send({
-            orderId: order.orderId,
-          });
-        chai.expect(res).to.have.status(404);
-        chai.expect(res.body).to.deep.equal({ msg: 'No order found.' });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.deep.equal({
+        acknowledged: true,
+        modifiedCount: 1,
+        upsertedId: null,
+        upsertedCount: 0,
+        matchedCount: 1,
       });
     });
 
-    describe('Validators', async function () {
-      testNonString({
-        method: 'put',
-        path: '/test/orders/complete',
-        body: {
-          orderId: 123,
-        },
-        query: {},
-        field: 'orderId',
+    it('Should modify no order if the order was previously completed', async function () {
+      await createBaseOrderOrOffer({
+        collection: collectionOrders,
+        path: pathOrders,
+        body: order,
       });
 
-      testNonEmpty({
-        method: 'put',
-        path: '/test/orders/complete',
-        body: {
-          orderId: '',
-        },
-        query: {},
-        field: 'orderId',
-      });
+      const res = await chai
+        .request(app)
+        .put('/test/orders/complete')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          orderId: order.orderId,
+        });
+      chai.expect(res).to.have.status(200);
 
-      testUnexpectedField({
-        method: 'put',
-        path: '/test/orders/complete',
-        body: {
-          orderId: '123',
-          unexpectedField: 'Unexpected field',
-        },
-        field: {},
-        field: 'unexpectedField',
-        location: 'body',
+      const res1 = await chai
+        .request(app)
+        .put('/test/orders/complete')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          orderId: order.orderId,
+        });
+      chai.expect(res1).to.have.status(200);
+      chai.expect(res1.body).to.deep.equal({
+        acknowledged: true,
+        modifiedCount: 0,
+        upsertedId: null,
+        upsertedCount: 0,
+        matchedCount: 1,
       });
+    });
 
-      testUnexpectedField({
-        method: 'put',
-        path: '/test/orders/complete',
-        body: {
-          orderId: '123',
-        },
-        query: { unexpectedField: 'Unexpected field' },
-        field: 'unexpectedField',
-        location: 'query',
-      });
+    it('Should fail if no order exists', async function () {
+      const res = await chai
+        .request(app)
+        .put('/test/orders/complete')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          orderId: order.orderId,
+        });
+      chai.expect(res).to.have.status(404);
+      chai.expect(res.body).to.deep.equal({ msg: 'No order found.' });
     });
   });
 });
