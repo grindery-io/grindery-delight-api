@@ -148,13 +148,29 @@ router.put('/offer/status', updateStatusOfferValidator, async (req, res) => {
   });
 });
 
-/* This is a PUT request that updates new offer. */
+/* This is a PUT request that updates the offer id. */
 router.put('/offer', updateOfferValidator, async (req, res) => {
   const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  return res.status(200).send(null);
+  const offer = await collection.findOne({
+    hash: req.body._grinderyTransactionHash,
+  });
+  if (offer) {
+    const response = await collection.updateOne(offer, {
+      $set: {
+        offerId: req.body._idOffer,
+      },
+    });
+    if (response.modifiedCount > 0)
+      trigger('offer', { offerId: req.body._idOffer });
+    return res.status(200).send(response);
+  }
+  res.status(404).send({
+    msg: 'Not found.',
+  });
 });
 
 /* This is a PUT request that updates offer trade. */

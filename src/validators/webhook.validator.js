@@ -222,7 +222,17 @@ export const updateOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_chainId')
+  body('_amount')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_idTrade')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_offerer')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -239,7 +249,9 @@ export const updateOfferValidator = [
         '_grinderyChainId',
         '_grinderyTransactionHash',
         '_idOffer',
-        '_chainId',
+        '_amount',
+        '_idTrade',
+        '_offerer',
         '_token',
       ],
       'body'
