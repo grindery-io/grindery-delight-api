@@ -98,7 +98,19 @@ describe('Blockchains route', async function () {
     });
 
     it('Should create a new blockchain', async function () {
-      await createBaseBlockchain(blockchain);
+      const res = await chai
+        .request(app)
+        .post(pathBlockchains)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(blockchain);
+      console.log('res.status special', res.status);
+      console.log('res.body special', res.body);
+      console.log('blockchain special', blockchain);
+
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.have.property('acknowledged').that.is.true;
+      chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
+      return res;
     });
 
     it('Should create a new blockchain with the proper fields', async function () {
