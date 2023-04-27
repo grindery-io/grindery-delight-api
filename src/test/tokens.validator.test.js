@@ -12,9 +12,6 @@ import { pathTokens, token } from './utils/variables.js';
 chai.use(chaiHttp);
 
 describe('Tokens route - Validators', async function () {
-  // Retry all tests in this suite up to 4 times
-  this.retries(4);
-
   describe('POST new token', async function () {
     for (const testCase of Object.keys(token)) {
       if (testCase !== 'isNative' && testCase !== 'isActive') {

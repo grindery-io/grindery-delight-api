@@ -31,9 +31,6 @@ async function createBaseOffer(offer) {
 }
 
 describe('Offers route', async function () {
-  // Retry all tests in this suite up to 4 times
-  this.retries(4);
-
   describe('POST new offer', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai

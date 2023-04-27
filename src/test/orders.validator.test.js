@@ -13,9 +13,6 @@ import app from '../index.js';
 chai.use(chaiHttp);
 
 describe('Orders route - Validators', async function () {
-  // Retry all tests in this suite up to 4 times
-  this.retries(4);
-
   describe('POST new order', async function () {
     it('Should fail if status is not pending, success or failure', async function () {
       // Make a request to create the offer with invalid data

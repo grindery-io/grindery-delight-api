@@ -30,9 +30,6 @@ async function createBaseOrderOrOffer({ collection, path, body }) {
 }
 
 describe('Orders route', async function () {
-  // Retry all tests in this suite up to 4 times
-  this.retries(4);
-
   describe('POST new order', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai

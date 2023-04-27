@@ -8,9 +8,6 @@ import { pathAdmin_Get_IsAdmin } from './utils/variables.js';
 chai.use(chaiHttp);
 
 describe('Admins route', async function () {
-  // Retry all tests in this suite up to 4 times
-  this.retries(4);
-
   it('Should return 403 if no token is provided', async function () {
     const res = await chai.request(app).get(pathAdmin_Get_IsAdmin);
     chai.expect(res).to.have.status(403);

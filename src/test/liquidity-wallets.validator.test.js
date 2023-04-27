@@ -22,9 +22,6 @@ import {
 chai.use(chaiHttp);
 
 describe('Liquidity wallets route - Validators', async function () {
-  // Retry all tests in this suite up to 4 times
-  this.retries(4);
-
   describe('POST new liquidity wallet', async function () {
     const testCases = ['walletAddress', 'chainId'];
     for (const testCase of testCases) {

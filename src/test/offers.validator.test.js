@@ -19,9 +19,6 @@ import {
 chai.use(chaiHttp);
 
 describe('Offers route - Validators', async function () {
-  // Retry all tests in this suite up to 4 times
-  this.retries(4);
-
   describe('POST new offer', async function () {
     it('Should fail validation if min is greater than max', async function () {
       // Make a request to create the offer with invalid data

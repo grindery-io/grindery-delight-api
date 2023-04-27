@@ -27,9 +27,6 @@ import {
 chai.use(chaiHttp);
 
 describe('Blockchains route - Validators', async function () {
-  // Retry all tests in this suite up to 4 times
-  this.retries(4);
-
   describe('POST - new blockchain', async function () {
     it('Should fail if rpc is not an array', async function () {
       // Make a request to create the offer with invalid data
