@@ -17,13 +17,6 @@ import { Database } from '../db/conn.js';
 chai.use(chaiHttp);
 
 describe('Liquidity wallets route - Validators', async function () {
-  afterEach(async function () {
-    const db = await Database.getInstance({});
-    if (db.namespace === 'grindery-delight-test-server') {
-      db.dropDatabase();
-    }
-  });
-
   // Retry all tests in this suite up to 4 times
   this.retries(4);
 

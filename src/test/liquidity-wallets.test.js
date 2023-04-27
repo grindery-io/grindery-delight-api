@@ -38,17 +38,6 @@ async function createBaseLiquidityWallet(liquidityWallet) {
 }
 
 describe('Liquidity wallets route', async function () {
-  /* The above code is a test cleanup function that runs after each test in a test suite. It gets an
-  instance of a database and checks if the namespace of the database is
-  'grindery-delight-test-server'. If it is, it drops the database. This is to ensure that the
-  database is cleaned up after each test and to prevent any interference between tests. */
-  afterEach(async function () {
-    const db = await Database.getInstance({});
-    if (db.namespace === 'grindery-delight-test-server') {
-      db.dropDatabase();
-    }
-  });
-
   // Retry all tests in this suite up to 4 times
   this.retries(4);
 
