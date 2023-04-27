@@ -5,8 +5,16 @@ import { mockedToken } from './utils/utils.js';
 import { ObjectId } from 'mongodb';
 import {
   collectionLiquidityWallet,
-  liquidityWalletPath,
+  pathLiquidityWallets_Post_NewLiquidityWallet,
   liquidityWallet,
+  pathLiquidityWallets_Delete,
+  pathLiquidityWallets_Get_All,
+  pathLiquidityWallets_Get_Single,
+  pathLiquidityWallets_Get_MongoDBId,
+  validMongoDBId,
+  randomMongoDBId,
+  pathLiquidityWallets_Get_LiquidityWalletByChainId,
+  pathLiquidityWallets_Put,
 } from './utils/variables.js';
 
 chai.use(chaiHttp);
@@ -21,7 +29,7 @@ chai.use(chaiHttp);
 async function createBaseLiquidityWallet(liquidityWallet) {
   const res = await chai
     .request(app)
-    .post(liquidityWalletPath)
+    .post(pathLiquidityWallets_Post_NewLiquidityWallet)
     .set('Authorization', `Bearer ${mockedToken}`)
     .send(liquidityWallet);
   chai.expect(res).to.have.status(201);
@@ -39,7 +47,7 @@ describe('Liquidity wallets route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .post(liquidityWalletPath)
+        .post(pathLiquidityWallets_Post_NewLiquidityWallet)
         .send(liquidityWallet);
       chai.expect(createResponse).to.have.status(403);
     });
@@ -58,15 +66,6 @@ describe('Liquidity wallets route', async function () {
         .expect(wallet)
         .to.have.property('walletAddress', liquidityWallet.walletAddress);
       chai.expect(wallet).to.have.property('chainId', liquidityWallet.chainId);
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({
-          chainId: liquidityWallet.chainId,
-          walletAddress: liquidityWallet.walletAddress,
-        });
-      chai.expect(deleteResponse).to.have.status(200);
     });
 
     it('Should create a new liquidity wallet with empty token object', async function () {
@@ -77,15 +76,6 @@ describe('Liquidity wallets route', async function () {
       });
       chai.expect(wallet).to.have.property('tokens').that.is.an('object').that
         .is.empty;
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({
-          chainId: liquidityWallet.chainId,
-          walletAddress: liquidityWallet.walletAddress,
-        });
-      chai.expect(deleteResponse).to.have.status(200);
     });
 
     it('Should fail if liquidity wallet already exists', async function () {
@@ -93,22 +83,13 @@ describe('Liquidity wallets route', async function () {
 
       const createResponse1 = await chai
         .request(app)
-        .post(liquidityWalletPath)
+        .post(pathLiquidityWallets_Post_NewLiquidityWallet)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(liquidityWallet);
       chai.expect(createResponse1).to.have.status(404);
       chai
         .expect(createResponse1.body)
         .to.deep.equal({ msg: 'This wallet already exists on this chain.' });
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({
-          chainId: liquidityWallet.chainId,
-          walletAddress: liquidityWallet.walletAddress,
-        });
-      chai.expect(deleteResponse).to.have.status(200);
     });
   });
 
@@ -116,15 +97,15 @@ describe('Liquidity wallets route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .get(liquidityWalletPath)
+        .get(pathLiquidityWallets_Get_LiquidityWalletByChainId)
         .query({ chainId: liquidityWallet.chainId });
       chai.expect(createResponse).to.have.status(403);
     });
 
-    it('Should return empty array if no offer available', async function () {
+    it('Should return empty array if no liquidity wallet available', async function () {
       const res = await chai
         .request(app)
-        .get(liquidityWalletPath)
+        .get(pathLiquidityWallets_Get_LiquidityWalletByChainId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ chainId: liquidityWallet.chainId });
       chai.expect(res).to.have.status(200);
@@ -156,7 +137,7 @@ describe('Liquidity wallets route', async function () {
       }
       const res = await chai
         .request(app)
-        .get(liquidityWalletPath)
+        .get(pathLiquidityWallets_Get_LiquidityWalletByChainId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ chainId: liquidityWallet.chainId });
       chai.expect(res).to.have.status(200);
@@ -164,17 +145,6 @@ describe('Liquidity wallets route', async function () {
       res.body.forEach((wallet) => {
         chai.expect(wallet.chainId).to.equal(liquidityWallet.chainId);
       });
-      for (let i = 0; i < nbrLiquidityWallet; i++) {
-        const deleteResponse = await chai
-          .request(app)
-          .delete(`/unit-test/liquidity-wallets`)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .query({
-            chainId: liquidityWallet.chainId,
-            walletAddress: `${liquidityWallet.walletAddress}-${i}`,
-          });
-        chai.expect(deleteResponse).to.have.status(200);
-      }
     });
   });
 
@@ -182,7 +152,7 @@ describe('Liquidity wallets route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .get('/unit-test/liquidity-wallets/all');
+        .get(pathLiquidityWallets_Get_All);
       chai.expect(createResponse).to.have.status(403);
     });
 
@@ -196,7 +166,7 @@ describe('Liquidity wallets route', async function () {
       ).userId;
       const res = await chai
         .request(app)
-        .get('/unit-test/liquidity-wallets/all')
+        .get(pathLiquidityWallets_Get_All)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       const wallets = await collectionLiquidityWallet
@@ -210,15 +180,6 @@ describe('Liquidity wallets route', async function () {
           .to.be.oneOf(wallets.map((w) => w.walletAddress));
         chai.expect(wallet.userId).to.equal(userId);
       });
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({
-          chainId: liquidityWallet.chainId,
-          walletAddress: liquidityWallet.walletAddress,
-        });
-      chai.expect(deleteResponse).to.have.status(200);
     });
   });
 
@@ -233,7 +194,7 @@ describe('Liquidity wallets route', async function () {
       ).userId;
       const res = await chai
         .request(app)
-        .get('/unit-test/liquidity-wallets/single')
+        .get(pathLiquidityWallets_Get_Single)
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ chainId: liquidityWallet.chainId, userId: userId });
       chai.expect(res).to.have.status(200);
@@ -243,16 +204,8 @@ describe('Liquidity wallets route', async function () {
         .expect(res.body.walletAddress)
         .to.equal(liquidityWallet.walletAddress);
       chai.expect(res.body.chainId).to.equal(liquidityWallet.chainId);
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({
-          chainId: liquidityWallet.chainId,
-          walletAddress: liquidityWallet.walletAddress,
-        });
-      chai.expect(deleteResponse).to.have.status(200);
     });
+
     it('Should return a single liquidity wallet (with walletAddress in the query)', async function () {
       const createResponse = await createBaseLiquidityWallet(liquidityWallet);
 
@@ -263,7 +216,7 @@ describe('Liquidity wallets route', async function () {
       ).userId;
       const res = await chai
         .request(app)
-        .get('/unit-test/liquidity-wallets/single')
+        .get(pathLiquidityWallets_Get_Single)
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({
           chainId: liquidityWallet.chainId,
@@ -277,15 +230,6 @@ describe('Liquidity wallets route', async function () {
         .expect(res.body.walletAddress)
         .to.equal(liquidityWallet.walletAddress);
       chai.expect(res.body.chainId).to.equal(liquidityWallet.chainId);
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({
-          chainId: liquidityWallet.chainId,
-          walletAddress: liquidityWallet.walletAddress,
-        });
-      chai.expect(deleteResponse).to.have.status(200);
     });
   });
 
@@ -293,9 +237,10 @@ describe('Liquidity wallets route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .get('/unit-test/liquidity-wallets/id/myId');
+        .get(pathLiquidityWallets_Get_MongoDBId + randomMongoDBId);
       chai.expect(createResponse).to.have.status(403);
     });
+
     it('Should return a single liquidity wallet', async function () {
       const createResponse = await createBaseLiquidityWallet(liquidityWallet);
 
@@ -304,34 +249,28 @@ describe('Liquidity wallets route', async function () {
           _id: new ObjectId(createResponse.body.insertedId),
         })
       ).userId;
-      const MongoDBId = createResponse.body.insertedId;
+
       const res = await chai
         .request(app)
-        .get(`/unit-test/liquidity-wallets/id/${MongoDBId}`)
+        .get(
+          pathLiquidityWallets_Get_MongoDBId + createResponse.body.insertedId
+        )
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
-      chai.expect(res.body._id).to.equal(MongoDBId);
+      chai.expect(res.body._id).to.equal(createResponse.body.insertedId);
       chai.expect(res.body.userId).to.equal(userId);
       chai
         .expect(res.body.walletAddress)
         .to.equal(liquidityWallet.walletAddress);
       chai.expect(res.body.chainId).to.equal(liquidityWallet.chainId);
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({
-          chainId: liquidityWallet.chainId,
-          walletAddress: liquidityWallet.walletAddress,
-        });
-      chai.expect(deleteResponse).to.have.status(200);
     });
+
     it('Should return an empty object if no wallet exists', async function () {
       const res = await chai
         .request(app)
-        .get('/unit-test/liquidity-wallets/id/111111111111111111111111')
+        .get(pathLiquidityWallets_Get_MongoDBId + validMongoDBId)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object').that.is.empty;
@@ -342,7 +281,7 @@ describe('Liquidity wallets route', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
-        .delete(liquidityWalletPath);
+        .delete(pathLiquidityWallets_Delete);
       chai.expect(createResponse).to.have.status(403);
     });
 
@@ -351,7 +290,7 @@ describe('Liquidity wallets route', async function () {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
+        .delete(pathLiquidityWallets_Delete)
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({
           chainId: liquidityWallet.chainId,
@@ -372,7 +311,7 @@ describe('Liquidity wallets route', async function () {
     it('Should return a 404 status and an error message if the wallet does not exist', async function () {
       const deleteResponse = await chai
         .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
+        .delete(pathLiquidityWallets_Delete)
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({
           chainId: liquidityWallet.chainId,
@@ -388,7 +327,9 @@ describe('Liquidity wallets route', async function () {
 
   describe('PUT liquidity wallets', async function () {
     it('Should return 403 if no token is provided', async function () {
-      const createResponse = await chai.request(app).put(liquidityWalletPath);
+      const createResponse = await chai
+        .request(app)
+        .put(pathLiquidityWallets_Put);
       chai.expect(createResponse).to.have.status(403);
     });
 
@@ -397,7 +338,7 @@ describe('Liquidity wallets route', async function () {
 
       const res = await chai
         .request(app)
-        .put(liquidityWalletPath)
+        .put(pathLiquidityWallets_Put)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
           ...liquidityWallet,
@@ -412,22 +353,13 @@ describe('Liquidity wallets route', async function () {
         upsertedCount: 0,
         matchedCount: 1,
       });
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({
-          chainId: liquidityWallet.chainId,
-          walletAddress: liquidityWallet.walletAddress,
-        });
-      chai.expect(deleteResponse).to.have.status(200);
     });
 
     it('Should modify token amount of the liquidity wallet', async function () {
       const createResponse = await createBaseLiquidityWallet(liquidityWallet);
       const res = await chai
         .request(app)
-        .put(liquidityWalletPath)
+        .put(pathLiquidityWallets_Put)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
           ...liquidityWallet,
@@ -439,21 +371,12 @@ describe('Liquidity wallets route', async function () {
         _id: new ObjectId(createResponse.body.insertedId),
       });
       chai.expect(wallet.tokens['USDC']).to.equal('3435');
-      const deleteResponse = await chai
-        .request(app)
-        .delete(`/unit-test/liquidity-wallets`)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({
-          chainId: liquidityWallet.chainId,
-          walletAddress: liquidityWallet.walletAddress,
-        });
-      chai.expect(deleteResponse).to.have.status(200);
     });
 
     it('Should fail if liquidity wallet doesnt exist', async function () {
       const res = await chai
         .request(app)
-        .put(liquidityWalletPath)
+        .put(pathLiquidityWallets_Put)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
           ...liquidityWallet,

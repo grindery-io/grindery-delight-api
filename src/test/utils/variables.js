@@ -27,10 +27,22 @@ export const pathBlockchains_Put_UsefulAddress_MongoDBId =
 export const pathBlockchains_Delete_UsefulAddress_MongoDBId =
   '/unit-test/blockchains/useful-address/';
 
+// Liquidity wallets paths
+export const pathLiquidityWallets_Post_NewLiquidityWallet =
+  '/unit-test/liquidity-wallets';
+export const pathLiquidityWallets_Get_LiquidityWalletByChainId =
+  '/unit-test/liquidity-wallets';
+export const pathLiquidityWallets_Delete = '/unit-test/liquidity-wallets';
+export const pathLiquidityWallets_Put = '/unit-test/liquidity-wallets';
+export const pathLiquidityWallets_Get_All = '/unit-test/liquidity-wallets/all';
+export const pathLiquidityWallets_Get_Single =
+  '/unit-test/liquidity-wallets/single';
+export const pathLiquidityWallets_Get_MongoDBId =
+  '/unit-test/liquidity-wallets/id/';
+
 export const pathOrders = '/unit-test/orders';
 export const pathTokens = '/unit-test/tokens';
 export const pathOffers = '/unit-test/offers';
-export const liquidityWalletPath = '/unit-test/liquidity-wallets';
 
 export const order = {
   amountTokenDeposit: '0.34',

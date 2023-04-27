@@ -7,10 +7,16 @@ import {
   testNonMongodbId,
 } from './utils/utils.js';
 import {
-  liquidityWalletPath,
+  pathLiquidityWallets_Post_NewLiquidityWallet,
   liquidityWallet,
   modifySingleLiquidityWallet,
   updateTokenLiquidityWallet,
+  pathLiquidityWallets_Get_MongoDBId,
+  notAMongoDBId,
+  pathLiquidityWallets_Get_Single,
+  pathLiquidityWallets_Get_LiquidityWalletByChainId,
+  pathLiquidityWallets_Delete,
+  pathLiquidityWallets_Put,
 } from './utils/variables.js';
 
 chai.use(chaiHttp);
@@ -24,7 +30,7 @@ describe('Liquidity wallets route - Validators', async function () {
     for (const testCase of testCases) {
       testNonString({
         method: 'post',
-        path: liquidityWalletPath,
+        path: pathLiquidityWallets_Post_NewLiquidityWallet,
         body: {
           ...liquidityWallet,
           [testCase]: 123,
@@ -34,7 +40,7 @@ describe('Liquidity wallets route - Validators', async function () {
       });
       testNonEmpty({
         method: 'post',
-        path: liquidityWalletPath,
+        path: pathLiquidityWallets_Post_NewLiquidityWallet,
         body: {
           ...liquidityWallet,
           [testCase]: '',
@@ -46,7 +52,7 @@ describe('Liquidity wallets route - Validators', async function () {
 
     testUnexpectedField({
       method: 'post',
-      path: liquidityWalletPath,
+      path: pathLiquidityWallets_Post_NewLiquidityWallet,
       body: {
         ...liquidityWallet,
         unexpectedField: 'unexpectedValue',
@@ -58,7 +64,7 @@ describe('Liquidity wallets route - Validators', async function () {
 
     testUnexpectedField({
       method: 'post',
-      path: liquidityWalletPath,
+      path: pathLiquidityWallets_Post_NewLiquidityWallet,
       body: liquidityWallet,
       query: { unexpectedField: 'unexpectedValue' },
       field: 'unexpectedField',
@@ -69,7 +75,7 @@ describe('Liquidity wallets route - Validators', async function () {
   describe('GET by chainId', async function () {
     testNonString({
       method: 'get',
-      path: liquidityWalletPath,
+      path: pathLiquidityWallets_Get_LiquidityWalletByChainId,
       body: {},
       query: { chainId: ['chainId1', 'chainId2'] },
       field: 'chainId',
@@ -77,7 +83,7 @@ describe('Liquidity wallets route - Validators', async function () {
 
     testNonEmpty({
       method: 'get',
-      path: liquidityWalletPath,
+      path: pathLiquidityWallets_Get_LiquidityWalletByChainId,
       body: {},
       query: { chainId: '' },
       field: 'chainId',
@@ -89,7 +95,7 @@ describe('Liquidity wallets route - Validators', async function () {
     for (const testCase of testCases) {
       testNonString({
         method: 'get',
-        path: '/unit-test/liquidity-wallets/single',
+        path: pathLiquidityWallets_Get_Single,
         body: {},
         query: {
           ...modifySingleLiquidityWallet,
@@ -100,7 +106,7 @@ describe('Liquidity wallets route - Validators', async function () {
 
       testNonEmpty({
         method: 'get',
-        path: '/unit-test/liquidity-wallets/single',
+        path: pathLiquidityWallets_Get_Single,
         body: {},
         query: {
           ...modifySingleLiquidityWallet,
@@ -114,7 +120,7 @@ describe('Liquidity wallets route - Validators', async function () {
   describe('GET liquidity wallet by MongoDbId', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/unit-test/liquidity-wallets/id/notAMongoDBId',
+      path: pathLiquidityWallets_Get_MongoDBId + notAMongoDBId,
       body: {},
       query: {},
       field: 'id',
@@ -126,7 +132,7 @@ describe('Liquidity wallets route - Validators', async function () {
     for (const testCase of testCases) {
       testNonString({
         method: 'delete',
-        path: liquidityWalletPath,
+        path: pathLiquidityWallets_Delete,
         body: {},
         query: {
           ...liquidityWallet,
@@ -137,7 +143,7 @@ describe('Liquidity wallets route - Validators', async function () {
 
       testNonEmpty({
         method: 'delete',
-        path: liquidityWalletPath,
+        path: pathLiquidityWallets_Delete,
         body: {},
         query: {
           ...liquidityWallet,
@@ -154,7 +160,7 @@ describe('Liquidity wallets route - Validators', async function () {
     for (const testCase of testCases) {
       testNonString({
         method: 'put',
-        path: liquidityWalletPath,
+        path: pathLiquidityWallets_Put,
         body: {
           ...updateTokenLiquidityWallet,
           [testCase]: 123,
@@ -164,7 +170,7 @@ describe('Liquidity wallets route - Validators', async function () {
       });
       testNonEmpty({
         method: 'put',
-        path: liquidityWalletPath,
+        path: pathLiquidityWallets_Put,
         body: {
           ...updateTokenLiquidityWallet,
           [testCase]: '',
@@ -176,7 +182,7 @@ describe('Liquidity wallets route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: liquidityWalletPath,
+      path: pathLiquidityWallets_Put,
       body: {
         ...updateTokenLiquidityWallet,
         unexpectedField: 'unexpectedValue',
@@ -188,7 +194,7 @@ describe('Liquidity wallets route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: liquidityWalletPath,
+      path: pathLiquidityWallets_Put,
       body: updateTokenLiquidityWallet,
       query: { unexpectedField: 'unexpectedValue' },
       field: 'unexpectedField',
