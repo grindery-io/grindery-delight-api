@@ -74,6 +74,9 @@ async function createBaseBlockchain(blockchain) {
     .post(pathBlockchains)
     .set('Authorization', `Bearer ${mockedToken}`)
     .send(blockchain);
+  console.log('res.status', res.status);
+  console.log('res.body', res.body);
+  console.log('blockchain', blockchain);
 
   chai.expect(res).to.have.status(200);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
