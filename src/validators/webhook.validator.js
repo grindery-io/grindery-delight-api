@@ -268,7 +268,7 @@ export const updateOfferValidator = [
   }),
 ];
 
-export const updateTradeOfferValidator = [
+export const updateOrderValidator = [
   body('_grinderyChainId')
     .isString()
     .withMessage('must be string value')
