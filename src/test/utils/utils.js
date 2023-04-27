@@ -197,21 +197,3 @@ export const testNonMongodbId = ({ method, path, body, query, field }) => {
     ).to.be.true;
   });
 };
-
-/**
- * This function deletes elements from a collection in a database based on their IDs.
- * @param elements - The `elements` parameter is an array of objects that represent MongoDB documents.
- * Each object has two properties: `collection`, which is a reference to the MongoDB collection where
- * the document is stored, and `id`, which is the ID of the document to be deleted. The function loops
- * through each element in
- */
-export const deleteElementsAfterTest = async (elements) => {
-  for (const element of elements) {
-    const elementDb = await element.collection.findOne({
-      _id: new ObjectId(element.id),
-    });
-    if (elementDb) {
-      await element.collection.deleteOne(elementDb);
-    }
-  }
-};
