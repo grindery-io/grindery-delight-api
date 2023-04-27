@@ -4,7 +4,6 @@ import app from '../index.js';
 import { mockedToken } from './utils/utils.js';
 import { ObjectId } from 'mongodb';
 import { collectionOffers, pathOffers, offer } from './utils/variables.js';
-import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 

@@ -12,7 +12,6 @@ import {
   modifySingleLiquidityWallet,
   updateTokenLiquidityWallet,
 } from './utils/variables.js';
-import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 

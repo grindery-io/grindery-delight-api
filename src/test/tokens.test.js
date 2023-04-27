@@ -1,15 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
-import {
-  mockedToken,
-  testNonString,
-  testNonEmpty,
-  testUnexpectedField,
-  testNonBoolean,
-  testNonMongodbId,
-  deleteElementsAfterTest,
-} from './utils/utils.js';
+import { mockedToken } from './utils/utils.js';
 import { ObjectId } from 'mongodb';
 import {
   collectionTokens,
@@ -17,7 +9,6 @@ import {
   token,
   toDeleteDb,
 } from './utils/variables.js';
-import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 

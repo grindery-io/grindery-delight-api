@@ -9,7 +9,6 @@ import {
   blockchain,
   usefulAddress,
 } from './utils/variables.js';
-import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 
@@ -94,22 +93,7 @@ describe('Blockchains route', async function () {
     });
 
     it('Should create a new blockchain', async function () {
-      try {
-        const res = await chai
-          .request(app)
-          .post(pathBlockchains)
-          .set('Authorization', `Bearer ${mockedToken}`)
-          .send(blockchain);
-        console.log('res.status special', res.status);
-        console.log('res.body special', res.body);
-        console.log('blockchain special', blockchain);
-
-        chai.expect(res).to.have.status(400);
-        chai.expect(res.body).to.have.property('acknowledged').that.is.true;
-        chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
-      } catch (e) {
-        console.log('error', e);
-      }
+      await createBaseBlockchain(blockchain);
     });
 
     it('Should create a new blockchain with the proper fields', async function () {

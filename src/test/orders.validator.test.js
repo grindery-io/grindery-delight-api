@@ -7,7 +7,6 @@ import {
   testNonMongodbId,
 } from './utils/utils.js';
 import { pathOrders, order } from './utils/variables.js';
-import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 
