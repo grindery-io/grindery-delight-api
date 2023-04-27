@@ -140,7 +140,7 @@ describe('Blockchains route - Validators', async function () {
           query: {},
           field: testCase,
         });
-      } else if (testCase !== 'rpc') {
+      } else if (testCase !== 'rpc' && testCase !== 'usefulAddresses') {
         testNonString({
           method: 'post',
           path: pathBlockchains,
@@ -152,16 +152,19 @@ describe('Blockchains route - Validators', async function () {
           field: testCase,
         });
       }
-      testNonEmpty({
-        method: 'post',
-        path: pathBlockchains,
-        body: {
-          ...blockchain,
-          [testCase]: '',
-        },
-        query: {},
-        field: testCase,
-      });
+
+      if (testCase !== 'usefulAddresses') {
+        testNonEmpty({
+          method: 'post',
+          path: pathBlockchains,
+          body: {
+            ...blockchain,
+            [testCase]: '',
+          },
+          query: {},
+          field: testCase,
+        });
+      }
     }
 
     testUnexpectedField({
@@ -191,7 +194,7 @@ describe('Blockchains route - Validators', async function () {
   describe('GET blockchain by MongoDBId', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/unit-test/blockchains/1111111111111111',
+      path: '/unit-test/blockchains/notAMongoDBId',
       body: {},
       query: {},
       field: 'blockchainId',
@@ -199,11 +202,11 @@ describe('Blockchains route - Validators', async function () {
   });
 
   describe('PUT - modify blockchain', async function () {
-    it('PUT /blockchains/11111111111111111111 - rpc - Should fail if rpc is not an array', async function () {
+    it('PUT /blockchains/myMongoDBId - rpc - Should fail if rpc is not an array', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
-        .put('/unit-test/blockchains/11111111111111111111')
+        .put('/unit-test/blockchains/myMongoDBId')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .send({ rpc: 'notAnArray' });
       // Assertions
@@ -216,11 +219,11 @@ describe('Blockchains route - Validators', async function () {
       ).to.be.true;
     });
 
-    it('PUT /blockchains/11111111111111111111 - rpc - Should fail if rpc contains non-URL values', async function () {
+    it('PUT /blockchains/myMongoDBId - rpc - Should fail if rpc contains non-URL values', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
-        .put('/unit-test/blockchains/11111111111111111111')
+        .put('/unit-test/blockchains/myMongoDBId')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .send({ rpc: ['notAnURL', 123] });
       // Assertions
@@ -248,7 +251,7 @@ describe('Blockchains route - Validators', async function () {
       if (testCase == 'caipId') {
         testNonCaipId({
           method: 'put',
-          path: '/unit-test/blockchains/11111111111111111111',
+          path: '/unit-test/blockchains/myMongoDBId',
           body: {
             ...blockchain,
             [testCase]: 123,
@@ -262,7 +265,7 @@ describe('Blockchains route - Validators', async function () {
       ) {
         testNonURL({
           method: 'put',
-          path: '/unit-test/blockchains/11111111111111111111',
+          path: '/unit-test/blockchains/myMongoDBId',
           body: {
             ...blockchain,
             [testCase]: 123,
@@ -277,7 +280,7 @@ describe('Blockchains route - Validators', async function () {
       ) {
         testNonBoolean({
           method: 'put',
-          path: '/unit-test/blockchains/11111111111111111111',
+          path: '/unit-test/blockchains/myMongoDBId',
           body: {
             ...blockchain,
             [testCase]: 123,
@@ -288,7 +291,7 @@ describe('Blockchains route - Validators', async function () {
       } else if (testCase !== 'rpc') {
         testNonString({
           method: 'put',
-          path: '/unit-test/blockchains/11111111111111111111',
+          path: '/unit-test/blockchains/myMongoDBId',
           body: {
             ...blockchain,
             [testCase]: 123,
@@ -300,7 +303,7 @@ describe('Blockchains route - Validators', async function () {
 
       testNonEmpty({
         method: 'put',
-        path: '/unit-test/blockchains/11111111111111111111',
+        path: '/unit-test/blockchains/myMongoDBId',
         body: {
           ...blockchain,
           [testCase]: '',
@@ -314,7 +317,7 @@ describe('Blockchains route - Validators', async function () {
   describe('DELETE blockchain', async function () {
     testNonMongodbId({
       method: 'delete',
-      path: '/unit-test/blockchains/1111111111111111',
+      path: '/unit-test/blockchains/notAMongoDBId',
       body: {},
       query: {},
       field: 'blockchainId',
@@ -327,7 +330,7 @@ describe('Blockchains route - Validators', async function () {
     for (const testCase of testCases) {
       testNonString({
         method: 'put',
-        path: '/unit-test/blockchains/useful-address/111111111111111111111111',
+        path: '/unit-test/blockchains/useful-address/myMongoDBId',
         body: {
           ...usefulAddress,
           [testCase]: 123,
@@ -337,7 +340,7 @@ describe('Blockchains route - Validators', async function () {
       });
       testNonEmpty({
         method: 'put',
-        path: '/unit-test/blockchains/useful-address/111111111111111111111111',
+        path: '/unit-test/blockchains/useful-address/myMongoDBId',
         body: {
           ...usefulAddress,
           [testCase]: '',
@@ -350,7 +353,7 @@ describe('Blockchains route - Validators', async function () {
   describe('DELETE useful address', async function () {
     testNonString({
       method: 'delete',
-      path: '/unit-test/blockchains/useful-address/111111111111111111111111',
+      path: '/unit-test/blockchains/useful-address/myMongoDBId',
       body: { contract: 123 },
       query: {},
       field: 'contract',
@@ -358,7 +361,7 @@ describe('Blockchains route - Validators', async function () {
 
     testNonEmpty({
       method: 'delete',
-      path: '/unit-test/blockchains/useful-address/111111111111111111111111',
+      path: '/unit-test/blockchains/useful-address/myMongoDBId',
       body: { contract: '' },
       query: {},
       field: 'contract',

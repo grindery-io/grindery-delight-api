@@ -3,7 +3,12 @@ import chaiHttp from 'chai-http';
 import app from '../index.js';
 import { mockedToken } from './utils/utils.js';
 import { ObjectId } from 'mongodb';
-import { collectionOffers, pathOffers, offer } from './utils/variables.js';
+import {
+  collectionOffers,
+  pathOffers,
+  offer,
+  modifiedOffer,
+} from './utils/variables.js';
 
 chai.use(chaiHttp);
 
@@ -22,6 +27,7 @@ async function createBaseOffer(offer) {
   chai.expect(res).to.have.status(200);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
   chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
+  return res;
 }
 
 describe('Offers route', async function () {
@@ -53,25 +59,12 @@ describe('Offers route', async function () {
       // Assertions
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.be.an('object');
-      chai.expect(getOffer.body.chainId).to.equal(offer.chainId);
-      chai.expect(getOffer.body.min).to.equal(offer.min);
-      chai.expect(getOffer.body.max).to.equal(offer.max);
-      chai.expect(getOffer.body.tokenId).to.equal(offer.tokenId);
-      chai.expect(getOffer.body.token).to.equal(offer.token);
-      chai.expect(getOffer.body.tokenAddress).to.equal(offer.tokenAddress);
-      chai.expect(getOffer.body.hash).to.equal(offer.hash);
-      chai.expect(getOffer.body.offerId).to.equal(offer.offerId);
-      chai.expect(getOffer.body.isActive).to.equal(offer.isActive);
-      chai.expect(getOffer.body.estimatedTime).to.equal(offer.estimatedTime);
-      chai.expect(getOffer.body.exchangeRate).to.equal(offer.exchangeRate);
-      chai.expect(getOffer.body.exchangeToken).to.equal(offer.exchangeToken);
-      chai
-        .expect(getOffer.body.exchangeChainId)
-        .to.equal(offer.exchangeChainId);
-      chai.expect(getOffer.body.provider).to.equal(offer.provider);
-      chai.expect(getOffer.body.title).to.equal(offer.title);
-      chai.expect(getOffer.body.image).to.equal(offer.image);
-      chai.expect(getOffer.body.amount).to.equal(offer.amount);
+
+      delete getOffer.body._id;
+      delete getOffer.body.userId;
+      delete getOffer.body.date;
+
+      chai.expect(getOffer.body).to.deep.equal(offer);
     });
 
     it('Should fail if same offerId exists', async function () {
@@ -617,24 +610,6 @@ describe('Offers route', async function () {
     it('Should modify all offer fields', async function () {
       await createBaseOffer(offer);
 
-      const modifiedOffer = {
-        chainId: '76',
-        min: '10',
-        max: '100',
-        tokenId: 'token-id',
-        token: 'token',
-        tokenAddress: 'token-address',
-        isActive: false,
-        exchangeRate: '2',
-        exchangeToken: 'exchange-token',
-        exchangeChainId: 'exchange-chain-id',
-        estimatedTime: '1 day',
-        provider: 'provider',
-        title: 'title',
-        image: 'image',
-        amount: '50',
-      };
-
       const modifyOffer = await chai
         .request(app)
         .put(`/unit-test/offers/${offer.offerId}`)
@@ -1137,6 +1112,38 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         amount: modifiedOffer.amount,
+      });
+    });
+
+    it('Should modify the status field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        status: 'failure',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(`/unit-test/offers/${offer.offerId}`)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get('/unit-test/offers/offerId')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        status: modifiedOffer.status,
       });
     });
   });

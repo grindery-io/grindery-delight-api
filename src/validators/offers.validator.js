@@ -2,6 +2,9 @@ import { body, param, query } from 'express-validator';
 import { validateFields } from '../utils/validators-utils.js';
 
 export const createOfferValidator = [
+  body('status')
+    .matches(/^(pending|success|failure)$/)
+    .withMessage('must be one of "pending", "success" or "failure"'),
   body('chainId')
     .isString()
     .withMessage('must be string value')
@@ -37,11 +40,7 @@ export const createOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('offerId')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  body('offerId').isString().withMessage('must be string value'),
   body('isActive')
     .isBoolean()
     .withMessage('must be boolean value')
@@ -75,6 +74,7 @@ export const createOfferValidator = [
     validateFields(
       req.body,
       [
+        'status',
         'chainId',
         'min',
         'max',
@@ -163,6 +163,16 @@ export const deleteOfferValidator = [
 ];
 
 export const updateOfferValidator = [
+  body('status')
+    .optional()
+    .matches(/^(pending|success|failure)$/)
+    .withMessage('must be one of "pending", "success" or "failure"'),
+  body('offerId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body('chainId')
     .optional()
     .isString()
@@ -247,6 +257,8 @@ export const updateOfferValidator = [
     validateFields(
       req.body,
       [
+        'offerId',
+        'status',
         'chainId',
         'min',
         'max',

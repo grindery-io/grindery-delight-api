@@ -86,7 +86,7 @@ describe('Orders route - Validators', async function () {
       method: 'get',
       path: '/unit-test/orders/id',
       body: {},
-      query: { id: 'nonMongodbId' },
+      query: { id: 'notAMongoDBId' },
       field: 'id',
     });
   });

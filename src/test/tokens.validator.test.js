@@ -46,7 +46,7 @@ describe('Tokens route - Validators', async function () {
   describe('GET by MongoDBId', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/unit-test/tokens/1111111111111111',
+      path: '/unit-test/tokens/notAMongoDBId',
       body: {},
       query: {},
       field: 'tokenId',
@@ -58,7 +58,7 @@ describe('Tokens route - Validators', async function () {
       if (testCase === 'isActive' || testCase === 'isNative') {
         testNonBoolean({
           method: 'put',
-          path: '/unit-test/tokens/111111111111111111111111',
+          path: '/unit-test/tokens/myMongoDBId',
           body: {
             [testCase]: 123,
           },
@@ -68,7 +68,7 @@ describe('Tokens route - Validators', async function () {
       } else {
         testNonString({
           method: 'put',
-          path: '/unit-test/tokens/111111111111111111111111',
+          path: '/unit-test/tokens/myMongoDBId',
           body: {
             [testCase]: 123,
           },
@@ -79,7 +79,7 @@ describe('Tokens route - Validators', async function () {
 
       testNonEmpty({
         method: 'put',
-        path: '/unit-test/tokens/111111111111111111111111',
+        path: '/unit-test/tokens/myMongoDBId',
         body: {
           ...token,
           [testCase]: '',
@@ -91,7 +91,7 @@ describe('Tokens route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/unit-test/tokens/111111111111111111111111',
+      path: '/unit-test/tokens/myMongoDBId',
       body: {
         unexpectedField: 'unexpectedField',
       },
@@ -102,7 +102,7 @@ describe('Tokens route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/unit-test/tokens/111111111111111111111111',
+      path: '/unit-test/tokens/myMongoDBId',
       body: {},
       query: { unexpectedField: 'unexpectedField' },
       field: 'unexpectedField',
@@ -111,7 +111,7 @@ describe('Tokens route - Validators', async function () {
 
     testNonMongodbId({
       method: 'put',
-      path: '/unit-test/tokens/1111111111111111',
+      path: '/unit-test/tokens/notAMongoDBId',
       body: {},
       query: {},
       field: 'tokenId',
@@ -121,7 +121,7 @@ describe('Tokens route - Validators', async function () {
   describe('DELETE by MongoDBId', async function () {
     testNonMongodbId({
       method: 'delete',
-      path: '/unit-test/tokens/1111111111111111',
+      path: '/unit-test/tokens/notAMongoDBId',
       body: {},
       query: {},
       field: 'tokenId',

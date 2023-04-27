@@ -13,7 +13,6 @@ import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
 
 const router = express.Router();
-// const collection = db.collection('offers');
 
 /* This is a POST request that creates a new offer. */
 router.post('/', createOfferValidator, isRequired, async (req, res) => {
@@ -22,12 +21,12 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   const collection = db.collection('offers');
 
   if (validator.length) {
-    console.log(
-      'Offer creation - Validation failed - userId',
-      res.locals.userId
-    );
-    console.log('Offer creation - Validation failed - request body', req.body);
-    console.log('Offer creation - Validation failed - Validator', validator);
+    // console.log(
+    //   'Offer creation - Validation failed - userId',
+    //   res.locals.userId
+    // );
+    // console.log('Offer creation - Validation failed - request body', req.body);
+    // console.log('Offer creation - Validation failed - Validator', validator);
     return res.status(400).send(validator);
   }
   if (
@@ -41,14 +40,14 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
     newDocument.userId = res.locals.userId;
     res.send(await collection.insertOne(newDocument)).status(201);
   } else {
-    console.log(
-      'Offer creation - Offer already exists - userId',
-      res.locals.userId
-    );
-    console.log(
-      'Offer creation - Offer already exists - request body',
-      req.body
-    );
+    // console.log(
+    //   'Offer creation - Offer already exists - userId',
+    //   res.locals.userId
+    // );
+    // console.log(
+    //   'Offer creation - Offer already exists - request body',
+    //   req.body
+    // );
     res.status(404).send({
       msg: 'This offer already exists.',
     });
@@ -186,34 +185,23 @@ router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
     res.status(200).send(
       await collection.updateOne(offer, {
         $set: {
-          chainId: req.body.chainId ? req.body.chainId : offer.chainId,
-          min: req.body.min ? req.body.min : offer.min,
-          max: req.body.max ? req.body.max : offer.max,
-          tokenId: req.body.tokenId ? req.body.tokenId : offer.tokenId,
-          token: req.body.token ? req.body.token : offer.token,
-          tokenAddress: req.body.tokenAddress
-            ? req.body.tokenAddress
-            : offer.tokenAddress,
-          isActive:
-            req.body.isActive === undefined
-              ? offer.isActive
-              : req.body.isActive,
-          exchangeRate: req.body.exchangeRate
-            ? req.body.exchangeRate
-            : offer.exchangeRate,
-          exchangeToken: req.body.exchangeToken
-            ? req.body.exchangeToken
-            : offer.exchangeToken,
-          exchangeChainId: req.body.exchangeChainId
-            ? req.body.exchangeChainId
-            : offer.exchangeChainId,
-          estimatedTime: req.body.estimatedTime
-            ? req.body.estimatedTime
-            : offer.estimatedTime,
-          provider: req.body.provider ? req.body.provider : offer.provider,
-          title: req.body.title ? req.body.title : offer.title,
-          image: req.body.image ? req.body.image : offer.image,
-          amount: req.body.amount ? req.body.amount : offer.amount,
+          chainId: req.body.chainId ?? offer.chainId,
+          min: req.body.min ?? offer.min,
+          max: req.body.max ?? offer.max,
+          tokenId: req.body.tokenId ?? offer.tokenId,
+          token: req.body.token ?? offer.token,
+          tokenAddress: req.body.tokenAddress ?? offer.tokenAddress,
+          isActive: req.body.isActive ?? offer.isActive,
+          exchangeRate: req.body.exchangeRate ?? offer.exchangeRate,
+          exchangeToken: req.body.exchangeToken ?? offer.exchangeToken,
+          exchangeChainId: req.body.exchangeChainId ?? offer.exchangeChainId,
+          estimatedTime: req.body.estimatedTime ?? offer.estimatedTime,
+          provider: req.body.provider ?? offer.provider,
+          title: req.body.title ?? offer.title,
+          image: req.body.image ?? offer.image,
+          amount: req.body.amount ?? offer.amount,
+          status: req.body.status ?? offer.status,
+          offerId: req.body.offerId ?? offer.offerId,
         },
       })
     );

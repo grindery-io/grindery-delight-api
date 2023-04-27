@@ -24,32 +24,12 @@ describe('Offers route - Validators', async function () {
 
   describe('POST new offer', async function () {
     it('Should fail validation if min is greater than max', async function () {
-      const invalidOffer = {
-        chainId: '1',
-        min: '30',
-        max: '20',
-        tokenId: 'tokenId',
-        token: 'token',
-        tokenAddress: 'tokenAddress',
-        hash: 'hash',
-        offerId: 'offerId',
-        isActive: true,
-        estimatedTime: '3 days',
-        exchangeRate: '5',
-        exchangeToken: 'ETH',
-        exchangeChainId: '1',
-        provider: 'provider',
-        title: 'title',
-        image: 'image',
-        amount: 'amount',
-      };
-
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
         .post(pathOffers)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .send(invalidOffer);
+        .send({ ...offer, min: '30', max: '20' });
 
       // Assertions
       chai.expect(res).to.have.status(400);
@@ -59,8 +39,27 @@ describe('Offers route - Validators', async function () {
       chai.expect(res.body[0].msg).to.equal('min must be less than max');
     });
 
+    it('Should fail if status is not pending, success or failure', async function () {
+      // Make a request to create the offer with invalid data
+      const res = await chai
+        .request(app)
+        .post(pathOffers)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .send({ ...offer, status: 'notAppropriate' });
+      // Assertions
+      chai.expect(res).to.have.status(400);
+      chai.expect(res.body).to.be.an('array');
+      chai.expect(
+        res.body.some(
+          (err) =>
+            err.msg === 'must be one of "pending", "success" or "failure"' &&
+            err.param === 'status'
+        )
+      ).to.be.true;
+    });
+
     for (const testCase of Object.keys(offer)) {
-      if (testCase !== 'isActive') {
+      if (testCase !== 'isActive' && testCase !== 'status') {
         testNonString({
           method: 'post',
           path: pathOffers,
@@ -77,7 +76,9 @@ describe('Offers route - Validators', async function () {
         testCase !== 'title' &&
         testCase !== 'image' &&
         testCase !== 'amount' &&
-        testCase !== 'provider'
+        testCase !== 'provider' &&
+        testCase !== 'offerId' &&
+        testCase !== 'status'
       ) {
         testNonEmpty({
           method: 'post',
@@ -176,8 +177,27 @@ describe('Offers route - Validators', async function () {
   });
 
   describe('PUT offer by offerId', async function () {
+    it('Should fail if status is not pending, success or failure', async function () {
+      // Make a request to create the offer with invalid data
+      const res = await chai
+        .request(app)
+        .put('/unit-test/offers/1234')
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .send({ ...offer, status: 'notAppropriate' });
+      // Assertions
+      chai.expect(res).to.have.status(400);
+      chai.expect(res.body).to.be.an('array');
+      chai.expect(
+        res.body.some(
+          (err) =>
+            err.msg === 'must be one of "pending", "success" or "failure"' &&
+            err.param === 'status'
+        )
+      ).to.be.true;
+    });
+
     for (const testCase of Object.keys(modifyOfferValidator)) {
-      if (testCase !== 'isActive') {
+      if (testCase !== 'isActive' && testCase !== 'status') {
         testNonString({
           method: 'put',
           path: '/unit-test/offers/1234',
@@ -192,7 +212,8 @@ describe('Offers route - Validators', async function () {
       if (
         testCase !== 'title' &&
         testCase !== 'image' &&
-        testCase !== 'amount'
+        testCase !== 'amount' &&
+        testCase !== 'status'
       ) {
         testNonEmpty({
           method: 'put',

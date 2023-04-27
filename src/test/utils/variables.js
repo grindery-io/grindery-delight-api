@@ -47,6 +47,26 @@ export const offer = {
   title: '',
   image: '',
   amount: '',
+  status: 'pending',
+};
+
+export const modifiedOffer = {
+  chainId: '76',
+  min: '10',
+  max: '100',
+  tokenId: 'token-id',
+  token: 'token',
+  tokenAddress: 'token-address',
+  isActive: false,
+  exchangeRate: '2',
+  exchangeToken: 'exchange-token',
+  exchangeChainId: 'exchange-chain-id',
+  estimatedTime: '1 day',
+  provider: 'provider',
+  title: 'title',
+  image: 'image',
+  amount: '50',
+  status: 'success',
 };
 
 export const modifyOfferValidator = {
@@ -64,6 +84,8 @@ export const modifyOfferValidator = {
   title: '',
   image: '',
   amount: '',
+  status: 'failure',
+  offerId: 'myNewOfferId',
 };
 
 export const searchActiveOfferValidator = {

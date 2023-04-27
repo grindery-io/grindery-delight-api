@@ -114,7 +114,7 @@ describe('Liquidity wallets route - Validators', async function () {
   describe('GET liquidity wallet by MongoDbId', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/unit-test/liquidity-wallets/id/notAValidMongoDbId',
+      path: '/unit-test/liquidity-wallets/id/notAMongoDBId',
       body: {},
       query: {},
       field: 'id',
