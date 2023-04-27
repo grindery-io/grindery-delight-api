@@ -5,8 +5,10 @@ import {
   testNonEmpty,
   testUnexpectedField,
   testNonMongodbId,
+  mockedToken,
 } from './utils/utils.js';
 import { pathOrders, order } from './utils/variables.js';
+import app from '../index.js';
 
 chai.use(chaiHttp);
 
@@ -15,28 +17,52 @@ describe('Orders route - Validators', async function () {
   this.retries(4);
 
   describe('POST new order', async function () {
-    for (const testCase of Object.keys(order)) {
-      testNonString({
-        method: 'post',
-        path: pathOrders,
-        body: {
-          ...order,
-          [testCase]: 123,
-        },
-        query: {},
-        field: testCase,
-      });
+    it('Should fail if status is not pending, success or failure', async function () {
+      // Make a request to create the offer with invalid data
+      const res = await chai
+        .request(app)
+        .post(pathOrders)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .send({ ...order, status: 'notAppropriate' });
 
-      testNonEmpty({
-        method: 'post',
-        path: pathOrders,
-        body: {
-          ...order,
-          [testCase]: '',
-        },
-        query: {},
-        field: testCase,
-      });
+      // Assertions
+      chai.expect(res).to.have.status(400);
+      chai.expect(res.body).to.be.an('array');
+      chai.expect(
+        res.body.some(
+          (err) =>
+            err.msg === 'must be one of "pending", "success" or "failure"' &&
+            err.param === 'status'
+        )
+      ).to.be.true;
+    });
+
+    for (const testCase of Object.keys(order)) {
+      if (testCase !== 'status') {
+        testNonString({
+          method: 'post',
+          path: pathOrders,
+          body: {
+            ...order,
+            [testCase]: 123,
+          },
+          query: {},
+          field: testCase,
+        });
+      }
+
+      if (testCase !== 'orderId' && testCase !== 'status') {
+        testNonEmpty({
+          method: 'post',
+          path: pathOrders,
+          body: {
+            ...order,
+            [testCase]: '',
+          },
+          query: {},
+          field: testCase,
+        });
+      }
     }
 
     testUnexpectedField({

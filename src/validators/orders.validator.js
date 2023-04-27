@@ -2,11 +2,10 @@ import { body, param, query } from 'express-validator';
 import { validateFields } from '../utils/validators-utils.js';
 
 export const createOrderValidator = [
-  body('orderId')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  body('status')
+    .matches(/^(pending|success|failure)$/)
+    .withMessage('must be one of "pending", "success" or "failure"'),
+  body('orderId').isString().withMessage('must be string value'),
   body('amountTokenDeposit')
     .isString()
     .withMessage('must be string value')
@@ -46,6 +45,7 @@ export const createOrderValidator = [
     validateFields(
       req.body,
       [
+        'status',
         'orderId',
         'amountTokenDeposit',
         'addressTokenDeposit',

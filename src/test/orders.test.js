@@ -66,23 +66,12 @@ describe('Orders route', async function () {
       // Assertions
       chai.expect(getOrder).to.have.status(200);
       chai.expect(getOrder.body).to.be.an('object');
-      chai
-        .expect(getOrder.body.amountTokenDeposit)
-        .to.equal(order.amountTokenDeposit);
-      chai
-        .expect(getOrder.body.addressTokenDeposit)
-        .to.equal(order.addressTokenDeposit);
-      chai
-        .expect(getOrder.body.chainIdTokenDeposit)
-        .to.equal(order.chainIdTokenDeposit);
-      chai.expect(getOrder.body.destAddr).to.equal(order.destAddr);
-      chai.expect(getOrder.body.offerId).to.equal(order.offerId);
-      chai.expect(getOrder.body.orderId).to.equal(order.orderId);
-      chai
-        .expect(getOrder.body.amountTokenOffer)
-        .to.equal(order.amountTokenOffer);
-      chai.expect(getOrder.body.hash).to.equal(order.hash);
-      chai.expect(getOrder.body.isComplete).to.equal(false);
+
+      delete getOrder.body._id;
+      delete getOrder.body.userId;
+      delete getOrder.body.date;
+
+      chai.expect(getOrder.body).to.deep.equal({ ...order, isComplete: false });
     });
 
     it('Should fail if same orderId exists', async function () {

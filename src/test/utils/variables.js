@@ -27,6 +27,7 @@ export const order = {
   orderId: 'myOrderId',
   amountTokenOffer: '5433',
   hash: 'myhash',
+  status: 'pending',
 };
 
 export const offer = {
