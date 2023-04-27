@@ -5,6 +5,7 @@ import {
   updateTokenOfferValidator,
   updateMinPriceOfferValidator,
   updateMaxPriceOfferValidator,
+  updateOfferValidator,
 } from '../validators/webhook.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import getDBConnection from '../db/conn.js';
@@ -144,6 +145,18 @@ router.put('/offer/status', updateStatusOfferValidator, async (req, res) => {
   res.status(404).send({
     msg: 'Not found.',
   });
+});
+
+/* This is a PUT request that updates new offer. */
+router.put('/offer', updateOfferValidator, async (req, res) => {
+  const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('offers');
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+
+  // trigger('offer', { offerId: req.body._idOffer });
+  return res.status(200).send(null);
 });
 
 const registerHooks = () => {
