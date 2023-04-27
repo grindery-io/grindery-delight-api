@@ -9,6 +9,8 @@ export const collectionTokens = dbTests.collection('tokens');
 export const collectionLiquidityWallet =
   dbTests.collection('liquidity-wallets');
 
+export const pathAdmin_Get_IsAdmin = '/unit-test/admins';
+
 export const pathBlockchains = '/unit-test/blockchains';
 export const pathOrders = '/unit-test/orders';
 export const pathTokens = '/unit-test/tokens';
