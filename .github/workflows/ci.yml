@@ -20,3 +20,4 @@ jobs:
         env:
           ATLAS_URI: ${{ secrets.ATLAS_URI }}
           GRINDERY_NEXUS_REFRESH_TOKEN: ${{ secrets.GRINDERY_NEXUS_REFRESH_TOKEN }}
+          USER_ID_TEST: ${{ secrets.USER_ID_TEST }}
