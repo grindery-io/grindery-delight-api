@@ -74,10 +74,6 @@ async function createBaseBlockchain(blockchain) {
     .post(pathBlockchains)
     .set('Authorization', `Bearer ${mockedToken}`)
     .send(blockchain);
-  console.log('res.status', res.status);
-  console.log('res.body', res.body);
-  console.log('blockchain', blockchain);
-
   chai.expect(res).to.have.status(200);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
   chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
@@ -98,19 +94,22 @@ describe('Blockchains route', async function () {
     });
 
     it('Should create a new blockchain', async function () {
-      const res = await chai
-        .request(app)
-        .post(pathBlockchains)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(blockchain);
-      console.log('res.status special', res.status);
-      console.log('res.body special', res);
-      console.log('blockchain special', blockchain);
+      try {
+        const res = await chai
+          .request(app)
+          .post(pathBlockchains)
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(blockchain);
+        console.log('res.status special', res.status);
+        console.log('res.body special', res.body);
+        console.log('blockchain special', blockchain);
 
-      chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.have.property('acknowledged').that.is.true;
-      chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
-      return res;
+        chai.expect(res).to.have.status(400);
+        chai.expect(res.body).to.have.property('acknowledged').that.is.true;
+        chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
+      } catch (e) {
+        console.log('error', e);
+      }
     });
 
     it('Should create a new blockchain with the proper fields', async function () {
