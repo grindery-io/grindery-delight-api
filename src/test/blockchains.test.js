@@ -104,7 +104,7 @@ describe('Blockchains route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(blockchain);
       console.log('res.status special', res.status);
-      console.log('res.body special', res.body);
+      console.log('res.body special', res);
       console.log('blockchain special', blockchain);
 
       chai.expect(res).to.have.status(200);
