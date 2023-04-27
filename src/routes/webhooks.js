@@ -151,12 +151,9 @@ router.put('/offer/status', updateStatusOfferValidator, async (req, res) => {
 /* This is a PUT request that updates new offer. */
 router.put('/offer', updateOfferValidator, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
-
-  // trigger('offer', { offerId: req.body._idOffer });
   return res.status(200).send(null);
 });
 
