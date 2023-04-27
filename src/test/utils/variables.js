@@ -9,9 +9,24 @@ export const collectionTokens = dbTests.collection('tokens');
 export const collectionLiquidityWallet =
   dbTests.collection('liquidity-wallets');
 
+export const validMongoDBId = '111111111111111111111111';
+export const randomMongoDBId = 'myMongoDBId';
+export const notAMongoDBId = 'notAMongoDBId';
+
+// Admins paths
 export const pathAdmin_Get_IsAdmin = '/unit-test/admins';
 
-export const pathBlockchains = '/unit-test/blockchains';
+// Blockchains paths
+export const pathBlockchains_Post_NewBlockchain = '/unit-test/blockchains';
+export const pathBlockchains_Get_MongoDBId = '/unit-test/blockchains/';
+export const pathBlockchains_Get_Active = '/unit-test/blockchains/active';
+export const pathBlockchains_Put_MongoDBId = '/unit-test/blockchains/';
+export const pathBlockchains_Delete_MongoDBId = '/unit-test/blockchains/';
+export const pathBlockchains_Put_UsefulAddress_MongoDBId =
+  '/unit-test/blockchains/useful-address/';
+export const pathBlockchains_Delete_UsefulAddress_MongoDBId =
+  '/unit-test/blockchains/useful-address/';
+
 export const pathOrders = '/unit-test/orders';
 export const pathTokens = '/unit-test/tokens';
 export const pathOffers = '/unit-test/offers';
