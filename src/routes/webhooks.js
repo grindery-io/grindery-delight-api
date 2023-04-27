@@ -6,6 +6,7 @@ import {
   updateMinPriceOfferValidator,
   updateMaxPriceOfferValidator,
   updateOfferValidator,
+  updateTradeOfferValidator,
 } from '../validators/webhook.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import getDBConnection from '../db/conn.js';
@@ -157,6 +158,31 @@ router.put('/offer', updateOfferValidator, async (req, res) => {
 
   // trigger('offer', { offerId: req.body._idOffer });
   return res.status(200).send(null);
+});
+
+/* This is a PUT request that updates offer trade. */
+router.put('/offer/trade', updateTradeOfferValidator, async (req, res) => {
+  const validator = validateResult(req, res);
+  const collection = (await getDBConnection(req)).collection('orders');
+  if (validator.length) {
+    return res.status(400).send(validator);
+  }
+  const order = await collection.findOne({
+    orderId: req.body._idTrade,
+  });
+  if (order) {
+    const response = await collection.updateOne(order, {
+      $set: {
+        isComplete: true,
+      },
+    });
+    if (response.modifiedCount > 0)
+      trigger('order', { orderId: req.body._idTrade });
+    return res.status(200).send(response);
+  }
+  res.status(404).send({
+    msg: 'Not found.',
+  });
 });
 
 const registerHooks = () => {

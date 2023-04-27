@@ -255,3 +255,65 @@ export const updateOfferValidator = [
     return true;
   }),
 ];
+
+export const updateTradeOfferValidator = [
+  body('_grinderyChainId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_grinderyTransactionHash')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_amount')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_idOffer')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_idTrade')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_offerer')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_token')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body().custom((value, { req }) => {
+    validateFields(
+      req.body,
+      [
+        '_grinderyChainId',
+        '_grinderyTransactionHash',
+        '_amount',
+        '_idOffer',
+        '_idTrade',
+        '_offerer',
+        '_token',
+      ],
+      'body'
+    );
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
+];
