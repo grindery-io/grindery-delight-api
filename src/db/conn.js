@@ -20,9 +20,9 @@ export class Database {
           console.error(e);
         }
 
-        Database.instance = req.originalUrl.includes('/test/')
-          ? conn.db('grindery-delight-tests')
-          : conn.db('grindery-delight');
+        Database.instance = req.originalUrl.includes('/v2-test/')
+          ? conn.db('grindery-delight-tests-v2')
+          : conn.db('grindery-delight-v2');
       } else {
         // This will create an new instance of "MongoMemoryServer" and automatically start it
         const mongod = await MongoMemoryServer.create();

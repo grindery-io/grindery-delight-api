@@ -3,12 +3,7 @@ import chaiHttp from 'chai-http';
 import app from '../index.js';
 import { mockedToken } from './utils/utils.js';
 import { ObjectId } from 'mongodb';
-import {
-  collectionTokens,
-  pathTokens,
-  token,
-  toDeleteDb,
-} from './utils/variables.js';
+import { collectionTokens, pathTokens, token } from './utils/variables.js';
 
 chai.use(chaiHttp);
 
@@ -60,8 +55,7 @@ function modifyTokenField({ field, value }) {
  * @param token - The `token` parameter is an object that will be sent as the request body in the POST
  * request to the `pathTokens` endpoint. It is used to create a new token in the database.
  * @returns the response object from the POST request made to the `pathTokens` endpoint with the
- * provided `token` data. The response object is also being stored in an array `toDeleteDb` for later
- * cleanup. The function is also performing some assertions on the response object using the Chai
+ * provided `token` data. The function is also performing some assertions on the response object using the Chai
  * library.
  */
 async function createBaseToken(token) {
@@ -70,10 +64,6 @@ async function createBaseToken(token) {
     .post(pathTokens)
     .set('Authorization', `Bearer ${mockedToken}`)
     .send(token);
-  toDeleteDb.push({
-    collection: collectionTokens,
-    id: res.body.insertedId,
-  });
   chai.expect(res).to.have.status(201);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
   chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;

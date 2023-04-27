@@ -118,10 +118,10 @@ app.listen(port, function () {
 });
 
 // Mount production router to root
-app.use('/', router);
+app.use('/v2/', router);
 
 // Mount test router to root
-app.use('/test/', router);
+app.use('/v2-test/', router);
 
 // Mount unit test router to root
 app.use('/unit-test/', router);

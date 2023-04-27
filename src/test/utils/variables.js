@@ -1,7 +1,4 @@
-import db from '../../db/conn-test.js';
 import { Database } from '../../db/conn.js';
-
-export const toDeleteDb = [];
 
 const dbTests = await Database.getInstance({});
 
