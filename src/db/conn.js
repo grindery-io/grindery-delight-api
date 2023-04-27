@@ -12,7 +12,6 @@ export class Database {
 
   static async getInstance(req) {
     if (!Database.instance) {
-      // if (process.env.NODE_ENV !== 'test') {
       if (req.originalUrl && !req.originalUrl.includes('/unit-test/')) {
         let conn;
         try {

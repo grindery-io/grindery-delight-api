@@ -81,28 +81,28 @@ async function createBaseBlockchain(blockchain) {
   return res;
 }
 
-/* The above code is setting up a test environment for a JavaScript application. It is using the
+describe('Blockchains route', async function () {
+  /* The above code is setting up a test environment for a JavaScript application. It is using the
 `beforeEach` function to run some code before each test case. */
-beforeEach(async function () {
-  const db = await Database.getInstance({});
-  const collectionAdmin = db.collection('admins');
-  await collectionAdmin.insertOne({
-    userId: process.env.USER_ID_TEST,
+  beforeEach(async function () {
+    const db = await Database.getInstance({});
+    const collectionAdmin = db.collection('admins');
+    await collectionAdmin.insertOne({
+      userId: process.env.USER_ID_TEST,
+    });
   });
-});
 
-/* The above code is a test cleanup function that runs after each test. It gets an instance of a
+  /* The above code is a test cleanup function that runs after each test. It gets an instance of a
 database and checks if the namespace is 'grindery-delight-test-server'. If it is, it drops the
 'blockchains' collection from the database. This ensures that the database is cleaned up after each
 test and is ready for the next test. */
-afterEach(async function () {
-  const db = await Database.getInstance({});
-  if (db.namespace === 'grindery-delight-test-server') {
-    db.dropDatabase();
-  }
-});
+  afterEach(async function () {
+    const db = await Database.getInstance({});
+    if (db.namespace === 'grindery-delight-test-server') {
+      db.dropDatabase();
+    }
+  });
 
-describe('Blockchains route', async function () {
   // Retry all tests in this suite up to 4 times
   this.retries(4);
 
