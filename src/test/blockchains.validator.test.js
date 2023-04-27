@@ -55,21 +55,51 @@ describe('Blockchains route - Validators', async function () {
         .to.be.true;
     });
 
-    const testCases = [
-      'chainId',
-      'caipId',
-      'label',
-      'icon',
-      'rpc',
-      'nativeTokenSymbol',
-      'transactionExplorerUrl',
-      'addressExplorerUrl',
-      'isEvm',
-      'isTestnet',
-      'isActive',
-    ];
+    it('Should fail if usefulAddresses is not an object', async function () {
+      // Make a request to create the offer with invalid data
+      const res = await chai
+        .request(app)
+        .post(pathBlockchains)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .send({ ...blockchain, usefulAddresses: 'notAnObject' });
+      // Assertions
+      chai.expect(res).to.have.status(400);
+      chai.expect(res.body).to.be.an('array');
+      chai.expect(
+        res.body.some(
+          (err) =>
+            err.msg === 'must be an object' && err.param === 'usefulAddresses'
+        )
+      ).to.be.true;
+    });
 
-    for (const testCase of testCases) {
+    it('Should fail if usefulAddresses not an object of string', async function () {
+      // Make a request to create the offer with invalid data
+      const res = await chai
+        .request(app)
+        .post(pathBlockchains)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .send({
+          ...blockchain,
+          usefulAddresses: {
+            myUsefulAddress1: 1,
+            myUsefulAddress2: 'myAddress2',
+          },
+        });
+      // Assertions
+      chai.expect(res).to.have.status(400);
+      chai.expect(res.body).to.be.an('array');
+      chai.expect(
+        res.body.some(
+          (err) =>
+            err.msg ===
+              'usefulAddresses.myUsefulAddress1 must be a string value' &&
+            err.param === 'usefulAddresses'
+        )
+      ).to.be.true;
+    });
+
+    for (const testCase of Object.keys(blockchain)) {
       if (testCase == 'caipId') {
         testNonCaipId({
           method: 'post',
