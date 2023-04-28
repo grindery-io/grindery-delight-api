@@ -50,7 +50,16 @@ export const pathOffers_Get_MongoDBId = '/unit-test/offers/id';
 export const pathOffers_Delete_MongoDBId = '/unit-test/offers/';
 export const pathOffers_Put = '/unit-test/offers/';
 
-export const pathOrders = '/unit-test/orders';
+// Orders paths
+export const pathOrders_Post = '/unit-test/orders';
+export const pathOrders_Get_OrderId = '/unit-test/orders/orderId';
+export const pathOrders_Get_User = '/unit-test/orders/user';
+export const pathOrders_Get_MongoDBId = '/unit-test/orders/id';
+export const pathOrders_Get_LiquidityProvider =
+  '/unit-test/orders/liquidity-provider';
+export const pathOrders_Delete_OrderId = '/unit-test/orders/';
+export const pathOrders_Put_Complete = '/unit-test/orders/complete';
+
 export const pathTokens = '/unit-test/tokens';
 
 export const order = {

@@ -7,7 +7,7 @@ import {
   testNonMongodbId,
   mockedToken,
 } from './utils/utils.js';
-import { pathOrders, order } from './utils/variables.js';
+import { pathOrders_Post, order } from './utils/variables.js';
 import app from '../index.js';
 
 chai.use(chaiHttp);
@@ -18,7 +18,7 @@ describe('Orders route - Validators', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
-        .post(pathOrders)
+        .post(pathOrders_Post)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .send({ ...order, status: 'notAppropriate' });
 
@@ -38,7 +38,7 @@ describe('Orders route - Validators', async function () {
       if (testCase !== 'status') {
         testNonString({
           method: 'post',
-          path: pathOrders,
+          path: pathOrders_Post,
           body: {
             ...order,
             [testCase]: 123,
@@ -51,7 +51,7 @@ describe('Orders route - Validators', async function () {
       if (testCase !== 'orderId' && testCase !== 'status') {
         testNonEmpty({
           method: 'post',
-          path: pathOrders,
+          path: pathOrders_Post,
           body: {
             ...order,
             [testCase]: '',
@@ -64,7 +64,7 @@ describe('Orders route - Validators', async function () {
 
     testUnexpectedField({
       method: 'post',
-      path: pathOrders,
+      path: pathOrders_Post,
       body: {
         ...order,
         unexpectedField: 'Unexpected field',
@@ -76,7 +76,7 @@ describe('Orders route - Validators', async function () {
 
     testUnexpectedField({
       method: 'post',
-      path: pathOrders,
+      path: pathOrders_Post,
       body: {
         ...order,
       },
