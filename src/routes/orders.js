@@ -7,7 +7,6 @@ import {
   setOrderCompleteValidator,
   getOrderByOrderIdValidator,
   deleteOrderValidator,
-  setOrderStatusValidator,
 } from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -32,6 +31,7 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
     newDocument.date = new Date();
     newDocument.userId = res.locals.userId;
     newDocument.isComplete = false;
+    newDocument.status = 'pending';
     res.send(await collection.insertOne(newDocument)).status(201);
   } else {
     res.status(404).send({
@@ -124,33 +124,6 @@ router.get('/liquidity-provider', isRequired, async (req, res) => {
   );
 
   res.send(result).status(200);
-});
-
-router.put('/status', setOrderStatusValidator, isRequired, async (req, res) => {
-  const validator = validateResult(req, res);
-  const db = await Database.getInstance(req);
-  const collection = db.collection('orders');
-
-  if (validator.length) {
-    return res.status(400).send(validator);
-  }
-  const order = await collection.findOne({
-    orderId: req.body.orderId,
-    userId: { $regex: res.locals.userId, $options: 'i' },
-  });
-  if (order) {
-    res.status(200).send(
-      await collection.updateOne(order, {
-        $set: {
-          status: req.body.status,
-        },
-      })
-    );
-  } else {
-    res.status(404).send({
-      msg: 'No order found.',
-    });
-  }
 });
 
 /* This is a PUT request that adds a order to an offer. */

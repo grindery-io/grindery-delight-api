@@ -2,9 +2,6 @@ import { body, param, query } from 'express-validator';
 import { validateFields } from '../utils/validators-utils.js';
 
 export const createOrderValidator = [
-  body('status')
-    .matches(/^(pending|success|failure)$/)
-    .withMessage('must be one of "pending", "success" or "failure"'),
   body('orderId').isString().withMessage('must be string value'),
   body('amountTokenDeposit')
     .isString()
@@ -45,7 +42,6 @@ export const createOrderValidator = [
     validateFields(
       req.body,
       [
-        'status',
         'orderId',
         'amountTokenDeposit',
         'addressTokenDeposit',
@@ -83,31 +79,6 @@ export const getOrderByIdValidator = [
     .withMessage('must be mongodb id')
     .notEmpty()
     .withMessage('must not be empty'),
-];
-
-export const setOrderStatusValidator = [
-  body('orderId')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('status')
-    .matches(/^(success|failure|completion|completionFailure)$/)
-    .withMessage(
-      'must be one of "success", "failure", "completion" or "completionFailure"'
-    ),
-  body().custom((value, { req }) => {
-    validateFields(req.body, ['orderId', 'status'], 'body');
-    return true;
-  }),
-  query().custom((value, { req }) => {
-    validateFields(req.query, [], 'query');
-    return true;
-  }),
-  param().custom((value, { req }) => {
-    validateFields(req.params, [], 'params');
-    return true;
-  }),
 ];
 
 export const setOrderCompleteValidator = [

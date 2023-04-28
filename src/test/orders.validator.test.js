@@ -21,26 +21,6 @@ chai.use(chaiHttp);
 
 describe('Orders route - Validators', async function () {
   describe('POST new order', async function () {
-    it('Should fail if status is not pending, success or failure', async function () {
-      // Make a request to create the offer with invalid data
-      const res = await chai
-        .request(app)
-        .post(pathOrders_Post)
-        .set({ Authorization: `Bearer ${mockedToken}` })
-        .send({ ...order, status: 'notAppropriate' });
-
-      // Assertions
-      chai.expect(res).to.have.status(400);
-      chai.expect(res.body).to.be.an('array');
-      chai.expect(
-        res.body.some(
-          (err) =>
-            err.msg === 'must be one of "pending", "success" or "failure"' &&
-            err.param === 'status'
-        )
-      ).to.be.true;
-    });
-
     for (const testCase of Object.keys(order)) {
       if (testCase !== 'status') {
         testNonString({
@@ -118,53 +98,6 @@ describe('Orders route - Validators', async function () {
       body: {},
       query: { id: 'notAMongoDBId' },
       field: 'id',
-    });
-  });
-
-  describe('PUT change status order', async function () {
-    it('Should fail if status is not in match range', async function () {
-      // Make a request to create the offer with invalid data
-      const res = await chai
-        .request(app)
-        .put(pathOrders_Put_Status)
-        .set({ Authorization: `Bearer ${mockedToken}` })
-        .send({ orderId: '123', status: 'pending' });
-      // Assertions
-      chai.expect(res).to.have.status(400);
-      chai.expect(res.body).to.be.an('array');
-      chai.expect(
-        res.body.some(
-          (err) =>
-            err.msg ===
-              'must be one of "success", "failure", "completion" or "completionFailure"' &&
-            err.param === 'status'
-        )
-      ).to.be.true;
-    });
-
-    testUnexpectedField({
-      method: 'put',
-      path: pathOrders_Put_Status,
-      body: {
-        orderId: '123',
-        status: 'success',
-        unexpectedField: 'Unexpected field',
-      },
-      field: {},
-      field: 'unexpectedField',
-      location: 'body',
-    });
-
-    testUnexpectedField({
-      method: 'put',
-      path: pathOrders_Put_Status,
-      body: {
-        orderId: '123',
-        status: 'success',
-      },
-      query: { unexpectedField: 'Unexpected field' },
-      field: 'unexpectedField',
-      location: 'query',
     });
   });
 

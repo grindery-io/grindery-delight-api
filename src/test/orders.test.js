@@ -76,7 +76,9 @@ describe('Orders route', async function () {
       delete getOrder.body.userId;
       delete getOrder.body.date;
 
-      chai.expect(getOrder.body).to.deep.equal({ ...order, isComplete: false });
+      chai
+        .expect(getOrder.body)
+        .to.deep.equal({ ...order, isComplete: false, status: 'pending' });
     });
 
     it('Should fail if same orderId exists', async function () {
@@ -205,11 +207,12 @@ describe('Orders route', async function () {
       delete res.body._id;
       delete res.body.date;
       delete res.body.userId;
-      delete res.body.isComplete;
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
-      chai.expect(res.body).to.deep.equal(order);
+      chai
+        .expect(res.body)
+        .to.deep.equal({ ...order, isComplete: false, status: 'pending' });
     });
 
     it('Should return the order with the proper userId', async function () {
@@ -438,61 +441,6 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(404);
       chai.expect(res.body).to.deep.equal({ msg: 'No order found' });
-    });
-  });
-
-  describe('PUT order status', async function () {
-    it('Should return 403 if no token is provided', async function () {
-      const res = await chai.request(app).put(pathOrders_Put_Status).send({
-        orderId: 'myOrderId',
-        status: 'success',
-      });
-      chai.expect(res).to.have.status(403);
-    });
-
-    it('Should the status of the given order', async function () {
-      const createResponse = await createBaseOrderOrOffer({
-        collection: collectionOrders,
-        path: pathOrders_Post,
-        body: order,
-      });
-
-      const res = await chai
-        .request(app)
-        .put(pathOrders_Put_Status)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send({
-          orderId: order.orderId,
-          status: 'success',
-        });
-      chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.deep.equal({
-        acknowledged: true,
-        modifiedCount: 1,
-        upsertedId: null,
-        upsertedCount: 0,
-        matchedCount: 1,
-      });
-
-      const getOrder = await chai
-        .request(app)
-        .get(pathOrders_Get_MongoDBId)
-        .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ id: createResponse.body.insertedId });
-      chai.expect(getOrder.body.status).to.equal('success');
-    });
-
-    it('Should fail if no order exists', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathOrders_Put_Status)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send({
-          orderId: order.orderId,
-          status: 'success',
-        });
-      chai.expect(res).to.have.status(404);
-      chai.expect(res.body).to.deep.equal({ msg: 'No order found.' });
     });
   });
 
