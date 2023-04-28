@@ -42,6 +42,7 @@ export const pathLiquidityWallets_Get_MongoDBId =
 
 // Offers paths
 export const pathOffers_Post = '/unit-test/offers';
+export const pathOffers_Get_All = '/unit-test/offers';
 export const pathOffers_Get_OfferId = '/unit-test/offers/offerId';
 export const pathOffers_Get_Search = '/unit-test/offers/search';
 export const pathOffers_Get_User = '/unit-test/offers/user';

@@ -14,6 +14,7 @@ import {
   pathOffers_Get_MongoDBId,
   pathOffers_Delete_MongoDBId,
   pathOffers_Put,
+  pathOffers_Get_All,
 } from './utils/variables.js';
 
 chai.use(chaiHttp);
@@ -87,7 +88,7 @@ describe('Offers route', async function () {
 
   describe('GET all offers', async function () {
     it('Should not fail if no token is provided', async function () {
-      const res = await chai.request(app).get(pathOffers_Post);
+      const res = await chai.request(app).get(pathOffers_Get_All);
 
       chai.expect(res).to.have.status(200);
     });
@@ -107,7 +108,7 @@ describe('Offers route', async function () {
 
       const res = await chai
         .request(app)
-        .get(pathOffers_Post)
+        .get(pathOffers_Get_All)
         .set({ Authorization: `Bearer ${mockedToken}` });
 
       chai.expect(res).to.have.status(200);
