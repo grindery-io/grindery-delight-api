@@ -14,6 +14,10 @@ import {
   offer,
   searchActiveOfferValidator,
   modifyOfferValidator,
+  pathOffers_Get_Search,
+  pathOffers_Get_OfferId,
+  pathOffers_Get_MongoDBId,
+  pathOffers_Put,
 } from './utils/variables.js';
 
 chai.use(chaiHttp);
@@ -129,7 +133,7 @@ describe('Offers route - Validators', async function () {
     for (const testCase of Object.keys(searchActiveOfferValidator)) {
       testNonString({
         method: 'get',
-        path: '/unit-test/offers/search',
+        path: pathOffers_Get_Search,
         body: {},
         query: { ...searchActiveOfferValidator, [testCase]: [123, 123] },
         field: testCase,
@@ -137,7 +141,7 @@ describe('Offers route - Validators', async function () {
 
       testNonEmpty({
         method: 'get',
-        path: '/unit-test/offers/search',
+        path: pathOffers_Get_Search,
         body: {},
         query: { ...searchActiveOfferValidator, [testCase]: '' },
         field: testCase,
@@ -148,7 +152,7 @@ describe('Offers route - Validators', async function () {
   describe('GET offer by offerId', async function () {
     testNonString({
       method: 'get',
-      path: '/unit-test/offers/offerId',
+      path: pathOffers_Get_OfferId,
       body: {},
       query: { offerId: [123, 123] },
       field: 'offerId',
@@ -156,7 +160,7 @@ describe('Offers route - Validators', async function () {
 
     testNonEmpty({
       method: 'get',
-      path: '/unit-test/offers/offerId',
+      path: pathOffers_Get_OfferId,
       body: {},
       query: { offerId: '' },
       field: 'offerId',
@@ -166,7 +170,7 @@ describe('Offers route - Validators', async function () {
   describe('GET offer by MongoDB id', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/unit-test/offers/id',
+      path: pathOffers_Get_MongoDBId,
       body: {},
       query: { id: 'nonMongodbId' },
       field: 'id',
@@ -178,7 +182,7 @@ describe('Offers route - Validators', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
-        .put('/unit-test/offers/1234')
+        .put(pathOffers_Put + 'myOfferId')
         .set({ Authorization: `Bearer ${mockedToken}` })
         .send({ ...offer, status: 'notAppropriate' });
       // Assertions
@@ -197,7 +201,7 @@ describe('Offers route - Validators', async function () {
       if (testCase !== 'isActive' && testCase !== 'status') {
         testNonString({
           method: 'put',
-          path: '/unit-test/offers/1234',
+          path: pathOffers_Put + 'myOfferId',
           body: {
             [testCase]: 123,
           },
@@ -214,7 +218,7 @@ describe('Offers route - Validators', async function () {
       ) {
         testNonEmpty({
           method: 'put',
-          path: '/unit-test/offers/1234',
+          path: pathOffers_Put + 'myOfferId',
           body: {
             [testCase]: '',
           },
@@ -226,7 +230,7 @@ describe('Offers route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/unit-test/offers/1234',
+      path: pathOffers_Put + 'myOfferId',
       body: {
         unexpectedField: 'Unexpected field',
       },
@@ -237,7 +241,7 @@ describe('Offers route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/unit-test/offers/1234',
+      path: pathOffers_Put + 'myOfferId',
       body: {
         chainId: '3434',
       },
