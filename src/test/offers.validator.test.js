@@ -178,13 +178,13 @@ describe('Offers route - Validators', async function () {
   });
 
   describe('PUT offer by offerId', async function () {
-    it('Should fail if status is not pending, success or failure', async function () {
+    it('Should fail if status is not success, failure, activation or deactivation', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
         .put(pathOffers_Put + 'myOfferId')
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .send({ ...offer, status: 'notAppropriate' });
+        .send({ ...offer, status: 'pending' });
       // Assertions
       chai.expect(res).to.have.status(400);
       chai.expect(res.body).to.be.an('array');
