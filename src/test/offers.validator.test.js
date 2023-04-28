@@ -40,27 +40,8 @@ describe('Offers route - Validators', async function () {
       chai.expect(res.body[0].msg).to.equal('min must be less than max');
     });
 
-    it('Should fail if status is not pending, success or failure', async function () {
-      // Make a request to create the offer with invalid data
-      const res = await chai
-        .request(app)
-        .post(pathOffers_Post)
-        .set({ Authorization: `Bearer ${mockedToken}` })
-        .send({ ...offer, status: 'notAppropriate' });
-      // Assertions
-      chai.expect(res).to.have.status(400);
-      chai.expect(res.body).to.be.an('array');
-      chai.expect(
-        res.body.some(
-          (err) =>
-            err.msg === 'must be one of "pending", "success" or "failure"' &&
-            err.param === 'status'
-        )
-      ).to.be.true;
-    });
-
     for (const testCase of Object.keys(offer)) {
-      if (testCase !== 'isActive' && testCase !== 'status') {
+      if (testCase !== 'isActive') {
         testNonString({
           method: 'post',
           path: pathOffers_Post,
@@ -78,8 +59,7 @@ describe('Offers route - Validators', async function () {
         testCase !== 'image' &&
         testCase !== 'amount' &&
         testCase !== 'provider' &&
-        testCase !== 'offerId' &&
-        testCase !== 'status'
+        testCase !== 'offerId'
       ) {
         testNonEmpty({
           method: 'post',
@@ -178,28 +158,8 @@ describe('Offers route - Validators', async function () {
   });
 
   describe('PUT offer by offerId', async function () {
-    it('Should fail if status is not in match range', async function () {
-      // Make a request to create the offer with invalid data
-      const res = await chai
-        .request(app)
-        .put(pathOffers_Put + 'myOfferId')
-        .set({ Authorization: `Bearer ${mockedToken}` })
-        .send({ ...offer, status: 'pending' });
-      // Assertions
-      chai.expect(res).to.have.status(400);
-      chai.expect(res.body).to.be.an('array');
-      chai.expect(
-        res.body.some(
-          (err) =>
-            err.msg ===
-              'must be one of "success", "failure", "activation", "activationFailure", "deactivation" or "deactivationFailure"' &&
-            err.param === 'status'
-        )
-      ).to.be.true;
-    });
-
     for (const testCase of Object.keys(modifyOfferValidator)) {
-      if (testCase !== 'isActive' && testCase !== 'status') {
+      if (testCase !== 'isActive') {
         testNonString({
           method: 'put',
           path: pathOffers_Put + 'myOfferId',
@@ -214,8 +174,7 @@ describe('Offers route - Validators', async function () {
       if (
         testCase !== 'title' &&
         testCase !== 'image' &&
-        testCase !== 'amount' &&
-        testCase !== 'status'
+        testCase !== 'amount'
       ) {
         testNonEmpty({
           method: 'put',

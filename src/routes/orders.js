@@ -1,4 +1,4 @@
-import express, { query } from 'express';
+import express from 'express';
 import { Database } from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {

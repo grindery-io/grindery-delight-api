@@ -2,9 +2,6 @@ import { body, param, query } from 'express-validator';
 import { validateFields } from '../utils/validators-utils.js';
 
 export const createOfferValidator = [
-  body('status')
-    .matches(/^(pending|success|failure)$/)
-    .withMessage('must be one of "pending", "success" or "failure"'),
   body('chainId')
     .isString()
     .withMessage('must be string value')
@@ -74,7 +71,6 @@ export const createOfferValidator = [
     validateFields(
       req.body,
       [
-        'status',
         'chainId',
         'min',
         'max',
@@ -163,14 +159,6 @@ export const deleteOfferValidator = [
 ];
 
 export const updateOfferValidator = [
-  body('status')
-    .optional()
-    .matches(
-      /^(success|failure|activation|activationFailure|deactivation|deactivationFailure)$/
-    )
-    .withMessage(
-      'must be one of "success", "failure", "activation", "activationFailure", "deactivation" or "deactivationFailure"'
-    ),
   body('offerId')
     .optional()
     .isString()
@@ -262,7 +250,6 @@ export const updateOfferValidator = [
       req.body,
       [
         'offerId',
-        'status',
         'chainId',
         'min',
         'max',

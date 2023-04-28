@@ -68,7 +68,7 @@ describe('Offers route', async function () {
       delete getOffer.body.userId;
       delete getOffer.body.date;
 
-      chai.expect(getOffer.body).to.deep.equal(offer);
+      chai.expect(getOffer.body).to.deep.equal({ ...offer, status: 'pending' });
     });
 
     it('Should fail if same offerId exists', async function () {
@@ -477,7 +477,7 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
-      chai.expect(res.body).to.deep.equal(offer);
+      chai.expect(res.body).to.deep.equal({ ...offer, status: 'pending' });
     });
 
     it('Should return the offer with the proper userId', async function () {
@@ -638,6 +638,7 @@ describe('Offers route', async function () {
         ...modifiedOffer,
         hash: offer.hash,
         offerId: offer.offerId,
+        status: 'pending',
       });
     });
 
@@ -669,6 +670,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         ...modifiedOffer,
       });
     });
@@ -701,6 +703,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         min: modifiedOffer.min,
       });
     });
@@ -733,6 +736,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         max: modifiedOffer.max,
       });
     });
@@ -765,6 +769,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         tokenId: modifiedOffer.tokenId,
       });
     });
@@ -797,6 +802,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         token: modifiedOffer.token,
       });
     });
@@ -829,6 +835,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         tokenAddress: modifiedOffer.tokenAddress,
       });
     });
@@ -861,6 +868,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         isActive: modifiedOffer.isActive,
       });
     });
@@ -893,6 +901,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         exchangeRate: modifiedOffer.exchangeRate,
       });
     });
@@ -925,6 +934,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         exchangeToken: modifiedOffer.exchangeToken,
       });
     });
@@ -957,6 +967,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         exchangeChainId: modifiedOffer.exchangeChainId,
       });
     });
@@ -989,6 +1000,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         estimatedTime: modifiedOffer.estimatedTime,
       });
     });
@@ -1021,6 +1033,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         provider: modifiedOffer.provider,
       });
     });
@@ -1053,6 +1066,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         title: modifiedOffer.title,
       });
     });
@@ -1085,6 +1099,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         image: modifiedOffer.image,
       });
     });
@@ -1117,39 +1132,8 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        status: 'pending',
         amount: modifiedOffer.amount,
-      });
-    });
-
-    it('Should modify the status field', async function () {
-      await createBaseOffer(offer);
-
-      const modifiedOffer = {
-        status: 'failure',
-      };
-
-      const modifyOffer = await chai
-        .request(app)
-        .put(pathOffers_Put + offer.offerId)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
-
-      chai.expect(modifyOffer).to.have.status(200);
-
-      const getOffer = await chai
-        .request(app)
-        .get(pathOffers_Get_OfferId)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
-
-      delete getOffer.body._id;
-      delete getOffer.body.date;
-      delete getOffer.body.userId;
-
-      chai.expect(getOffer).to.have.status(200);
-      chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
-        status: modifiedOffer.status,
       });
     });
   });

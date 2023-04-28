@@ -98,7 +98,6 @@ export const offer = {
   title: '',
   image: '',
   amount: '',
-  status: 'pending',
 };
 
 export const modifiedOffer = {
@@ -117,7 +116,6 @@ export const modifiedOffer = {
   title: 'title',
   image: 'image',
   amount: '50',
-  status: 'success',
 };
 
 export const modifyOfferValidator = {
@@ -135,7 +133,6 @@ export const modifyOfferValidator = {
   title: '',
   image: '',
   amount: '',
-  status: 'failure',
   offerId: 'myNewOfferId',
 };
 
