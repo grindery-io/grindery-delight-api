@@ -21,12 +21,6 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   const collection = db.collection('offers');
 
   if (validator.length) {
-    // console.log(
-    //   'Offer creation - Validation failed - userId',
-    //   res.locals.userId
-    // );
-    // console.log('Offer creation - Validation failed - request body', req.body);
-    // console.log('Offer creation - Validation failed - Validator', validator);
     return res.status(400).send(validator);
   }
   if (
@@ -40,14 +34,6 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
     newDocument.userId = res.locals.userId;
     res.send(await collection.insertOne(newDocument)).status(201);
   } else {
-    // console.log(
-    //   'Offer creation - Offer already exists - userId',
-    //   res.locals.userId
-    // );
-    // console.log(
-    //   'Offer creation - Offer already exists - request body',
-    //   req.body
-    // );
     res.status(404).send({
       msg: 'This offer already exists.',
     });
