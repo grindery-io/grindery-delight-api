@@ -91,6 +91,31 @@ export const setOrderStatusValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body('status')
+    .matches(/^(success|failure|completion|completionFailure)$/)
+    .withMessage(
+      'must be one of "success", "failure", "completion" or "completionFailure"'
+    ),
+  body().custom((value, { req }) => {
+    validateFields(req.body, ['orderId', 'status'], 'body');
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
+];
+
+export const setOrderCompleteValidator = [
+  body('orderId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(req.body, ['orderId'], 'body');
     return true;

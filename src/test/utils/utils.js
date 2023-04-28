@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import chai from 'chai';
 import app from '../../index.js';
-import { ObjectId } from 'mongodb';
 
 dotenv.config();
 

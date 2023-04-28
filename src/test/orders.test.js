@@ -16,6 +16,7 @@ import {
   pathOrders_Put_Complete,
   pathOffers_Post,
   pathOrders_Get_LiquidityProvider,
+  pathOrders_Put_Status,
 } from './utils/variables.js';
 
 chai.use(chaiHttp);
@@ -440,6 +441,61 @@ describe('Orders route', async function () {
     });
   });
 
+  describe('PUT order status', async function () {
+    it('Should return 403 if no token is provided', async function () {
+      const res = await chai.request(app).put(pathOrders_Put_Status).send({
+        orderId: 'myOrderId',
+        status: 'success',
+      });
+      chai.expect(res).to.have.status(403);
+    });
+
+    it('Should the status of the given order', async function () {
+      const createResponse = await createBaseOrderOrOffer({
+        collection: collectionOrders,
+        path: pathOrders_Post,
+        body: order,
+      });
+
+      const res = await chai
+        .request(app)
+        .put(pathOrders_Put_Status)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          orderId: order.orderId,
+          status: 'success',
+        });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.deep.equal({
+        acknowledged: true,
+        modifiedCount: 1,
+        upsertedId: null,
+        upsertedCount: 0,
+        matchedCount: 1,
+      });
+
+      const getOrder = await chai
+        .request(app)
+        .get(pathOrders_Get_MongoDBId)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ id: createResponse.body.insertedId });
+      chai.expect(getOrder.body.status).to.equal('success');
+    });
+
+    it('Should fail if no order exists', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOrders_Put_Status)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          orderId: order.orderId,
+          status: 'success',
+        });
+      chai.expect(res).to.have.status(404);
+      chai.expect(res.body).to.deep.equal({ msg: 'No order found.' });
+    });
+  });
+
   describe('PUT order as complete', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).put(pathOrders_Put_Complete).send({
@@ -470,6 +526,13 @@ describe('Orders route', async function () {
         upsertedCount: 0,
         matchedCount: 1,
       });
+
+      const getOrder = await chai
+        .request(app)
+        .get(pathOrders_Get_MongoDBId)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ id: createResponse.body.insertedId });
+      chai.expect(getOrder.body.isComplete).to.be.true;
     });
 
     it('Should modify no order if the order was previously completed', async function () {

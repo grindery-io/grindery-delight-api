@@ -165,8 +165,12 @@ export const deleteOfferValidator = [
 export const updateOfferValidator = [
   body('status')
     .optional()
-    .matches(/^(success|failure|activation|deactivation)$/)
-    .withMessage('must be one of "pending", "success" or "failure"'),
+    .matches(
+      /^(success|failure|activation|activationFailure|deactivation|deactivationFailure)$/
+    )
+    .withMessage(
+      'must be one of "success", "failure", "activation", "activationFailure", "deactivation" or "deactivationFailure"'
+    ),
   body('offerId')
     .optional()
     .isString()

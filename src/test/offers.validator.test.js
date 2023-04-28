@@ -178,7 +178,7 @@ describe('Offers route - Validators', async function () {
   });
 
   describe('PUT offer by offerId', async function () {
-    it('Should fail if status is not success, failure, activation or deactivation', async function () {
+    it('Should fail if status is not in match range', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
@@ -191,7 +191,8 @@ describe('Offers route - Validators', async function () {
       chai.expect(
         res.body.some(
           (err) =>
-            err.msg === 'must be one of "pending", "success" or "failure"' &&
+            err.msg ===
+              'must be one of "success", "failure", "activation", "activationFailure", "deactivation" or "deactivationFailure"' &&
             err.param === 'status'
         )
       ).to.be.true;

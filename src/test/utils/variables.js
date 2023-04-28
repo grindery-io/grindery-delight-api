@@ -58,6 +58,7 @@ export const pathOrders_Get_MongoDBId = '/unit-test/orders/id';
 export const pathOrders_Get_LiquidityProvider =
   '/unit-test/orders/liquidity-provider';
 export const pathOrders_Delete_OrderId = '/unit-test/orders/';
+export const pathOrders_Put_Status = '/unit-test/orders/status';
 export const pathOrders_Put_Complete = '/unit-test/orders/complete';
 
 // Tokens paths
