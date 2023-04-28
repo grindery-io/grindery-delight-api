@@ -7,7 +7,13 @@ import {
   testNonBoolean,
   testNonMongodbId,
 } from './utils/utils.js';
-import { pathTokens, token } from './utils/variables.js';
+import {
+  pathTokens_Post,
+  pathTokens_Put_MongoDBId,
+  token,
+  notAMongoDBId,
+  randomMongoDBId,
+} from './utils/variables.js';
 
 chai.use(chaiHttp);
 
@@ -17,7 +23,7 @@ describe('Tokens route - Validators', async function () {
       if (testCase !== 'isNative' && testCase !== 'isActive') {
         testNonString({
           method: 'post',
-          path: pathTokens,
+          path: pathTokens_Post,
           body: {
             ...token,
             [testCase]: 123,
@@ -29,7 +35,7 @@ describe('Tokens route - Validators', async function () {
 
       testNonEmpty({
         method: 'post',
-        path: pathTokens,
+        path: pathTokens_Post,
         body: {
           ...token,
           [testCase]: '',
@@ -43,7 +49,7 @@ describe('Tokens route - Validators', async function () {
   describe('GET by MongoDBId', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/unit-test/tokens/notAMongoDBId',
+      path: pathTokens_Put_MongoDBId + notAMongoDBId,
       body: {},
       query: {},
       field: 'tokenId',
@@ -55,7 +61,7 @@ describe('Tokens route - Validators', async function () {
       if (testCase === 'isActive' || testCase === 'isNative') {
         testNonBoolean({
           method: 'put',
-          path: '/unit-test/tokens/myMongoDBId',
+          path: pathTokens_Put_MongoDBId + randomMongoDBId,
           body: {
             [testCase]: 123,
           },
@@ -65,7 +71,7 @@ describe('Tokens route - Validators', async function () {
       } else {
         testNonString({
           method: 'put',
-          path: '/unit-test/tokens/myMongoDBId',
+          path: pathTokens_Put_MongoDBId + randomMongoDBId,
           body: {
             [testCase]: 123,
           },
@@ -76,7 +82,7 @@ describe('Tokens route - Validators', async function () {
 
       testNonEmpty({
         method: 'put',
-        path: '/unit-test/tokens/myMongoDBId',
+        path: pathTokens_Put_MongoDBId + randomMongoDBId,
         body: {
           ...token,
           [testCase]: '',
@@ -88,7 +94,7 @@ describe('Tokens route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/unit-test/tokens/myMongoDBId',
+      path: pathTokens_Put_MongoDBId + randomMongoDBId,
       body: {
         unexpectedField: 'unexpectedField',
       },
@@ -99,7 +105,7 @@ describe('Tokens route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/unit-test/tokens/myMongoDBId',
+      path: pathTokens_Put_MongoDBId + randomMongoDBId,
       body: {},
       query: { unexpectedField: 'unexpectedField' },
       field: 'unexpectedField',
@@ -108,7 +114,7 @@ describe('Tokens route - Validators', async function () {
 
     testNonMongodbId({
       method: 'put',
-      path: '/unit-test/tokens/notAMongoDBId',
+      path: pathTokens_Put_MongoDBId + notAMongoDBId,
       body: {},
       query: {},
       field: 'tokenId',
@@ -118,7 +124,7 @@ describe('Tokens route - Validators', async function () {
   describe('DELETE by MongoDBId', async function () {
     testNonMongodbId({
       method: 'delete',
-      path: '/unit-test/tokens/notAMongoDBId',
+      path: pathTokens_Put_MongoDBId + notAMongoDBId,
       body: {},
       query: {},
       field: 'tokenId',

@@ -60,7 +60,12 @@ export const pathOrders_Get_LiquidityProvider =
 export const pathOrders_Delete_OrderId = '/unit-test/orders/';
 export const pathOrders_Put_Complete = '/unit-test/orders/complete';
 
-export const pathTokens = '/unit-test/tokens';
+// Tokens paths
+export const pathTokens_Post = '/unit-test/tokens';
+export const pathTokens_Get_Active = '/unit-test/tokens/active';
+export const pathTokens_Get_MongoDBId = '/unit-test/tokens/';
+export const pathTokens_Put_MongoDBId = '/unit-test/tokens/';
+export const pathTokens_Delete_MongoDBId = '/unit-test/tokens/';
 
 export const order = {
   amountTokenDeposit: '0.34',
