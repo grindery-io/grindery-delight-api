@@ -40,9 +40,17 @@ export const pathLiquidityWallets_Get_Single =
 export const pathLiquidityWallets_Get_MongoDBId =
   '/unit-test/liquidity-wallets/id/';
 
+// Offers paths
+export const pathOffers_Post = '/unit-test/offers';
+export const pathOffers_Get_OfferId = '/unit-test/offers/offerId';
+export const pathOffers_Get_Search = '/unit-test/offers/search';
+export const pathOffers_Get_User = '/unit-test/offers/user';
+export const pathOffers_Get_MongoDBId = '/unit-test/offers/id';
+export const pathOffers_Delete_MongoDBId = '/unit-test/offers/';
+export const pathOffers_Put = '/unit-test/offers/';
+
 export const pathOrders = '/unit-test/orders';
 export const pathTokens = '/unit-test/tokens';
-export const pathOffers = '/unit-test/offers';
 
 export const order = {
   amountTokenDeposit: '0.34',

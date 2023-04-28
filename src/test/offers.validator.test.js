@@ -10,7 +10,7 @@ import {
   testNonMongodbId,
 } from './utils/utils.js';
 import {
-  pathOffers,
+  pathOffers_Post,
   offer,
   searchActiveOfferValidator,
   modifyOfferValidator,
@@ -24,7 +24,7 @@ describe('Offers route - Validators', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
-        .post(pathOffers)
+        .post(pathOffers_Post)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .send({ ...offer, min: '30', max: '20' });
 
@@ -40,7 +40,7 @@ describe('Offers route - Validators', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
-        .post(pathOffers)
+        .post(pathOffers_Post)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .send({ ...offer, status: 'notAppropriate' });
       // Assertions
@@ -59,7 +59,7 @@ describe('Offers route - Validators', async function () {
       if (testCase !== 'isActive' && testCase !== 'status') {
         testNonString({
           method: 'post',
-          path: pathOffers,
+          path: pathOffers_Post,
           body: {
             ...offer,
             [testCase]: 123,
@@ -79,7 +79,7 @@ describe('Offers route - Validators', async function () {
       ) {
         testNonEmpty({
           method: 'post',
-          path: pathOffers,
+          path: pathOffers_Post,
           body: {
             ...offer,
             [testCase]: '',
@@ -92,7 +92,7 @@ describe('Offers route - Validators', async function () {
 
     testNonBoolean({
       method: 'post',
-      path: pathOffers,
+      path: pathOffers_Post,
       body: {
         ...offer,
         isActive: 123,
@@ -103,7 +103,7 @@ describe('Offers route - Validators', async function () {
 
     testUnexpectedField({
       method: 'post',
-      path: pathOffers,
+      path: pathOffers_Post,
       body: {
         ...offer,
         unexpectedField: 'Unexpected field',
@@ -115,7 +115,7 @@ describe('Offers route - Validators', async function () {
 
     testUnexpectedField({
       method: 'post',
-      path: pathOffers,
+      path: pathOffers_Post,
       body: {
         ...offer,
       },
