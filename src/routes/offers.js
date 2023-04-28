@@ -11,7 +11,10 @@ import {
 } from '../validators/offers.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
-import { getOffersWithLiquidityWallets } from '../utils/offers-utils.js';
+import {
+  getOffersWithLiquidityWallets,
+  getOneOfferWithLiquidityWallet,
+} from '../utils/offers-utils.js';
 
 const router = express.Router();
 
@@ -115,16 +118,20 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('offers');
-
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     res.status(200).send(
-      await collection.findOne({
-        offerId: req.query.offerId,
-      })
+      await getOneOfferWithLiquidityWallet(
+        db.collection('liquidity-wallets'),
+        await collection.findOne({
+          offerId: req.query.offerId,
+        })
+      )
     );
   }
 );
@@ -132,17 +139,21 @@ router.get(
 /* This is a GET request that returns an offer by id. */
 router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const db = await Database.getInstance(req);
-  const collection = db.collection('offers');
-
   if (validator.length) {
     return res.status(400).send(validator);
   }
+
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   res.status(200).send(
-    await collection.findOne({
-      _id: new ObjectId(req.query.id),
-      userId: { $regex: res.locals.userId, $options: 'i' },
-    })
+    await getOneOfferWithLiquidityWallet(
+      db.collection('liquidity-wallets'),
+      await collection.findOne({
+        _id: new ObjectId(req.query.id),
+        userId: { $regex: res.locals.userId, $options: 'i' },
+      })
+    )
   );
 });
 

@@ -5,13 +5,25 @@ export async function getOffersWithLiquidityWallets(db, offers) {
 
   return await Promise.all(
     offers.map(async (offer) => {
-      return {
+      return await getOneOfferWithLiquidityWallet(
+        collectionLiquidityWallet,
+        offer
+      );
+    })
+  );
+}
+
+export async function getOneOfferWithLiquidityWallet(
+  collectionLiquidityWallet,
+  offer
+) {
+  return offer
+    ? {
         ...offer,
         liquidityWallet: await collectionLiquidityWallet.findOne({
           chainId: offer.chainId,
           walletAddress: offer.provider,
         }),
-      };
-    })
-  );
+      }
+    : null;
 }

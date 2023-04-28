@@ -71,7 +71,9 @@ describe('Offers route', async function () {
       delete getOffer.body.userId;
       delete getOffer.body.date;
 
-      chai.expect(getOffer.body).to.deep.equal({ ...offer, status: 'pending' });
+      chai
+        .expect(getOffer.body)
+        .to.deep.equal({ ...offer, status: 'pending', liquidityWallet: null });
     });
 
     it('Should fail if same offerId exists', async function () {
@@ -535,6 +537,40 @@ describe('Offers route', async function () {
       chai.expect(res.body.offerId).to.equal(offer.offerId);
     });
 
+    it('Should return the offer with the proper fields', async function () {
+      await createBaseOffer(offer);
+
+      const db = await Database.getInstance({});
+      const collectionLiquidityWallet = db.collection('liquidity-wallets');
+      await collectionLiquidityWallet.insertOne({
+        chainId: offer.chainId,
+        walletAddress: offer.provider,
+      });
+
+      const offerTmp = await collectionOffers.findOne({});
+      const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
+
+      const formattedData = {
+        ...offerTmp,
+        _id: offerTmp._id.toString(),
+        date: offerTmp.date.toISOString(),
+        liquidityWallet: {
+          ...liquidityWalletTmp,
+          _id: liquidityWalletTmp._id.toString(),
+        },
+      };
+
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ offerId: offer.offerId });
+
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.be.an('object');
+      chai.expect(res.body).to.deep.equal(formattedData);
+    });
+
     it('Should return an empty object if offerId doesnt exist', async function () {
       const res = await chai
         .request(app)
@@ -554,29 +590,6 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_MongoDBId)
         .query({ id: '643471eaaceeded45b420be6' });
       chai.expect(res).to.have.status(403);
-    });
-
-    it('Should return the offer with the proper MongoDB id', async function () {
-      const createResponse = await chai
-        .request(app)
-        .post(pathOffers_Post)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(offer);
-      chai.expect(createResponse).to.have.status(200);
-
-      const res = await chai
-        .request(app)
-        .get(pathOffers_Get_MongoDBId)
-        .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ id: createResponse.body.insertedId });
-
-      delete res.body._id;
-      delete res.body.date;
-      delete res.body.userId;
-
-      chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.be.an('object');
-      chai.expect(res.body).to.deep.equal({ ...offer, status: 'pending' });
     });
 
     it('Should return the offer with the proper userId', async function () {
@@ -601,6 +614,39 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.userId).to.equal(userId);
+    });
+
+    it('Should return the offer with the proper fields', async function () {
+      await createBaseOffer(offer);
+
+      const db = await Database.getInstance({});
+      const collectionLiquidityWallet = db.collection('liquidity-wallets');
+      await collectionLiquidityWallet.insertOne({
+        chainId: offer.chainId,
+        walletAddress: offer.provider,
+      });
+
+      const offerTmp = await collectionOffers.findOne({});
+      const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
+
+      const formattedData = {
+        ...offerTmp,
+        _id: offerTmp._id.toString(),
+        date: offerTmp.date.toISOString(),
+        liquidityWallet: {
+          ...liquidityWalletTmp,
+          _id: liquidityWalletTmp._id.toString(),
+        },
+      };
+
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_MongoDBId)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ id: offerTmp._id.toString() });
+
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.deep.equal(formattedData);
     });
 
     it('Should return an empty object if MongoDB id doesnt exist', async function () {
@@ -738,6 +784,7 @@ describe('Offers route', async function () {
         hash: offer.hash,
         offerId: offer.offerId,
         status: 'pending',
+        liquidityWallet: null,
       });
     });
 
@@ -770,6 +817,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         ...modifiedOffer,
       });
     });
@@ -803,6 +851,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         min: modifiedOffer.min,
       });
     });
@@ -836,6 +885,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         max: modifiedOffer.max,
       });
     });
@@ -869,6 +919,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         tokenId: modifiedOffer.tokenId,
       });
     });
@@ -902,6 +953,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         token: modifiedOffer.token,
       });
     });
@@ -935,6 +987,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         tokenAddress: modifiedOffer.tokenAddress,
       });
     });
@@ -968,6 +1021,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         isActive: modifiedOffer.isActive,
       });
     });
@@ -1001,6 +1055,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         exchangeRate: modifiedOffer.exchangeRate,
       });
     });
@@ -1034,6 +1089,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         exchangeToken: modifiedOffer.exchangeToken,
       });
     });
@@ -1067,6 +1123,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         exchangeChainId: modifiedOffer.exchangeChainId,
       });
     });
@@ -1100,6 +1157,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         estimatedTime: modifiedOffer.estimatedTime,
       });
     });
@@ -1133,6 +1191,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         provider: modifiedOffer.provider,
       });
     });
@@ -1166,6 +1225,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         title: modifiedOffer.title,
       });
     });
@@ -1199,6 +1259,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         image: modifiedOffer.image,
       });
     });
@@ -1232,6 +1293,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
         status: 'pending',
+        liquidityWallet: null,
         amount: modifiedOffer.amount,
       });
     });
