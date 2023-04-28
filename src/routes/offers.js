@@ -45,7 +45,24 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 router.get('/', async (req, res) => {
   const db = await Database.getInstance(req);
   const collection = db.collection('offers');
-  res.send(await collection.find({}).toArray()).status(200);
+  const collectionLiquidityWallet = db.collection('liquidity-wallets');
+  const offers = await collection.find({}).toArray();
+
+  res
+    .send(
+      await Promise.all(
+        offers.map(async (offer) => {
+          return {
+            ...offer,
+            liquidityWallet: await collectionLiquidityWallet.findOne({
+              chainId: offer.chainId,
+              walletAddress: offer.provider,
+            }),
+          };
+        })
+      )
+    )
+    .status(200);
 });
 
 /* This is a GET request that returns all activated offers

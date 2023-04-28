@@ -15,7 +15,10 @@ import {
   pathOffers_Delete_MongoDBId,
   pathOffers_Put,
   pathOffers_Get_All,
+  pathLiquidityWallets_Post_NewLiquidityWallet,
+  collectionLiquidityWallet,
 } from './utils/variables.js';
+import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 
@@ -87,24 +90,37 @@ describe('Offers route', async function () {
   });
 
   describe('GET all offers', async function () {
+    beforeEach(async function () {
+      const db = await Database.getInstance({});
+      await createBaseOffer(offer);
+
+      const collectionLiquidityWallet = db.collection('liquidity-wallets');
+      await collectionLiquidityWallet.insertOne({
+        chainId: offer.chainId,
+        walletAddress: offer.provider,
+      });
+    });
+
     it('Should not fail if no token is provided', async function () {
       const res = await chai.request(app).get(pathOffers_Get_All);
-
       chai.expect(res).to.have.status(200);
     });
 
     it('Should return an array with the correct MongoDB elements', async function () {
-      // Transform each item in mongoData
-      const formattedData = (await collectionOffers.find({}).toArray()).map(
-        (item) => {
-          // Return a new object with the formatted fields
-          return {
-            ...item,
-            _id: item._id.toString(),
-            date: item.date.toISOString(),
-          };
-        }
-      );
+      const offerTmp = await collectionOffers.findOne({});
+      const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
+
+      const formattedData = [
+        {
+          ...offerTmp,
+          _id: offerTmp._id.toString(),
+          date: offerTmp.date.toISOString(),
+          liquidityWallet: {
+            ...liquidityWalletTmp,
+            _id: liquidityWalletTmp._id.toString(),
+          },
+        },
+      ];
 
       const res = await chai
         .request(app)
