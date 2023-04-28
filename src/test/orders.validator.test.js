@@ -7,7 +7,13 @@ import {
   testNonMongodbId,
   mockedToken,
 } from './utils/utils.js';
-import { pathOrders_Post, order } from './utils/variables.js';
+import {
+  pathOrders_Post,
+  order,
+  pathOrders_Get_OrderId,
+  pathOrders_Get_MongoDBId,
+  pathOrders_Put_Complete,
+} from './utils/variables.js';
 import app from '../index.js';
 
 chai.use(chaiHttp);
@@ -89,7 +95,7 @@ describe('Orders route - Validators', async function () {
   describe('GET by orderId', async function () {
     testNonString({
       method: 'get',
-      path: '/unit-test/orders/orderId',
+      path: pathOrders_Get_OrderId,
       body: {},
       query: { orderId: [123, 123] },
       field: 'orderId',
@@ -97,7 +103,7 @@ describe('Orders route - Validators', async function () {
 
     testNonEmpty({
       method: 'get',
-      path: '/unit-test/orders/orderId',
+      path: pathOrders_Get_OrderId,
       body: {},
       query: { orderId: '' },
       field: 'orderId',
@@ -107,7 +113,7 @@ describe('Orders route - Validators', async function () {
   describe('GET by MongoDbId', async function () {
     testNonMongodbId({
       method: 'get',
-      path: '/unit-test/orders/id',
+      path: pathOrders_Get_MongoDBId,
       body: {},
       query: { id: 'notAMongoDBId' },
       field: 'id',
@@ -117,7 +123,7 @@ describe('Orders route - Validators', async function () {
   describe('PUT order as complete', async function () {
     testNonString({
       method: 'put',
-      path: '/unit-test/orders/complete',
+      path: pathOrders_Put_Complete,
       body: {
         orderId: 123,
       },
@@ -127,7 +133,7 @@ describe('Orders route - Validators', async function () {
 
     testNonEmpty({
       method: 'put',
-      path: '/unit-test/orders/complete',
+      path: pathOrders_Put_Complete,
       body: {
         orderId: '',
       },
@@ -137,7 +143,7 @@ describe('Orders route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/unit-test/orders/complete',
+      path: pathOrders_Put_Complete,
       body: {
         orderId: '123',
         unexpectedField: 'Unexpected field',
@@ -149,7 +155,7 @@ describe('Orders route - Validators', async function () {
 
     testUnexpectedField({
       method: 'put',
-      path: '/unit-test/orders/complete',
+      path: pathOrders_Put_Complete,
       body: {
         orderId: '123',
       },
