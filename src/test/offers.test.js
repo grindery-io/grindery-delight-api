@@ -434,6 +434,18 @@ describe('Offers route', async function () {
   });
 
   describe('GET all offers for a user', async function () {
+    beforeEach(async function () {
+      const db = await Database.getInstance({});
+
+      await createBaseOffer(offer);
+
+      const collectionLiquidityWallet = db.collection('liquidity-wallets');
+      await collectionLiquidityWallet.insertOne({
+        chainId: offer.chainId,
+        walletAddress: offer.provider,
+      });
+    });
+
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get(pathOffers_Get_User);
       chai.expect(res).to.have.status(403);
@@ -472,6 +484,31 @@ describe('Offers route', async function () {
       for (const offer of res.body) {
         chai.expect(offer.userId).to.equal(userId);
       }
+    });
+
+    it('Should offers with the proper information', async function () {
+      const offerTmp = await collectionOffers.findOne({});
+      const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
+
+      const formattedData = [
+        {
+          ...offerTmp,
+          _id: offerTmp._id.toString(),
+          date: offerTmp.date.toISOString(),
+          liquidityWallet: {
+            ...liquidityWalletTmp,
+            _id: liquidityWalletTmp._id.toString(),
+          },
+        },
+      ];
+
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_User)
+        .set({ Authorization: `Bearer ${mockedToken}` });
+      chai.expect(res).to.have.status(200);
+
+      chai.expect(res.body).to.deep.equal(formattedData);
     });
   });
 

@@ -11,6 +11,7 @@ import {
 } from '../validators/offers.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
+import { getOffersWithLiquidityWallets } from '../utils/offers-utils.js';
 
 const router = express.Router();
 
@@ -44,22 +45,12 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 /* This is a GET request that returns all offers. */
 router.get('/', async (req, res) => {
   const db = await Database.getInstance(req);
-  const collection = db.collection('offers');
-  const collectionLiquidityWallet = db.collection('liquidity-wallets');
-  const offers = await collection.find({}).toArray();
 
   res
     .send(
-      await Promise.all(
-        offers.map(async (offer) => {
-          return {
-            ...offer,
-            liquidityWallet: await collectionLiquidityWallet.findOne({
-              chainId: offer.chainId,
-              walletAddress: offer.provider,
-            }),
-          };
-        })
+      await getOffersWithLiquidityWallets(
+        db,
+        await db.collection('offers').find({}).toArray()
       )
     )
     .status(200);
@@ -76,34 +67,24 @@ router.get('/search', getOffersValidator, async (req, res) => {
 
   const db = await Database.getInstance(req);
   const collection = db.collection('offers');
-  const collectionLiquidityWallet = db.collection('liquidity-wallets');
-
-  const offers = (
-    await collection
-      .find({
-        isActive: true,
-        exchangeChainId: req.query.exchangeChainId,
-        exchangeToken: req.query.exchangeToken,
-        chainId: req.query.chainId,
-        token: req.query.token,
-      })
-      .toArray()
-  ).filter((offer) => {
-    const rateAmount = req.query.depositAmount / offer.exchangeRate;
-    return offer.min <= rateAmount && offer.max >= rateAmount;
-  });
 
   res
     .send(
-      await Promise.all(
-        offers.map(async (offer) => {
-          return {
-            ...offer,
-            liquidityWallet: await collectionLiquidityWallet.findOne({
-              chainId: offer.chainId,
-              walletAddress: offer.provider,
-            }),
-          };
+      await getOffersWithLiquidityWallets(
+        db,
+        (
+          await collection
+            .find({
+              isActive: true,
+              exchangeChainId: req.query.exchangeChainId,
+              exchangeToken: req.query.exchangeToken,
+              chainId: req.query.chainId,
+              token: req.query.token,
+            })
+            .toArray()
+        ).filter((offer) => {
+          const rateAmount = req.query.depositAmount / offer.exchangeRate;
+          return offer.min <= rateAmount && offer.max >= rateAmount;
         })
       )
     )
@@ -117,9 +98,12 @@ router.get('/user', isRequired, async (req, res) => {
 
   res
     .send(
-      await collection
-        .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
-        .toArray()
+      await getOffersWithLiquidityWallets(
+        db,
+        await collection
+          .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+          .toArray()
+      )
     )
     .status(200);
 });
