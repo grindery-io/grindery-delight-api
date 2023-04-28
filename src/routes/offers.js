@@ -69,28 +69,45 @@ router.get('/', async (req, res) => {
 and filter by exchangeChainId, exchangeToken, chainId,token */
 router.get('/search', getOffersValidator, async (req, res) => {
   const validator = validateResult(req, res);
-  const db = await Database.getInstance(req);
-  const collection = db.collection('offers');
 
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  let offers = await collection
-    .find({
-      isActive: true,
-      exchangeChainId: req.query.exchangeChainId,
-      exchangeToken: req.query.exchangeToken,
-      chainId: req.query.chainId,
-      token: req.query.token,
-    })
-    .toArray();
 
-  offers = offers.filter((offer) => {
-    offer.rateAmount = req.query.depositAmount / offer.exchangeRate;
-    return offer.min <= offer.rateAmount && offer.max >= offer.rateAmount;
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+  const collectionLiquidityWallet = db.collection('liquidity-wallets');
+
+  const offers = (
+    await collection
+      .find({
+        isActive: true,
+        exchangeChainId: req.query.exchangeChainId,
+        exchangeToken: req.query.exchangeToken,
+        chainId: req.query.chainId,
+        token: req.query.token,
+      })
+      .toArray()
+  ).filter((offer) => {
+    const rateAmount = req.query.depositAmount / offer.exchangeRate;
+    return offer.min <= rateAmount && offer.max >= rateAmount;
   });
 
-  res.send(offers).status(200);
+  res
+    .send(
+      await Promise.all(
+        offers.map(async (offer) => {
+          return {
+            ...offer,
+            liquidityWallet: await collectionLiquidityWallet.findOne({
+              chainId: offer.chainId,
+              walletAddress: offer.provider,
+            }),
+          };
+        })
+      )
+    )
+    .status(200);
 });
 
 /* This is a GET request that returns all offers for a specific user. */

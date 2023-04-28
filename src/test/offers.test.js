@@ -133,6 +133,16 @@ describe('Offers route', async function () {
   });
 
   describe('GET all active offers with filters', async function () {
+    beforeEach(async function () {
+      const db = await Database.getInstance({});
+
+      const collectionLiquidityWallet = db.collection('liquidity-wallets');
+      await collectionLiquidityWallet.insertOne({
+        chainId: offer.chainId,
+        walletAddress: offer.provider,
+      });
+    });
+
     it('Should not fail if no token is provided', async function () {
       const query = {
         exchangeChainId: 'myExchangeChainId',
@@ -366,6 +376,42 @@ describe('Offers route', async function () {
       for (const offer of res.body) {
         const rateAmount = query.depositAmount / offer.exchangeRate;
         chai.expect(Number(offer.max)).to.be.at.least(rateAmount);
+      }
+    });
+
+    it('Should return offers with proper liquidy wallet information', async function () {
+      const customOffer = { ...offer, isActive: true, exchangeRate: '2' };
+      const nbrOffers = 1;
+      for (let i = 0; i < nbrOffers; i++) {
+        customOffer.offerId = `offerId-number${i}`;
+        // isActive est true pour les i pairs, false pour les i impairs
+        customOffer.isActive = i % 2 === 0;
+        await createBaseOffer(customOffer);
+      }
+
+      const query = {
+        exchangeChainId: offer.exchangeChainId,
+        exchangeToken: offer.exchangeToken,
+        chainId: offer.chainId,
+        token: offer.token,
+        depositAmount: '1',
+      };
+
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_Search)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query(query);
+
+      chai.expect(res).to.have.status(200);
+
+      const liquidityWallet = await collectionLiquidityWallet.findOne({});
+
+      for (const offer of res.body) {
+        chai.expect(offer.liquidityWallet).to.deep.equal({
+          ...liquidityWallet,
+          _id: liquidityWallet._id.toString(),
+        });
       }
     });
 
