@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import './loadEnvironment.js';
 import router from './router.js';
+import websocket from '../websocket-server.js';
 
 const { json, urlencoded } = pkg;
 const __filename = fileURLToPath(import.meta.url);
@@ -113,9 +114,11 @@ app.get('/', (req, res) => {
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, function () {
+const server = app.listen(port, function () {
   console.log(`Delight API listening on port ${port}`);
 });
+
+const wss = websocket(server);
 
 // Mount production router to root
 app.use('/', router);
@@ -124,3 +127,4 @@ app.use('/', router);
 app.use('/test/', router);
 
 export default app;
+export { wss };
