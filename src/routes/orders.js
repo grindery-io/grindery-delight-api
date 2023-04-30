@@ -113,7 +113,6 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
 router.get('/liquidity-provider', isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
 
-  let result = [];
   const activeOffersForUser = await db
     .collection('offers')
     .find({
@@ -122,19 +121,21 @@ router.get('/liquidity-provider', isRequired, async (req, res) => {
     })
     .toArray();
 
-  await Promise.all(
-    activeOffersForUser.map(async (offer) => {
-      const OrdersForUser = await db
-        .collection('orders')
-        .find({
-          offerId: offer.offerId,
-        })
-        .toArray();
-      result.push(...OrdersForUser);
-    })
+  res.status(200).send(
+    await getOrdersWithOffers(
+      db,
+      (
+        await Promise.all(
+          activeOffersForUser.map(async (offer) => {
+            return await db
+              .collection('orders')
+              .find({ offerId: offer.offerId })
+              .toArray();
+          })
+        )
+      ).flat()
+    )
   );
-
-  res.send(await getOrdersWithOffers(db, result)).status(200);
 });
 
 /* This is a PUT request that adds a order to an offer. */
