@@ -54,6 +54,7 @@ describe('Orders route', async function () {
         body: order,
       });
     });
+
     it('Should POST a new order with relevant fields', async function () {
       await createBaseOrderOrOffer({
         collection: collectionOrders,
@@ -71,9 +72,12 @@ describe('Orders route', async function () {
       delete getOrder.body._id;
       delete getOrder.body.userId;
       delete getOrder.body.date;
-      chai
-        .expect(getOrder.body)
-        .to.deep.equal({ ...order, isComplete: false, status: 'pending' });
+      chai.expect(getOrder.body).to.deep.equal({
+        ...order,
+        isComplete: false,
+        status: 'pending',
+        offer: null,
+      });
     });
     it('Should fail if same orderId exists', async function () {
       await createBaseOrderOrOffer({
@@ -92,6 +96,7 @@ describe('Orders route', async function () {
         .to.be.equal('This order already exists.');
     });
   });
+
   describe('GET by user', async function () {
     beforeEach(async function () {
       const db = await Database.getInstance({});
@@ -199,8 +204,8 @@ describe('Orders route', async function () {
   describe('GET by MongoDbId', async function () {
     beforeEach(async function () {
       const db = await Database.getInstance({});
-      const collectionOffers = db.collection('offers');
-      await collectionOffers.insertOne(offer);
+
+      await db.collection('offers').insertOne(offer);
       await collectionOrders.insertOne({
         ...order,
         offerId: offer.offerId,
@@ -278,119 +283,75 @@ describe('Orders route', async function () {
   });
 
   describe('GET by liquidity provider', async function () {
-    it('Should show only orders with existing offerId in the offers collection', async function () {
-      const customOffer = { ...offer };
-      const customOrder = { ...order };
-      const nbrOffersOrders = 1;
-      let customOfferIds = [];
-      for (let i = 0; i < nbrOffersOrders; i++) {
-        customOffer.offerId = `offerId-number${i}`;
-        // isActive est true pour les i pairs, false pour les i impairs
-        customOffer.isActive = i % 2 === 0;
-        customOfferIds.push(customOffer.offerId);
-        await createBaseOrderOrOffer({
-          collection: collectionOffers,
-          path: pathOffers_Post,
-          body: customOffer,
-        });
-        customOrder.orderId = `orderId-number${i}`;
-        customOrder.offerId = customOffer.offerId;
-        await createBaseOrderOrOffer({
-          collection: collectionOrders,
-          path: pathOrders_Post,
-          body: customOrder,
-        });
-      }
-      const res = await chai
-        .request(app)
-        .get(pathOrders_Get_LiquidityProvider)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      const offerIds = res.body.map((order) => order.offerId);
-      chai.expect(offerIds.every((offerId) => customOfferIds.includes(offerId)))
-        .to.be.true;
+    beforeEach(async function () {
+      await collectionOffers.insertMany([
+        { ...offer, userId: process.env.USER_ID_TEST },
+      ]);
+
+      await collectionOrders.insertMany([
+        {
+          ...order,
+          offerId: offer.offerId,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...order,
+          offerId: 'offerId1',
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...order,
+          offerId: 'offerId2',
+          userId: 'anotherUserId',
+        },
+      ]);
     });
+
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get(pathOrders_Get_LiquidityProvider);
       chai.expect(res).to.have.status(403);
     });
-    it('Should show only orders corresponding to active offers', async function () {
-      const customOffer = { ...offer };
-      const customOrder = { ...order };
-      const nbrOffersOrders = 1;
-      for (let i = 0; i < nbrOffersOrders; i++) {
-        customOffer.offerId = `offerId-number${i}`;
-        // isActive est true pour les i pairs, false pour les i impairs
-        customOffer.isActive = i % 2 === 0;
-        await createBaseOrderOrOffer({
-          collection: collectionOffers,
-          path: pathOffers_Post,
-          body: customOffer,
-        });
-        customOrder.orderId = `orderId-number${i}`;
-        customOrder.offerId = customOffer.offerId;
-        await createBaseOrderOrOffer({
-          collection: collectionOrders,
-          path: pathOrders_Post,
-          body: customOrder,
-        });
-      }
+
+    it('Should show only orders with existing offerId in the offers collection', async function () {
       const res = await chai
         .request(app)
         .get(pathOrders_Get_LiquidityProvider)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      const offers = await collectionOffers
-        .find({ offerId: { $in: res.body.map((order) => order.offerId) } })
-        .toArray();
-      chai.expect(offers).to.be.an('array');
-      offers.forEach((offer) => {
-        chai.expect(offer.isActive).to.be.true;
+
+      const orderTmp = await collectionOffers.findOne({
+        offerId: res.body[0].offerId,
+      });
+
+      chai.expect(orderTmp).to.be.an('object');
+      chai.expect(orderTmp).to.have.property('_id');
+    });
+
+    it('Should show only orders corresponding to active offers', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_LiquidityProvider)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        chai.expect(order.offer.isActive).to.be.true;
       });
     });
+
     it('Should show only orders corresponding offers created by the user', async function () {
-      const customOffer = { ...offer };
-      const customOrder = { ...order };
-      const nbrOffersOrders = 1;
-      let userId = '';
-      for (let i = 0; i < nbrOffersOrders; i++) {
-        customOffer.offerId = `offerId-number${i}`;
-        // isActive est true pour les i pairs, false pour les i impairs
-        customOffer.isActive = i % 2 === 0;
-        await createBaseOrderOrOffer({
-          collection: collectionOffers,
-          path: pathOffers_Post,
-          body: customOffer,
-        });
-        customOrder.orderId = `orderId-number${i}`;
-        customOrder.offerId = customOffer.offerId;
-        const newOrder = await createBaseOrderOrOffer({
-          collection: collectionOrders,
-          path: pathOrders_Post,
-          body: customOrder,
-        });
-        if (i === 0) {
-          userId = (
-            await collectionOrders.findOne({
-              _id: new ObjectId(newOrder.body.insertedId),
-            })
-          ).userId;
-        }
-      }
       const res = await chai
         .request(app)
         .get(pathOrders_Get_LiquidityProvider)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      const offers = await collectionOffers
-        .find({ offerId: { $in: res.body.map((order) => order.offerId) } })
-        .toArray();
-      chai.expect(offers).to.be.an('array');
-      offers.forEach((offer) => {
-        chai.expect(offer.userId).to.equal(userId);
+
+      res.body.forEach((order) => {
+        chai.expect(order.offer.userId).to.equal(order.userId);
       });
     });
   });
+
   describe('DELETE order by orderId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai

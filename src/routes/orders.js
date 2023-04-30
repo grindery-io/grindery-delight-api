@@ -47,15 +47,6 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
 /* This is a GET request that returns all orders for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
-  // const collection = db.collection('orders');
-
-  // res
-  //   .send(
-  //     await collection
-  //       .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
-  //       .toArray()
-  //   )
-  //   .status(200);
 
   res
     .send(
@@ -121,11 +112,10 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
 
 router.get('/liquidity-provider', isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
-  const collection = db.collection('orders');
-  const collectionOffer = db.collection('offers');
 
   let result = [];
-  const activeOffersForUser = await collectionOffer
+  const activeOffersForUser = await db
+    .collection('offers')
     .find({
       userId: { $regex: res.locals.userId, $options: 'i' },
       isActive: true,
@@ -134,7 +124,8 @@ router.get('/liquidity-provider', isRequired, async (req, res) => {
 
   await Promise.all(
     activeOffersForUser.map(async (offer) => {
-      const OrdersForUser = await collection
+      const OrdersForUser = await db
+        .collection('orders')
         .find({
           offerId: offer.offerId,
         })
@@ -143,7 +134,7 @@ router.get('/liquidity-provider', isRequired, async (req, res) => {
     })
   );
 
-  res.send(result).status(200);
+  res.send(await getOrdersWithOffers(db, result)).status(200);
 });
 
 /* This is a PUT request that adds a order to an offer. */
