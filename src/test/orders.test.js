@@ -18,6 +18,7 @@ import {
   pathOrders_Get_LiquidityProvider,
   pathOrders_Put_Status,
 } from './utils/variables.js';
+import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 
@@ -46,7 +47,6 @@ describe('Orders route', async function () {
         .send(order);
       chai.expect(createResponse).to.have.status(403);
     });
-
     it('Should POST a new order', async function () {
       await createBaseOrderOrOffer({
         collection: collectionOrders,
@@ -54,40 +54,33 @@ describe('Orders route', async function () {
         body: order,
       });
     });
-
     it('Should POST a new order with relevant fields', async function () {
       await createBaseOrderOrOffer({
         collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
-
       const getOrder = await chai
         .request(app)
         .get(pathOrders_Get_OrderId)
         .query({ orderId: order.orderId })
         .set('Authorization', `Bearer ${mockedToken}`);
-
       // Assertions
       chai.expect(getOrder).to.have.status(200);
       chai.expect(getOrder.body).to.be.an('object');
-
       delete getOrder.body._id;
       delete getOrder.body.userId;
       delete getOrder.body.date;
-
       chai
         .expect(getOrder.body)
         .to.deep.equal({ ...order, isComplete: false, status: 'pending' });
     });
-
     it('Should fail if same orderId exists', async function () {
       await createBaseOrderOrOffer({
         collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
-
       const createDuplicateResponse = await chai
         .request(app)
         .post(pathOrders_Post)
@@ -99,48 +92,66 @@ describe('Orders route', async function () {
         .to.be.equal('This order already exists.');
     });
   });
-
   describe('GET by user', async function () {
+    beforeEach(async function () {
+      const db = await Database.getInstance({});
+      const collectionOffers = db.collection('offers');
+      await collectionOffers.insertOne(offer);
+      await collectionOrders.insertOne({
+        ...order,
+        offerId: offer.offerId,
+        userId: process.env.USER_ID_TEST,
+      });
+      await collectionOrders.insertOne({
+        ...order,
+        offerId: offer.offerId,
+        userId: 'anotherUserId',
+      });
+    });
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get(pathOrders_Get_User);
       chai.expect(res).to.have.status(403);
     });
-
-    it('Should return only orders for the given user', async function () {
-      const customOrder = { ...order };
-      const nbrOrders = 1;
-      let userId = '';
-      for (let i = 0; i < nbrOrders; i++) {
-        customOrder.orderId = `orderId-number${i}`;
-
-        const createResponse = await createBaseOrderOrOffer({
-          collection: collectionOrders,
-          path: pathOrders_Post,
-          body: customOrder,
-        });
-
-        if (i === 0) {
-          userId = (
-            await collectionOrders.findOne({
-              _id: new ObjectId(createResponse.body.insertedId),
-            })
-          ).userId;
-        }
-      }
-
+    it('Should return only orders for the given user and proper fields', async function () {
+      const offerTmp = await collectionOffers.findOne({});
+      const orderTmp = await collectionOrders.findOne({
+        userId: process.env.USER_ID_TEST,
+      });
       const res = await chai
         .request(app)
         .get(pathOrders_Get_User)
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
-
-      for (const order of res.body) {
-        chai.expect(order.userId).to.equal(userId);
-      }
+      chai.expect(res.body).to.deep.equal([
+        {
+          ...orderTmp,
+          _id: orderTmp._id.toString(),
+          offer: {
+            ...offerTmp,
+            _id: offerTmp._id.toString(),
+          },
+        },
+      ]);
     });
   });
-
   describe('GET by orderId', async function () {
+    beforeEach(async function () {
+      const db = await Database.getInstance({});
+      const collectionOffers = db.collection('offers');
+      await collectionOffers.insertOne(offer);
+      await collectionOrders.insertOne({
+        ...order,
+        offerId: offer.offerId,
+        userId: process.env.USER_ID_TEST,
+      });
+      await collectionOrders.insertOne({
+        ...order,
+        orderId: 'anotherOrderId',
+        offerId: offer.offerId,
+        userId: process.env.USER_ID_TEST,
+      });
+    });
+
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -150,10 +161,10 @@ describe('Orders route', async function () {
     });
 
     it('Should get an order corresponding to orderId', async function () {
-      await createBaseOrderOrOffer({
-        collection: collectionOrders,
-        path: pathOrders_Post,
-        body: order,
+      const offerTmp = await collectionOffers.findOne({});
+      const orderTmp = await collectionOrders.findOne({
+        orderId: order.orderId,
+        userId: process.env.USER_ID_TEST,
       });
 
       const res = await chai
@@ -162,10 +173,14 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ orderId: order.orderId });
       chai.expect(res).to.have.status(200);
-
-      chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.be.an('object');
-      chai.expect(res.body.orderId).to.equal(order.orderId);
+      chai.expect(res.body).to.deep.equal({
+        ...orderTmp,
+        _id: orderTmp._id.toString(),
+        offer: {
+          ...offerTmp,
+          _id: offerTmp._id.toString(),
+        },
+      });
     });
 
     it('Should return an empty string if no order exists', async function () {
@@ -173,15 +188,13 @@ describe('Orders route', async function () {
         .request(app)
         .get(pathOrders_Get_OrderId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ orderId: order.orderId });
+        .query({ orderId: 'nonExistingOrderId' });
       chai.expect(res).to.have.status(200);
-
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
       chai.expect(res.body).to.be.empty;
     });
   });
-
   describe('GET by MongoDbId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
@@ -190,66 +203,55 @@ describe('Orders route', async function () {
         .query({ id: 'mongoDbId' });
       chai.expect(res).to.have.status(403);
     });
-
     it('Should return the order with the proper MongoDB id', async function () {
       const createResponse = await createBaseOrderOrOffer({
         collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
-
       const res = await chai
         .request(app)
         .get(pathOrders_Get_MongoDBId)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: createResponse.body.insertedId });
-
       delete res.body._id;
       delete res.body.date;
       delete res.body.userId;
-
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
       chai
         .expect(res.body)
         .to.deep.equal({ ...order, isComplete: false, status: 'pending' });
     });
-
     it('Should return the order with the proper userId', async function () {
       const createResponse = await createBaseOrderOrOffer({
         collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
-
       const userId = (
         await collectionOrders.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         })
       ).userId;
-
       const res = await chai
         .request(app)
         .get(pathOrders_Get_MongoDBId)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: createResponse.body.insertedId });
-
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.userId).to.equal(userId);
     });
-
     it('Should return an empty object if MongoDB id doesnt exist', async function () {
       const res = await chai
         .request(app)
         .get(pathOrders_Get_MongoDBId)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: '111111111111111111111111' });
-
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object').that.is.empty;
     });
   });
-
   describe('GET by liquidity provider', async function () {
     it('Should show only orders with existing offerId in the offers collection', async function () {
       const customOffer = { ...offer };
@@ -260,15 +262,12 @@ describe('Orders route', async function () {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
         customOfferIds.push(customOffer.offerId);
-
         await createBaseOrderOrOffer({
           collection: collectionOffers,
           path: pathOffers_Post,
           body: customOffer,
         });
-
         customOrder.orderId = `orderId-number${i}`;
         customOrder.offerId = customOffer.offerId;
         await createBaseOrderOrOffer({
@@ -277,24 +276,19 @@ describe('Orders route', async function () {
           body: customOrder,
         });
       }
-
       const res = await chai
         .request(app)
         .get(pathOrders_Get_LiquidityProvider)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-
       const offerIds = res.body.map((order) => order.offerId);
-
       chai.expect(offerIds.every((offerId) => customOfferIds.includes(offerId)))
         .to.be.true;
     });
-
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get(pathOrders_Get_LiquidityProvider);
       chai.expect(res).to.have.status(403);
     });
-
     it('Should show only orders corresponding to active offers', async function () {
       const customOffer = { ...offer };
       const customOrder = { ...order };
@@ -303,13 +297,11 @@ describe('Orders route', async function () {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
         await createBaseOrderOrOffer({
           collection: collectionOffers,
           path: pathOffers_Post,
           body: customOffer,
         });
-
         customOrder.orderId = `orderId-number${i}`;
         customOrder.offerId = customOffer.offerId;
         await createBaseOrderOrOffer({
@@ -318,23 +310,19 @@ describe('Orders route', async function () {
           body: customOrder,
         });
       }
-
       const res = await chai
         .request(app)
         .get(pathOrders_Get_LiquidityProvider)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-
       const offers = await collectionOffers
         .find({ offerId: { $in: res.body.map((order) => order.offerId) } })
         .toArray();
-
       chai.expect(offers).to.be.an('array');
       offers.forEach((offer) => {
         chai.expect(offer.isActive).to.be.true;
       });
     });
-
     it('Should show only orders corresponding offers created by the user', async function () {
       const customOffer = { ...offer };
       const customOrder = { ...order };
@@ -344,13 +332,11 @@ describe('Orders route', async function () {
         customOffer.offerId = `offerId-number${i}`;
         // isActive est true pour les i pairs, false pour les i impairs
         customOffer.isActive = i % 2 === 0;
-
         await createBaseOrderOrOffer({
           collection: collectionOffers,
           path: pathOffers_Post,
           body: customOffer,
         });
-
         customOrder.orderId = `orderId-number${i}`;
         customOrder.offerId = customOffer.offerId;
         const newOrder = await createBaseOrderOrOffer({
@@ -358,7 +344,6 @@ describe('Orders route', async function () {
           path: pathOrders_Post,
           body: customOrder,
         });
-
         if (i === 0) {
           userId = (
             await collectionOrders.findOne({
@@ -367,24 +352,20 @@ describe('Orders route', async function () {
           ).userId;
         }
       }
-
       const res = await chai
         .request(app)
         .get(pathOrders_Get_LiquidityProvider)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-
       const offers = await collectionOffers
         .find({ offerId: { $in: res.body.map((order) => order.offerId) } })
         .toArray();
-
       chai.expect(offers).to.be.an('array');
       offers.forEach((offer) => {
         chai.expect(offer.userId).to.equal(userId);
       });
     });
   });
-
   describe('DELETE order by orderId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
@@ -392,14 +373,12 @@ describe('Orders route', async function () {
         .delete(pathOrders_Delete_OrderId + 'myOrderId');
       chai.expect(res).to.have.status(403);
     });
-
     it('Should delete one order', async function () {
       await createBaseOrderOrOffer({
         collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
-
       const deleteResponse = await chai
         .request(app)
         .delete(pathOrders_Delete_OrderId + order.orderId)
@@ -408,20 +387,17 @@ describe('Orders route', async function () {
       chai.expect(deleteResponse.body.acknowledged).to.be.true;
       chai.expect(deleteResponse.body.deletedCount).to.equal(1);
     });
-
     it('Should delete the appropriate order', async function () {
       const createResponse = await createBaseOrderOrOffer({
         collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
-
       chai.expect(
         await collectionOrders.findOne({
           _id: new ObjectId(createResponse.body.insertedId),
         })
       ).to.not.be.empty;
-
       const deleteResponse = await chai
         .request(app)
         .delete(pathOrders_Delete_OrderId + order.orderId)
@@ -433,7 +409,6 @@ describe('Orders route', async function () {
         })
       ).to.be.null;
     });
-
     it('Should return 404 with message if no order found', async function () {
       const res = await chai
         .request(app)
@@ -443,7 +418,6 @@ describe('Orders route', async function () {
       chai.expect(res.body).to.deep.equal({ msg: 'No order found' });
     });
   });
-
   describe('PUT order as complete', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).put(pathOrders_Put_Complete).send({
@@ -451,14 +425,12 @@ describe('Orders route', async function () {
       });
       chai.expect(res).to.have.status(403);
     });
-
     it('Should modify one order if the order was previously not completed', async function () {
       const createResponse = await createBaseOrderOrOffer({
         collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
-
       const res = await chai
         .request(app)
         .put(pathOrders_Put_Complete)
@@ -474,7 +446,6 @@ describe('Orders route', async function () {
         upsertedCount: 0,
         matchedCount: 1,
       });
-
       const getOrder = await chai
         .request(app)
         .get(pathOrders_Get_MongoDBId)
@@ -482,14 +453,12 @@ describe('Orders route', async function () {
         .query({ id: createResponse.body.insertedId });
       chai.expect(getOrder.body.isComplete).to.be.true;
     });
-
     it('Should modify no order if the order was previously completed', async function () {
       await createBaseOrderOrOffer({
         collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
-
       const res = await chai
         .request(app)
         .put(pathOrders_Put_Complete)
@@ -498,7 +467,6 @@ describe('Orders route', async function () {
           orderId: order.orderId,
         });
       chai.expect(res).to.have.status(200);
-
       const res1 = await chai
         .request(app)
         .put(pathOrders_Put_Complete)
@@ -515,7 +483,6 @@ describe('Orders route', async function () {
         matchedCount: 1,
       });
     });
-
     it('Should fail if no order exists', async function () {
       const res = await chai
         .request(app)

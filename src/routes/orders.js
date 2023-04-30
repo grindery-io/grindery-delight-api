@@ -10,6 +10,10 @@ import {
 } from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
+import {
+  getOneOrderWithOffer,
+  getOrdersWithOffers,
+} from '../utils/orders-utils.js';
 
 const router = express.Router();
 
@@ -43,13 +47,25 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
 /* This is a GET request that returns all orders for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
-  const collection = db.collection('orders');
+  // const collection = db.collection('orders');
+
+  // res
+  //   .send(
+  //     await collection
+  //       .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+  //       .toArray()
+  //   )
+  //   .status(200);
 
   res
     .send(
-      await collection
-        .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
-        .toArray()
+      await getOrdersWithOffers(
+        db,
+        await db
+          .collection('orders')
+          .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+          .toArray()
+      )
     )
     .status(200);
 });
@@ -60,20 +76,22 @@ router.get(
   getOrderByOrderIdValidator,
   isRequired,
   async (req, res) => {
-    const db = await Database.getInstance(req);
-    const collection = db.collection('orders');
     const validator = validateResult(req, res);
-
     if (validator.length) {
       return res.status(400).send(validator);
     }
 
+    const db = await Database.getInstance(req);
+
     res
       .send(
-        await collection.findOne({
-          userId: { $regex: res.locals.userId, $options: 'i' },
-          orderId: req.query.orderId,
-        })
+        await getOneOrderWithOffer(
+          db.collection('offers'),
+          await db.collection('orders').findOne({
+            userId: { $regex: res.locals.userId, $options: 'i' },
+            orderId: req.query.orderId,
+          })
+        )
       )
       .status(200);
   }
