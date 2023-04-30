@@ -123,16 +123,19 @@ describe('Orders route', async function () {
         .get(pathOrders_Get_User)
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.deep.equal([
-        {
-          ...orderTmp,
-          _id: orderTmp._id.toString(),
-          offer: {
-            ...offerTmp,
-            _id: offerTmp._id.toString(),
+      chai.expect(res.body).to.deep.equal({
+        orders: [
+          {
+            ...orderTmp,
+            _id: orderTmp._id.toString(),
+            offer: {
+              ...offerTmp,
+              _id: offerTmp._id.toString(),
+            },
           },
-        },
-      ]);
+        ],
+        totalCount: 1,
+      });
     });
   });
   describe('GET by orderId', async function () {

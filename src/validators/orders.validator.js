@@ -65,6 +65,11 @@ export const createOrderValidator = [
   }),
 ];
 
+export const getOrderByUserValidator = [
+  query('limit').optional().isInt().withMessage('must be int value'),
+  query('offset').optional().isInt().withMessage('must be int value'),
+];
+
 export const getOrderByOrderIdValidator = [
   query('orderId')
     .isString()

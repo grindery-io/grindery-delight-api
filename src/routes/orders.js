@@ -7,6 +7,7 @@ import {
   setOrderCompleteValidator,
   getOrderByOrderIdValidator,
   deleteOrderValidator,
+  getOrderByUserValidator,
 } from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -44,20 +45,40 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
   }
 });
 
-/* This is a GET request that returns all orders for a specific user. */
-router.get('/user', isRequired, async (req, res) => {
+// /* This is a GET request that returns all orders for a specific user. */
+// router.get('/user', isRequired, async (req, res) => {
+//   const db = await Database.getInstance(req);
+
+//   res
+//     .send(
+//       await getOrdersWithOffers(
+//         db,
+//         await db
+//           .collection('orders')
+//           .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+//           .toArray()
+//       )
+//     )
+//     .status(200);
+// });
+
+router.get('/user', getOrderByUserValidator, isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
+  const query = { userId: { $regex: res.locals.userId, $options: 'i' } };
 
   res
-    .send(
-      await getOrdersWithOffers(
+    .send({
+      orders: await getOrdersWithOffers(
         db,
         await db
           .collection('orders')
-          .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+          .find(query)
+          .skip(+req.query.offset || 0)
+          .limit(+req.query.limit || 0)
           .toArray()
-      )
-    )
+      ),
+      totalCount: await db.collection('orders').countDocuments(query),
+    })
     .status(200);
 });
 
