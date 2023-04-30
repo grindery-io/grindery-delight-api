@@ -99,20 +99,22 @@ router.get(
 
 /* This is a GET request that returns a order for a specific user by the order id. */
 router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
-  const db = await Database.getInstance(req);
-  const collection = db.collection('orders');
   const validator = validateResult(req, res);
-
   if (validator.length) {
     return res.status(400).send(validator);
   }
 
+  const db = await Database.getInstance(req);
+
   res
     .send(
-      await collection.findOne({
-        userId: { $regex: res.locals.userId, $options: 'i' },
-        _id: new ObjectId(req.query.id),
-      })
+      await getOneOrderWithOffer(
+        db.collection('offers'),
+        await db.collection('orders').findOne({
+          userId: { $regex: res.locals.userId, $options: 'i' },
+          _id: new ObjectId(req.query.id),
+        })
+      )
     )
     .status(200);
 });

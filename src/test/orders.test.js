@@ -195,7 +195,19 @@ describe('Orders route', async function () {
       chai.expect(res.body).to.be.empty;
     });
   });
+
   describe('GET by MongoDbId', async function () {
+    beforeEach(async function () {
+      const db = await Database.getInstance({});
+      const collectionOffers = db.collection('offers');
+      await collectionOffers.insertOne(offer);
+      await collectionOrders.insertOne({
+        ...order,
+        offerId: offer.offerId,
+        userId: process.env.USER_ID_TEST,
+      });
+    });
+
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -203,45 +215,57 @@ describe('Orders route', async function () {
         .query({ id: 'mongoDbId' });
       chai.expect(res).to.have.status(403);
     });
+
     it('Should return the order with the proper MongoDB id', async function () {
-      const createResponse = await createBaseOrderOrOffer({
-        collection: collectionOrders,
-        path: pathOrders_Post,
-        body: order,
+      const orderTmp = await collectionOrders.findOne({
+        userId: process.env.USER_ID_TEST,
       });
+
       const res = await chai
         .request(app)
         .get(pathOrders_Get_MongoDBId)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ id: createResponse.body.insertedId });
-      delete res.body._id;
-      delete res.body.date;
-      delete res.body.userId;
+        .query({ id: orderTmp._id.toString() });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.be.an('object');
-      chai
-        .expect(res.body)
-        .to.deep.equal({ ...order, isComplete: false, status: 'pending' });
+      chai.expect(res.body._id).to.equal(orderTmp._id.toString());
     });
+
     it('Should return the order with the proper userId', async function () {
-      const createResponse = await createBaseOrderOrOffer({
-        collection: collectionOrders,
-        path: pathOrders_Post,
-        body: order,
+      const orderTmp = await collectionOrders.findOne({
+        userId: process.env.USER_ID_TEST,
       });
-      const userId = (
-        await collectionOrders.findOne({
-          _id: new ObjectId(createResponse.body.insertedId),
-        })
-      ).userId;
+
       const res = await chai
         .request(app)
         .get(pathOrders_Get_MongoDBId)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ id: createResponse.body.insertedId });
+        .query({ id: orderTmp._id.toString() });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.userId).to.equal(userId);
+      chai.expect(res.body.userId).to.equal(orderTmp.userId);
     });
+
+    it('Should return the order with all the proper fields', async function () {
+      const offerTmp = await collectionOffers.findOne({});
+      const orderTmp = await collectionOrders.findOne({
+        userId: process.env.USER_ID_TEST,
+      });
+
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_MongoDBId)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ id: orderTmp._id.toString() });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body).to.deep.equal({
+        ...orderTmp,
+        _id: orderTmp._id.toString(),
+        offer: {
+          ...offerTmp,
+          _id: offerTmp._id.toString(),
+        },
+      });
+    });
+
     it('Should return an empty object if MongoDB id doesnt exist', async function () {
       const res = await chai
         .request(app)
@@ -252,6 +276,7 @@ describe('Orders route', async function () {
       chai.expect(res.body).to.be.an('object').that.is.empty;
     });
   });
+
   describe('GET by liquidity provider', async function () {
     it('Should show only orders with existing offerId in the offers collection', async function () {
       const customOffer = { ...offer };
