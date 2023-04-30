@@ -14,9 +14,7 @@ import {
   pathOrders_Get_MongoDBId,
   pathOrders_Delete_OrderId,
   pathOrders_Put_Complete,
-  pathOffers_Post,
   pathOrders_Get_LiquidityProvider,
-  pathOrders_Put_Status,
 } from './utils/variables.js';
 import { Database } from '../db/conn.js';
 
@@ -99,8 +97,6 @@ describe('Orders route', async function () {
 
   describe('GET by user', async function () {
     beforeEach(async function () {
-      const db = await Database.getInstance({});
-      const collectionOffers = db.collection('offers');
       await collectionOffers.insertOne(offer);
       await collectionOrders.insertOne({
         ...order,
@@ -141,8 +137,6 @@ describe('Orders route', async function () {
   });
   describe('GET by orderId', async function () {
     beforeEach(async function () {
-      const db = await Database.getInstance({});
-      const collectionOffers = db.collection('offers');
       await collectionOffers.insertOne(offer);
       await collectionOrders.insertOne({
         ...order,
@@ -203,9 +197,7 @@ describe('Orders route', async function () {
 
   describe('GET by MongoDbId', async function () {
     beforeEach(async function () {
-      const db = await Database.getInstance({});
-
-      await db.collection('offers').insertOne(offer);
+      await collectionOffers.insertOne(offer);
       await collectionOrders.insertOne({
         ...order,
         offerId: offer.offerId,

@@ -1,10 +1,9 @@
 import { Database } from '../db/conn.js';
+import { collectionAdmins } from './utils/variables.js';
 
 export const mochaHooks = {
   beforeEach: async function () {
-    const db = await Database.getInstance({});
-    const collectionAdmin = db.collection('admins');
-    await collectionAdmin.insertOne({
+    await collectionAdmins.insertOne({
       userId: process.env.USER_ID_TEST,
     });
   },

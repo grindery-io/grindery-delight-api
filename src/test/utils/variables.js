@@ -2,6 +2,7 @@ import { Database } from '../../db/conn.js';
 
 const dbTests = await Database.getInstance({});
 
+export const collectionAdmins = dbTests.collection('admins');
 export const collectionOrders = dbTests.collection('orders');
 export const collectionOffers = dbTests.collection('offers');
 export const collectionBlockchains = dbTests.collection('blockchains');

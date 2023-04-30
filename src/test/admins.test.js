@@ -2,7 +2,6 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
 import { mockedToken } from './utils/utils.js';
-import { Database } from '../db/conn.js';
 import { pathAdmin_Get_IsAdmin } from './utils/variables.js';
 
 chai.use(chaiHttp);
