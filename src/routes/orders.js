@@ -110,6 +110,8 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
     .status(200);
 });
 
+/* This is a GET request that returns all orders associated with active offers for a specific user who
+is a liquidity provider. */
 router.get('/liquidity-provider', isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
 
@@ -145,29 +147,31 @@ router.put(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('orders');
-
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('orders');
+
     const order = await collection.findOne({
       orderId: req.body.orderId,
       userId: { $regex: res.locals.userId, $options: 'i' },
     });
-    if (order) {
-      res.status(200).send(
-        await collection.updateOne(order, {
-          $set: {
-            isComplete: true,
-          },
-        })
-      );
-    } else {
-      res.status(404).send({
+
+    if (!order) {
+      return res.status(404).send({
         msg: 'No order found.',
       });
     }
+
+    res.status(200).send(
+      await collection.updateOne(order, {
+        $set: {
+          isComplete: true,
+        },
+      })
+    );
   }
 );
 
