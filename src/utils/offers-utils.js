@@ -1,5 +1,3 @@
-import { Database } from '../db/conn.js';
-
 export async function getOffersWithLiquidityWallets(db, offers) {
   const collectionLiquidityWallet = db.collection('liquidity-wallets');
 
