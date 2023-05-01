@@ -14,7 +14,7 @@ function onConnection(ws, req) {
     try {
       const request = JSON.parse(message);
 
-      if (request.method !== 'authenticate') {
+      if (request.method !== 'authenticated') {
         ws.close();
         console.log('Client connection closed due to invalid method');
         return;
