@@ -4,10 +4,11 @@ import { checkToken } from './src/utils/auth-utils.js';
 function onConnection(ws, req) {
   ws.send(`Mercari Web Socket Server!`);
 
+  const FIVE_SECONDS = 5000;
   const authTimeout = setTimeout(() => {
     ws.close();
     console.log('Client connection closed due to authentication timeout');
-  }, 5000);
+  }, FIVE_SECONDS);
 
   ws.on('message', async (message) => {
     try {
