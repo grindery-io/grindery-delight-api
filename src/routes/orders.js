@@ -21,46 +21,31 @@ const router = express.Router();
 /* This is a POST request that creates a new order. */
 router.post('/', createOrderValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const db = await Database.getInstance(req);
-  const collection = db.collection('orders');
-
   if (validator.length) {
     return res.status(400).send(validator);
   }
+
+  const db = await Database.getInstance(req);
+  const collection = db.collection('orders');
+
   if (
-    !(await collection.findOne({
+    (await collection.findOne({
       orderId: req.body.orderId,
-    }))
+    })) &&
+    req.body.orderId !== ''
   ) {
-    let newDocument = req.body;
-    newDocument.date = new Date();
-    newDocument.userId = res.locals.userId;
-    newDocument.isComplete = false;
-    newDocument.status = 'pending';
-    res.send(await collection.insertOne(newDocument)).status(201);
-  } else {
     res.status(404).send({
       msg: 'This order already exists.',
     });
   }
+
+  let newDocument = req.body;
+  newDocument.date = new Date();
+  newDocument.userId = res.locals.userId;
+  newDocument.isComplete = false;
+  newDocument.status = 'pending';
+  res.send(await collection.insertOne(newDocument)).status(201);
 });
-
-// /* This is a GET request that returns all orders for a specific user. */
-// router.get('/user', isRequired, async (req, res) => {
-//   const db = await Database.getInstance(req);
-
-//   res
-//     .send(
-//       await getOrdersWithOffers(
-//         db,
-//         await db
-//           .collection('orders')
-//           .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
-//           .toArray()
-//       )
-//     )
-//     .status(200);
-// });
 
 router.get('/user', getOrderByUserValidator, isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
