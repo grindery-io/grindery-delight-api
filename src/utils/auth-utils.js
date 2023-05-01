@@ -1,7 +1,7 @@
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 
-const checkToken = async (token, workspaceKey) => {
+export const checkToken = async (token, workspaceKey) => {
   let res;
   try {
     res = await axios.post(
