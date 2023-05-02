@@ -52,19 +52,21 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 router.get('/', getOffersPaginationValidator, async (req, res) => {
   const db = await Database.getInstance(req);
 
+  const query = { amount: { $exists: true, $ne: '' } };
+
   res
     .send({
       offers: await getOffersWithLiquidityWallets(
         db,
         await db
           .collection('offers')
-          .find({})
+          .find(query)
           .sort({ date: -1 })
           .skip(+req.query.offset || 0)
           .limit(+req.query.limit || 0)
           .toArray()
       ),
-      totalCount: await db.collection('offers').countDocuments({}),
+      totalCount: await db.collection('offers').countDocuments(query),
     })
     .status(200);
 });

@@ -99,7 +99,7 @@ describe('Offers route', async function () {
   describe('GET all offers', async function () {
     beforeEach(async function () {
       const db = await Database.getInstance({});
-      await createBaseOffer(offer);
+      await createBaseOffer({ ...offer, amount: '8' });
 
       const collectionLiquidityWallet = db.collection('liquidity-wallets');
       await collectionLiquidityWallet.insertOne({
@@ -116,18 +116,6 @@ describe('Offers route', async function () {
     it('Should return an array with the correct MongoDB elements', async function () {
       const offerTmp = await collectionOffers.findOne({});
       const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
-
-      const formattedData = [
-        {
-          ...offerTmp,
-          _id: offerTmp._id.toString(),
-          date: offerTmp.date.toISOString(),
-          liquidityWallet: {
-            ...liquidityWalletTmp,
-            _id: liquidityWalletTmp._id.toString(),
-          },
-        },
-      ];
 
       const res = await chai
         .request(app)
