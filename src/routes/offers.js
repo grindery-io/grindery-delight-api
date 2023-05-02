@@ -21,28 +21,30 @@ const router = express.Router();
 /* This is a POST request that creates a new offer. */
 router.post('/', createOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const db = await Database.getInstance(req);
-  const collection = db.collection('offers');
-
   if (validator.length) {
     return res.status(400).send(validator);
   }
+
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   if (
-    !(await collection.findOne({
+    (await collection.findOne({
       offerId: req.body.offerId,
       userId: { $regex: res.locals.userId, $options: 'i' },
-    }))
+    })) &&
+    req.body.offerId !== ''
   ) {
-    let newDocument = req.body;
-    newDocument.date = new Date();
-    newDocument.userId = res.locals.userId;
-    newDocument.status = 'pending';
-    res.send(await collection.insertOne(newDocument)).status(201);
-  } else {
     res.status(404).send({
       msg: 'This offer already exists.',
     });
   }
+
+  let newDocument = req.body;
+  newDocument.date = new Date();
+  newDocument.userId = res.locals.userId;
+  newDocument.status = 'pending';
+  res.send(await collection.insertOne(newDocument)).status(201);
 });
 
 /* This is a GET request that returns all offers. */
