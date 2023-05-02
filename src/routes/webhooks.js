@@ -206,6 +206,7 @@ router.put('/offer', updateOfferValidator, async (req, res) => {
     const response = await collection.updateOne(offer, {
       $set: {
         offerId: req.body._idOffer,
+        status: 'sucess',
       },
     });
     if (response.modifiedCount > 0)
@@ -239,6 +240,7 @@ router.put('/order', updateOrderValidator, async (req, res) => {
     const response = await collection.updateOne(order, {
       $set: {
         orderId: req.body._idTrade,
+        status: 'sucess',
       },
     });
     if (response.modifiedCount > 0)
