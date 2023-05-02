@@ -39,12 +39,16 @@ router.put(
           method: 'update',
           params: {
             type: 'offer',
-            _id: req.body._idOffer,
+            id: req.body._idOffer,
+            userId: offer.userId,
           },
           id: req.body._idOffer,
         });
       return res.status(200).send(response);
     }
+    res.status(400).send({
+      msg: 'Not found.',
+    });
   }
 );
 
@@ -73,7 +77,8 @@ router.put(
           method: 'update',
           params: {
             type: 'offer',
-            _id: req.body._idOffer,
+            id: req.body._idOffer,
+            userId: offer.userId,
           },
           id: req.body._idOffer,
         });
@@ -106,7 +111,8 @@ router.put('/offer/token', updateTokenOfferValidator, async (req, res) => {
         method: 'update',
         params: {
           type: 'offer',
-          _id: req.body._idOffer,
+          id: req.body._idOffer,
+          userId: offer.userId,
         },
         id: req.body._idOffer,
       });
@@ -138,7 +144,8 @@ router.put('/offer/chain', updateChainIdOfferValidator, async (req, res) => {
         method: 'update',
         params: {
           type: 'offer',
-          _id: req.body._idOffer,
+          id: req.body._idOffer,
+          userId: offer.userId,
         },
         id: req.body._idOffer,
       });
@@ -173,7 +180,8 @@ router.put('/offer/status', updateStatusOfferValidator, async (req, res) => {
         method: 'update',
         params: {
           type: 'offer',
-          _id: req.body._idOffer,
+          id: req.body._idOffer,
+          userId: offer.userId,
         },
         id: req.body._idOffer,
       });
@@ -205,7 +213,8 @@ router.put('/offer', updateOfferValidator, async (req, res) => {
         method: 'update',
         params: {
           type: 'offer',
-          _id: req.body._idOffer,
+          id: req.body._idOffer,
+          userId: offer.userId,
         },
         id: req.body._idOffer,
       });
@@ -219,7 +228,7 @@ router.put('/offer', updateOfferValidator, async (req, res) => {
 /* This is a PUT request that updates offer trade. */
 router.put('/order', updateOrderValidator, async (req, res) => {
   const db = await Database.getInstance(req);
-  const collection = db.collection('offers');
+  const collection = db.collection('orders');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -237,7 +246,8 @@ router.put('/order', updateOrderValidator, async (req, res) => {
         method: 'update',
         params: {
           type: 'order',
-          _id: req.body._idTrade,
+          id: req.body._idTrade,
+          userId: order.userId,
         },
         id: req.body._idTrade,
       });
