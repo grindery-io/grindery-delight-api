@@ -8,6 +8,7 @@ import blockchains from './routes/blockchains.js';
 import tokens from './routes/tokens.js';
 import admins from './routes/admins.js';
 import view_blockchains from './routes/view-blockchains.js';
+import webhooks from './routes/webhooks.js';
 import g_sheets from './routes/g-sheets.js';
 
 const router = Router();
@@ -21,6 +22,7 @@ router.use('/blockchains', blockchains);
 router.use('/tokens', tokens);
 router.use('/admins', admins);
 router.use('/view-blockchains', view_blockchains);
+router.use('/webhooks', webhooks);
 router.use('/gsheets', g_sheets);
 
 export default router;
