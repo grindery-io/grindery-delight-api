@@ -112,21 +112,31 @@ router.get('/search', getOffersValidator, async (req, res) => {
 });
 
 /* This is a GET request that returns all offers for a specific user. */
-router.get('/user', isRequired, async (req, res) => {
-  const db = await Database.getInstance(req);
-  const collection = db.collection('offers');
+router.get(
+  '/user',
+  getOffersPaginationValidator,
+  isRequired,
+  async (req, res) => {
+    const db = await Database.getInstance(req);
+    const query = { userId: { $regex: res.locals.userId, $options: 'i' } };
 
-  res
-    .send(
-      await getOffersWithLiquidityWallets(
-        db,
-        await collection
-          .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
-          .toArray()
-      )
-    )
-    .status(200);
-});
+    res
+      .send({
+        offers: await getOffersWithLiquidityWallets(
+          db,
+          await db
+            .collection('offers')
+            .find(query)
+            .sort({ date: -1 })
+            .skip(+req.query.offset || 0)
+            .limit(+req.query.limit || 0)
+            .toArray()
+        ),
+        totalCount: await db.collection('offers').countDocuments(query),
+      })
+      .status(200);
+  }
+);
 
 /* This is a GET request that returns an offer by id. */
 router.get(

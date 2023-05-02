@@ -148,6 +148,8 @@ export const getOffersValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
+  query('limit').optional().isInt().withMessage('must be int value'),
+  query('offset').optional().isInt().withMessage('must be int value'),
 ];
 
 export const getOffersPaginationValidator = [

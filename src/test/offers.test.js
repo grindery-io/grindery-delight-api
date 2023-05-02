@@ -501,7 +501,7 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
 
-      for (const offer of res.body) {
+      for (const offer of res.body.offers) {
         chai.expect(offer.userId).to.equal(userId);
       }
     });
@@ -510,25 +510,26 @@ describe('Offers route', async function () {
       const offerTmp = await collectionOffers.findOne({});
       const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
 
-      const formattedData = [
-        {
-          ...offerTmp,
-          _id: offerTmp._id.toString(),
-          date: offerTmp.date.toISOString(),
-          liquidityWallet: {
-            ...liquidityWalletTmp,
-            _id: liquidityWalletTmp._id.toString(),
-          },
-        },
-      ];
-
       const res = await chai
         .request(app)
         .get(pathOffers_Get_User)
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
 
-      chai.expect(res.body).to.deep.equal(formattedData);
+      chai.expect(res.body).to.deep.equal({
+        offers: [
+          {
+            ...offerTmp,
+            _id: offerTmp._id.toString(),
+            date: offerTmp.date.toISOString(),
+            liquidityWallet: {
+              ...liquidityWalletTmp,
+              _id: liquidityWalletTmp._id.toString(),
+            },
+          },
+        ],
+        totalCount: 1,
+      });
     });
   });
 
