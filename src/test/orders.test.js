@@ -45,11 +45,26 @@ describe('Orders route', async function () {
         .send(order);
       chai.expect(createResponse).to.have.status(403);
     });
+
     it('Should POST a new order', async function () {
       await createBaseOrderOrOffer({
         collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
+      });
+    });
+
+    it('Should POST multiple new orders with empty orderId', async function () {
+      await createBaseOrderOrOffer({
+        collection: collectionOrders,
+        path: pathOrders_Post,
+        body: { ...order, orderId: '' },
+      });
+
+      await createBaseOrderOrOffer({
+        collection: collectionOrders,
+        path: pathOrders_Post,
+        body: { ...order, orderId: '' },
       });
     });
 

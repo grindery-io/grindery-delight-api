@@ -54,6 +54,11 @@ describe('Offers route', async function () {
       await createBaseOffer(offer);
     });
 
+    it('Should POST multiple new offers with empty offerId', async function () {
+      await createBaseOffer({ ...offer, offerId: '' });
+      await createBaseOffer({ ...offer, offerId: '' });
+    });
+
     it('Should POST a new offer if all fields are completed and no existing offer (with correct fields)', async function () {
       await createBaseOffer(offer);
 
