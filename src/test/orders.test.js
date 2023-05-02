@@ -16,7 +16,6 @@ import {
   pathOrders_Put_Complete,
   pathOrders_Get_LiquidityProvider,
 } from './utils/variables.js';
-import { Database } from '../db/conn.js';
 
 chai.use(chaiHttp);
 

@@ -52,7 +52,11 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 router.get('/', getOffersPaginationValidator, async (req, res) => {
   const db = await Database.getInstance(req);
 
-  const query = { amount: { $exists: true, $ne: '' } };
+  const query = {
+    amount: { $exists: true, $ne: '' },
+    status: 'success',
+    offerId: { $exists: true, $ne: '' },
+  };
 
   res
     .send({
@@ -91,6 +95,8 @@ router.get('/search', getOffersValidator, async (req, res) => {
         exchangeToken: req.query.exchangeToken,
         chainId: req.query.chainId,
         token: req.query.token,
+        status: 'success',
+        offerId: { $exists: true, $ne: '' },
       })
       .sort({ date: -1 })
       .toArray()
