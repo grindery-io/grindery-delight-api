@@ -7,7 +7,7 @@ import {
   setOrderCompleteValidator,
   getOrderByOrderIdValidator,
   deleteOrderValidator,
-  getOrdersValidator,
+  getOrdersPaginationValidator,
 } from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -47,26 +47,31 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
   res.send(await collection.insertOne(newDocument)).status(201);
 });
 
-router.get('/user', getOrdersValidator, isRequired, async (req, res) => {
-  const db = await Database.getInstance(req);
-  const query = { userId: { $regex: res.locals.userId, $options: 'i' } };
+router.get(
+  '/user',
+  getOrdersPaginationValidator,
+  isRequired,
+  async (req, res) => {
+    const db = await Database.getInstance(req);
+    const query = { userId: { $regex: res.locals.userId, $options: 'i' } };
 
-  res
-    .send({
-      orders: await getOrdersWithOffers(
-        db,
-        await db
-          .collection('orders')
-          .find(query)
-          .sort({ date: -1 })
-          .skip(+req.query.offset || 0)
-          .limit(+req.query.limit || 0)
-          .toArray()
-      ),
-      totalCount: await db.collection('orders').countDocuments(query),
-    })
-    .status(200);
-});
+    res
+      .send({
+        orders: await getOrdersWithOffers(
+          db,
+          await db
+            .collection('orders')
+            .find(query)
+            .sort({ date: -1 })
+            .skip(+req.query.offset || 0)
+            .limit(+req.query.limit || 0)
+            .toArray()
+        ),
+        totalCount: await db.collection('orders').countDocuments(query),
+      })
+      .status(200);
+  }
+);
 
 /* This is a GET request that returns a order for a specific user by the order id. */
 router.get(
@@ -121,7 +126,7 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
 is a liquidity provider. */
 router.get(
   '/liquidity-provider',
-  getOrdersValidator,
+  getOrdersPaginationValidator,
   isRequired,
   async (req, res) => {
     const db = await Database.getInstance(req);

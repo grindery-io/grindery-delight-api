@@ -8,6 +8,7 @@ import {
   updateOfferValidator,
   getOfferByIdValidator,
   getOffersValidator,
+  getOffersPaginationValidator,
 } from '../validators/offers.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -48,16 +49,23 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 });
 
 /* This is a GET request that returns all offers. */
-router.get('/', async (req, res) => {
+router.get('/', getOffersPaginationValidator, async (req, res) => {
   const db = await Database.getInstance(req);
 
   res
-    .send(
-      await getOffersWithLiquidityWallets(
+    .send({
+      offers: await getOffersWithLiquidityWallets(
         db,
-        await db.collection('offers').find({}).toArray()
-      )
-    )
+        await db
+          .collection('offers')
+          .find({})
+          .sort({ date: -1 })
+          .skip(+req.query.offset || 0)
+          .limit(+req.query.limit || 0)
+          .toArray()
+      ),
+      totalCount: await db.collection('offers').countDocuments({}),
+    })
     .status(200);
 });
 
@@ -71,28 +79,35 @@ router.get('/search', getOffersValidator, async (req, res) => {
   }
 
   const db = await Database.getInstance(req);
-  const collection = db.collection('offers');
+
+  const offersWithFilters = (
+    await db
+      .collection('offers')
+      .find({
+        isActive: true,
+        exchangeChainId: req.query.exchangeChainId,
+        exchangeToken: req.query.exchangeToken,
+        chainId: req.query.chainId,
+        token: req.query.token,
+      })
+      .sort({ date: -1 })
+      .toArray()
+  ).filter((offer) => {
+    const rateAmount = req.query.depositAmount / offer.exchangeRate;
+    return offer.min <= rateAmount && offer.max >= rateAmount;
+  });
+
+  const skip = +req.query.offset || 0;
+  const limit = +req.query.limit || offersWithFilters.length;
 
   res
-    .send(
-      await getOffersWithLiquidityWallets(
+    .send({
+      offers: await getOffersWithLiquidityWallets(
         db,
-        (
-          await collection
-            .find({
-              isActive: true,
-              exchangeChainId: req.query.exchangeChainId,
-              exchangeToken: req.query.exchangeToken,
-              chainId: req.query.chainId,
-              token: req.query.token,
-            })
-            .toArray()
-        ).filter((offer) => {
-          const rateAmount = req.query.depositAmount / offer.exchangeRate;
-          return offer.min <= rateAmount && offer.max >= rateAmount;
-        })
-      )
-    )
+        offersWithFilters.slice(skip, skip + limit)
+      ),
+      totalCount: offersWithFilters.length,
+    })
     .status(200);
 });
 

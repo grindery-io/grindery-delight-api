@@ -150,6 +150,11 @@ export const getOffersValidator = [
     .withMessage('must not be empty'),
 ];
 
+export const getOffersPaginationValidator = [
+  query('limit').optional().isInt().withMessage('must be int value'),
+  query('offset').optional().isInt().withMessage('must be int value'),
+];
+
 export const deleteOfferValidator = [
   param('offerId')
     .isString()

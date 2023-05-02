@@ -135,7 +135,20 @@ describe('Offers route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` });
 
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.deep.equal(formattedData);
+      chai.expect(res.body).to.deep.equal({
+        offers: [
+          {
+            ...offerTmp,
+            _id: offerTmp._id.toString(),
+            date: offerTmp.date.toISOString(),
+            liquidityWallet: {
+              ...liquidityWalletTmp,
+              _id: liquidityWalletTmp._id.toString(),
+            },
+          },
+        ],
+        totalCount: 1,
+      });
     });
   });
 
@@ -191,9 +204,9 @@ describe('Offers route', async function () {
         .query(query);
 
       chai.expect(res).to.have.status(200);
-      chai.expect(Array.isArray(res.body)).to.be.true;
+      chai.expect(Array.isArray(res.body.offers)).to.be.true;
 
-      for (const offer of res.body) {
+      for (const offer of res.body.offers) {
         chai.expect(offer.isActive).to.be.true;
       }
     });
@@ -224,7 +237,7 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
 
-      for (const offer of res.body) {
+      for (const offer of res.body.offers) {
         chai.expect(offer.exchangeChainId).to.equal(offer.exchangeChainId);
       }
     });
@@ -255,7 +268,7 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
 
-      for (const offer of res.body) {
+      for (const offer of res.body.offers) {
         chai.expect(offer.exchangeToken).to.equal(offer.exchangeToken);
       }
     });
@@ -286,7 +299,7 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
 
-      for (const offer of res.body) {
+      for (const offer of res.body.offers) {
         chai.expect(offer.chainId).to.equal(offer.chainId);
       }
     });
@@ -317,7 +330,7 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
 
-      for (const offer of res.body) {
+      for (const offer of res.body.offers) {
         chai.expect(offer.token).to.equal(offer.token);
       }
     });
@@ -348,7 +361,7 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
 
-      for (const offer of res.body) {
+      for (const offer of res.body.offers) {
         const rateAmount = query.depositAmount / offer.exchangeRate;
         chai.expect(Number(offer.min)).to.be.at.most(rateAmount);
       }
@@ -380,7 +393,7 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
 
-      for (const offer of res.body) {
+      for (const offer of res.body.offers) {
         const rateAmount = query.depositAmount / offer.exchangeRate;
         chai.expect(Number(offer.max)).to.be.at.least(rateAmount);
       }
@@ -414,7 +427,7 @@ describe('Offers route', async function () {
 
       const liquidityWallet = await collectionLiquidityWallet.findOne({});
 
-      for (const offer of res.body) {
+      for (const offer of res.body.offers) {
         chai.expect(offer.liquidityWallet).to.deep.equal({
           ...liquidityWallet,
           _id: liquidityWallet._id.toString(),
@@ -436,7 +449,7 @@ describe('Offers route', async function () {
         });
 
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.be.an('array').that.is.empty;
+      chai.expect(res.body.offers).to.be.an('array').that.is.empty;
     });
   });
 
