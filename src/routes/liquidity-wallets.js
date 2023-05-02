@@ -1,5 +1,5 @@
 import express from 'express';
-import getDBConnection from '../db/conn.js';
+import { Database } from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
 import {
@@ -21,9 +21,9 @@ router.post(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection(
-      'liquidity-wallets'
-    );
+    const db = await Database.getInstance(req);
+    const collection = db.collection('liquidity-wallets');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -53,9 +53,9 @@ router.put(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection(
-      'liquidity-wallets'
-    );
+    const db = await Database.getInstance(req);
+    const collection = db.collection('liquidity-wallets');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -81,30 +81,28 @@ router.put(
 /* This is a route that is used to get all the wallets for a specific chain. */
 router.get('/', getLiquidityWalletValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection(
-    'liquidity-wallets'
-  );
+  const db = await Database.getInstance(req);
+  const collection = db.collection('liquidity-wallets');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  res
-    .status(200)
-    .send(
-      await collection
-        .find({
-          chainId: req.query.chainId,
-          userId: { $regex: res.locals.userId, $options: 'i' },
-        })
-        .toArray()
-    );
+  res.status(200).send(
+    await collection
+      .find({
+        chainId: req.query.chainId,
+        userId: { $regex: res.locals.userId, $options: 'i' },
+      })
+      .toArray()
+  );
 });
 
 /* This is a route that is used to get all the wallets for a specific chain. */
 router.get('/all', isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection(
-    'liquidity-wallets'
-  );
+  const db = await Database.getInstance(req);
+  const collection = db.collection('liquidity-wallets');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -119,9 +117,9 @@ router.get('/all', isRequired, async (req, res) => {
 
 router.get('/single', getSingleLiquidityWalletValidator, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection(
-    'liquidity-wallets'
-  );
+  const db = await Database.getInstance(req);
+  const collection = db.collection('liquidity-wallets');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -129,9 +127,9 @@ router.get('/single', getSingleLiquidityWalletValidator, async (req, res) => {
     await collection.findOne({
       chainId: req.query.chainId,
       userId: req.query.userId,
-      ...(req.query.walletAddress && {
-        walletAddress: req.query.walletAddress,
-      }),
+      // ...(req.query.walletAddress && {
+      //   walletAddress: req.query.walletAddress,
+      // }),
     })
   );
 });
@@ -139,9 +137,9 @@ router.get('/single', getSingleLiquidityWalletValidator, async (req, res) => {
 /* This is a route that is used to get a single wallet. */
 router.get('/id/:id', getWalletByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection(
-    'liquidity-wallets'
-  );
+  const db = await Database.getInstance(req);
+  const collection = db.collection('liquidity-wallets');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -160,9 +158,9 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection(
-      'liquidity-wallets'
-    );
+    const db = await Database.getInstance(req);
+    const collection = db.collection('liquidity-wallets');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }

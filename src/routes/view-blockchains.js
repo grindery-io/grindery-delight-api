@@ -7,7 +7,7 @@ import {
 import { validateResult } from '../utils/validators-utils.js';
 import { ethers } from 'ethers';
 import { createRequire } from 'node:module';
-import getDBConnection from '../db/conn.js';
+import { Database } from '../db/conn.js';
 const require = createRequire(import.meta.url);
 
 const ERC20 = require('../abis/erc20.json');
@@ -20,9 +20,9 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collectionBlockchains = (await getDBConnection(req)).collection(
-      'blockchains'
-    );
+    const db = await Database.getInstance(req);
+    const collectionBlockchains = db.collection('blockchains');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -53,9 +53,10 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collectionBlockchains = (await getDBConnection(req)).collection(
-      'blockchains'
-    );
+    const db = await Database.getInstance(req);
+    const collectionBlockchains = db.collection('blockchains');
+
+    collectionBlockchains;
     if (validator.length) {
       return res.status(400).send(validator);
     }

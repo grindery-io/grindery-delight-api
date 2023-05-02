@@ -37,11 +37,7 @@ export const createOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('offerId')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  body('offerId').isString().withMessage('must be string value'),
   body('isActive')
     .isBoolean()
     .withMessage('must be boolean value')
@@ -163,6 +159,12 @@ export const deleteOfferValidator = [
 ];
 
 export const updateOfferValidator = [
+  body('offerId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body('chainId')
     .optional()
     .isString()
@@ -247,6 +249,7 @@ export const updateOfferValidator = [
     validateFields(
       req.body,
       [
+        'offerId',
         'chainId',
         'min',
         'max',

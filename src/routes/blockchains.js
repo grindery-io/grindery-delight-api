@@ -1,5 +1,5 @@
 import express from 'express';
-import getDBConnection from '../db/conn.js';
+import { Database } from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
 import {
@@ -21,8 +21,9 @@ exists, it returns a 404 error. Otherwise, it inserts the new blockchain into th
 returns a 201 status code. */
 router.post('/', createBlockchainValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collectionAdmin = (await getDBConnection(req)).collection('admins');
-  const collection = (await getDBConnection(req)).collection('blockchains');
+  const db = await Database.getInstance(req);
+  const collectionAdmin = db.collection('admins');
+  const collection = db.collection('blockchains');
   if (
     validator.length ||
     !(await collectionAdmin.findOne({
@@ -47,7 +48,8 @@ check if the blockchain already exists. If it does not exist, it will create the
 does exist, it will return a 404 error. */
 router.get('/active', async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('blockchains');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('blockchains');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -71,7 +73,9 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('blockchains');
+    const db = await Database.getInstance(req);
+    const collection = db.collection('blockchains');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -95,8 +99,10 @@ router.put(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collectionAdmin = (await getDBConnection(req)).collection('admins');
-    const collection = (await getDBConnection(req)).collection('blockchains');
+    const db = await Database.getInstance(req);
+    const collectionAdmin = db.collection('admins');
+    const collection = db.collection('blockchains');
+
     const user = await collectionAdmin.findOne({
       userId: { $regex: res.locals.userId, $options: 'i' },
     });
@@ -146,8 +152,10 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('blockchains');
-    const collectionAdmin = (await getDBConnection(req)).collection('admins');
+    const db = await Database.getInstance(req);
+    const collectionAdmin = db.collection('admins');
+    const collection = db.collection('blockchains');
+
     if (
       validator.length ||
       !(await collectionAdmin.findOne({
@@ -180,8 +188,9 @@ router.put(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('blockchains');
-    const collectionAdmin = (await getDBConnection(req)).collection('admins');
+    const db = await Database.getInstance(req);
+    const collectionAdmin = db.collection('admins');
+    const collection = db.collection('blockchains');
 
     if (
       validator.length ||
@@ -221,8 +230,10 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('blockchains');
-    const collectionAdmin = (await getDBConnection(req)).collection('admins');
+    const db = await Database.getInstance(req);
+    const collectionAdmin = db.collection('admins');
+    const collection = db.collection('blockchains');
+
     if (
       validator.length ||
       !(await collectionAdmin.findOne({

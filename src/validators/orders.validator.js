@@ -2,11 +2,7 @@ import { body, param, query } from 'express-validator';
 import { validateFields } from '../utils/validators-utils.js';
 
 export const createOrderValidator = [
-  body('orderId')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  body('orderId').isString().withMessage('must be string value'),
   body('amountTokenDeposit')
     .isString()
     .withMessage('must be string value')
@@ -69,6 +65,11 @@ export const createOrderValidator = [
   }),
 ];
 
+export const getOrderByUserValidator = [
+  query('limit').optional().isInt().withMessage('must be int value'),
+  query('offset').optional().isInt().withMessage('must be int value'),
+];
+
 export const getOrderByOrderIdValidator = [
   query('orderId')
     .isString()
@@ -85,7 +86,7 @@ export const getOrderByIdValidator = [
     .withMessage('must not be empty'),
 ];
 
-export const setOrderStatusValidator = [
+export const setOrderCompleteValidator = [
   body('orderId')
     .isString()
     .withMessage('must be string value')
@@ -106,5 +107,9 @@ export const setOrderStatusValidator = [
 ];
 
 export const deleteOrderValidator = [
-  param('orderId').notEmpty().withMessage('must not be empty'),
+  param('orderId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
 ];

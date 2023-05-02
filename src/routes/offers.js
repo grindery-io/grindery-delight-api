@@ -1,5 +1,5 @@
 import express from 'express';
-import getDBConnection from '../db/conn.js';
+import { Database } from '../db/conn.js';
 import isRequired from '../utils/auth-utils.js';
 import {
   createOfferValidator,
@@ -11,21 +11,20 @@ import {
 } from '../validators/offers.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
+import {
+  getOffersWithLiquidityWallets,
+  getOneOfferWithLiquidityWallet,
+} from '../utils/offers-utils.js';
 
 const router = express.Router();
-// const collection = db.collection('offers');
 
 /* This is a POST request that creates a new offer. */
 router.post('/', createOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   if (validator.length) {
-    console.log(
-      'Offer creation - Validation failed - userId',
-      res.locals.userId
-    );
-    console.log('Offer creation - Validation failed - request body', req.body);
-    console.log('Offer creation - Validation failed - Validator', validator);
     return res.status(400).send(validator);
   }
   if (
@@ -37,16 +36,9 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
     let newDocument = req.body;
     newDocument.date = new Date();
     newDocument.userId = res.locals.userId;
+    newDocument.status = 'pending';
     res.send(await collection.insertOne(newDocument)).status(201);
   } else {
-    console.log(
-      'Offer creation - Offer already exists - userId',
-      res.locals.userId
-    );
-    console.log(
-      'Offer creation - Offer already exists - request body',
-      req.body
-    );
     res.status(404).send({
       msg: 'This offer already exists.',
     });
@@ -55,44 +47,66 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all offers. */
 router.get('/', async (req, res) => {
-  const collection = (await getDBConnection(req)).collection('offers');
-  res.send(await collection.find({}).toArray()).status(200);
+  const db = await Database.getInstance(req);
+
+  res
+    .send(
+      await getOffersWithLiquidityWallets(
+        db,
+        await db.collection('offers').find({}).toArray()
+      )
+    )
+    .status(200);
 });
 
 /* This is a GET request that returns all activated offers
 and filter by exchangeChainId, exchangeToken, chainId,token */
 router.get('/search', getOffersValidator, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  let offers = await collection
-    .find({
-      isActive: true,
-      exchangeChainId: req.query.exchangeChainId,
-      exchangeToken: req.query.exchangeToken,
-      chainId: req.query.chainId,
-      token: req.query.token,
-    })
-    .toArray();
 
-  offers = offers.filter((offer) => {
-    offer.rateAmount = req.query.depositAmount / offer.exchangeRate;
-    return offer.min <= offer.rateAmount && offer.max >= offer.rateAmount;
-  });
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
 
-  res.send(offers).status(200);
+  res
+    .send(
+      await getOffersWithLiquidityWallets(
+        db,
+        (
+          await collection
+            .find({
+              isActive: true,
+              exchangeChainId: req.query.exchangeChainId,
+              exchangeToken: req.query.exchangeToken,
+              chainId: req.query.chainId,
+              token: req.query.token,
+            })
+            .toArray()
+        ).filter((offer) => {
+          const rateAmount = req.query.depositAmount / offer.exchangeRate;
+          return offer.min <= rateAmount && offer.max >= rateAmount;
+        })
+      )
+    )
+    .status(200);
 });
 
 /* This is a GET request that returns all offers for a specific user. */
 router.get('/user', isRequired, async (req, res) => {
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   res
     .send(
-      await collection
-        .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
-        .toArray()
+      await getOffersWithLiquidityWallets(
+        db,
+        await collection
+          .find({ userId: { $regex: res.locals.userId, $options: 'i' } })
+          .toArray()
+      )
     )
     .status(200);
 });
@@ -104,14 +118,20 @@ router.get(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     res.status(200).send(
-      await collection.findOne({
-        offerId: req.query.offerId,
-      })
+      await getOneOfferWithLiquidityWallet(
+        db.collection('liquidity-wallets'),
+        await collection.findOne({
+          offerId: req.query.offerId,
+        })
+      )
     );
   }
 );
@@ -119,15 +139,21 @@ router.get(
 /* This is a GET request that returns an offer by id. */
 router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
+
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   res.status(200).send(
-    await collection.findOne({
-      _id: new ObjectId(req.query.id),
-      userId: { $regex: res.locals.userId, $options: 'i' },
-    })
+    await getOneOfferWithLiquidityWallet(
+      db.collection('liquidity-wallets'),
+      await collection.findOne({
+        _id: new ObjectId(req.query.id),
+        userId: { $regex: res.locals.userId, $options: 'i' },
+      })
+    )
   );
 });
 
@@ -138,7 +164,9 @@ router.delete(
   isRequired,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('offers');
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -159,7 +187,9 @@ router.delete(
 /* This is a PUT request that updates an offer by id. */
 router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -171,34 +201,22 @@ router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
     res.status(200).send(
       await collection.updateOne(offer, {
         $set: {
-          chainId: req.body.chainId ? req.body.chainId : offer.chainId,
-          min: req.body.min ? req.body.min : offer.min,
-          max: req.body.max ? req.body.max : offer.max,
-          tokenId: req.body.tokenId ? req.body.tokenId : offer.tokenId,
-          token: req.body.token ? req.body.token : offer.token,
-          tokenAddress: req.body.tokenAddress
-            ? req.body.tokenAddress
-            : offer.tokenAddress,
-          isActive:
-            req.body.isActive === undefined
-              ? offer.isActive
-              : req.body.isActive,
-          exchangeRate: req.body.exchangeRate
-            ? req.body.exchangeRate
-            : offer.exchangeRate,
-          exchangeToken: req.body.exchangeToken
-            ? req.body.exchangeToken
-            : offer.exchangeToken,
-          exchangeChainId: req.body.exchangeChainId
-            ? req.body.exchangeChainId
-            : offer.exchangeChainId,
-          estimatedTime: req.body.estimatedTime
-            ? req.body.estimatedTime
-            : offer.estimatedTime,
-          provider: req.body.provider ? req.body.provider : offer.provider,
-          title: req.body.title ? req.body.title : offer.title,
-          image: req.body.image ? req.body.image : offer.image,
-          amount: req.body.amount ? req.body.amount : offer.amount,
+          chainId: req.body.chainId ?? offer.chainId,
+          min: req.body.min ?? offer.min,
+          max: req.body.max ?? offer.max,
+          tokenId: req.body.tokenId ?? offer.tokenId,
+          token: req.body.token ?? offer.token,
+          tokenAddress: req.body.tokenAddress ?? offer.tokenAddress,
+          isActive: req.body.isActive ?? offer.isActive,
+          exchangeRate: req.body.exchangeRate ?? offer.exchangeRate,
+          exchangeToken: req.body.exchangeToken ?? offer.exchangeToken,
+          exchangeChainId: req.body.exchangeChainId ?? offer.exchangeChainId,
+          estimatedTime: req.body.estimatedTime ?? offer.estimatedTime,
+          provider: req.body.provider ?? offer.provider,
+          title: req.body.title ?? offer.title,
+          image: req.body.image ?? offer.image,
+          amount: req.body.amount ?? offer.amount,
+          offerId: req.body.offerId ?? offer.offerId,
         },
       })
     );

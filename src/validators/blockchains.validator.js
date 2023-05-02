@@ -64,6 +64,7 @@ export const createBlockchainValidator = [
     .withMessage('must not be empty'),
   body('usefulAddresses')
     .isObject()
+    .withMessage('must be an object')
     .custom((value, { req }) => {
       const keys = Object.keys(value);
       for (const key of keys) {
