@@ -9,8 +9,7 @@ import {
   updateOrderValidator,
 } from '../validators/webhook.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
-import getDBConnection from '../db/conn.js';
-import webhooks from 'node-webhooks';
+import { Database } from '../db/conn.js';
 
 const router = express.Router();
 
@@ -20,8 +19,8 @@ router.put(
   updateMaxPriceOfferValidator,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('offers');
-
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -35,8 +34,8 @@ router.put(
         },
       });
       if (response.modifiedCount > 0)
-        trigger('offer', { offerId: req.body._idOffer });
-      return res.status(200).send(response);
+        // trigger('offer', { offerId: req.body._idOffer });
+        return res.status(200).send(response);
     }
   }
 );
@@ -47,7 +46,8 @@ router.put(
   updateMinPriceOfferValidator,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const collection = (await getDBConnection(req)).collection('offers');
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
@@ -61,8 +61,8 @@ router.put(
         },
       });
       if (response.modifiedCount > 0)
-        trigger('offer', { offerId: req.body._idOffer });
-      return res.status(200).send(response);
+        // trigger('offer', { offerId: req.body._idOffer });
+        return res.status(200).send(response);
     }
     res.status(400).send({
       msg: 'Not found.',
@@ -72,8 +72,8 @@ router.put(
 
 /* This is a PUT request that updates token offer. */
 router.put('/offer/token', updateTokenOfferValidator, async (req, res) => {
-  const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -87,8 +87,8 @@ router.put('/offer/token', updateTokenOfferValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      trigger('offer', { offerId: req.body._idOffer });
-    return res.status(200).send(response);
+      // trigger('offer', { offerId: req.body._idOffer });
+      return res.status(200).send(response);
   }
   res.status(400).send({
     msg: 'Not found.',
@@ -97,8 +97,8 @@ router.put('/offer/token', updateTokenOfferValidator, async (req, res) => {
 
 /* This is a PUT request that updates chain id offer. */
 router.put('/offer/chain', updateChainIdOfferValidator, async (req, res) => {
-  const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -112,8 +112,8 @@ router.put('/offer/chain', updateChainIdOfferValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      trigger('offer', { offerId: req.body._idOffer });
-    return res.status(200).send(response);
+      // trigger('offer', { offerId: req.body._idOffer });
+      return res.status(200).send(response);
   }
   res.status(400).send({
     msg: 'Not found.',
@@ -122,8 +122,8 @@ router.put('/offer/chain', updateChainIdOfferValidator, async (req, res) => {
 
 /* This is a PUT request that updates status offer. */
 router.put('/offer/status', updateStatusOfferValidator, async (req, res) => {
-  const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -140,8 +140,8 @@ router.put('/offer/status', updateStatusOfferValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      trigger('offer', { offerId: req.body._idOffer });
-    return res.status(200).send(response);
+      // trigger('offer', { offerId: req.body._idOffer });
+      return res.status(200).send(response);
   }
   res.status(404).send({
     msg: 'Not found.',
@@ -150,8 +150,8 @@ router.put('/offer/status', updateStatusOfferValidator, async (req, res) => {
 
 /* This is a PUT request that updates the offer id. */
 router.put('/offer', updateOfferValidator, async (req, res) => {
-  const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('offers');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -165,8 +165,8 @@ router.put('/offer', updateOfferValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      trigger('offer', { offerId: req.body._idOffer });
-    return res.status(200).send(response);
+      // trigger('offer', { offerId: req.body._idOffer });
+      return res.status(200).send(response);
   }
   res.status(404).send({
     msg: 'Not found.',
@@ -175,9 +175,8 @@ router.put('/offer', updateOfferValidator, async (req, res) => {
 
 /* This is a PUT request that updates offer trade. */
 router.put('/order', updateOrderValidator, async (req, res) => {
-  console.log(req.body);
-  const validator = validateResult(req, res);
-  const collection = (await getDBConnection(req)).collection('orders');
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
   if (validator.length) {
     return res.status(400).send(validator);
   }
@@ -191,28 +190,12 @@ router.put('/order', updateOrderValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      trigger('order', { orderId: req.body._idTrade });
-    return res.status(200).send(response);
+      // trigger('order', { orderId: req.body._idTrade });
+      return res.status(200).send(response);
   }
   res.status(404).send({
     msg: 'Not found.',
   });
 });
-
-const registerHooks = () => {
-  return new webhooks({
-    db: {
-      callback_hook: [process.env.GRINDERY_MERCARI_CLIENT],
-    },
-  });
-};
-
-const hooks = registerHooks();
-
-const trigger = (topic, data) =>
-  hooks.trigger('callback_hook', {
-    msg: topic,
-    data: data,
-  });
 
 export default router;
