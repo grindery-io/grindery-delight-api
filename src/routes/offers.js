@@ -53,6 +53,7 @@ router.get('/', getOffersPaginationValidator, async (req, res) => {
   const db = await Database.getInstance(req);
 
   const query = {
+    isActive: true,
     amount: { $exists: true, $ne: '' },
     status: 'success',
     offerId: { $exists: true, $ne: '' },
