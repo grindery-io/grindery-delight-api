@@ -7,7 +7,7 @@ import {
   setOrderCompleteValidator,
   getOrderByOrderIdValidator,
   deleteOrderValidator,
-  getOrderByUserValidator,
+  getOrdersValidator,
 } from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -47,7 +47,7 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
   res.send(await collection.insertOne(newDocument)).status(201);
 });
 
-router.get('/user', getOrderByUserValidator, isRequired, async (req, res) => {
+router.get('/user', getOrdersValidator, isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
   const query = { userId: { $regex: res.locals.userId, $options: 'i' } };
 
@@ -58,6 +58,7 @@ router.get('/user', getOrderByUserValidator, isRequired, async (req, res) => {
         await db
           .collection('orders')
           .find(query)
+          .sort({ date: -1 })
           .skip(+req.query.offset || 0)
           .limit(+req.query.limit || 0)
           .toArray()
@@ -118,33 +119,40 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
 
 /* This is a GET request that returns all orders associated with active offers for a specific user who
 is a liquidity provider. */
-router.get('/liquidity-provider', isRequired, async (req, res) => {
-  const db = await Database.getInstance(req);
+router.get(
+  '/liquidity-provider',
+  getOrdersValidator,
+  isRequired,
+  async (req, res) => {
+    const db = await Database.getInstance(req);
 
-  const activeOffersForUser = await db
-    .collection('offers')
-    .find({
-      userId: { $regex: res.locals.userId, $options: 'i' },
-      isActive: true,
-    })
-    .toArray();
+    const activeOffersForUser = await db
+      .collection('offers')
+      .find({
+        userId: { $regex: res.locals.userId, $options: 'i' },
+        isActive: true,
+      })
+      .toArray();
 
-  res.status(200).send(
-    await getOrdersWithOffers(
-      db,
-      (
-        await Promise.all(
-          activeOffersForUser.map(async (offer) => {
-            return await db
-              .collection('orders')
-              .find({ offerId: offer.offerId })
-              .toArray();
-          })
-        )
-      ).flat()
-    )
-  );
-});
+    const query = {
+      offerId: { $in: activeOffersForUser.map((offer) => offer.offerId) },
+    };
+
+    res.status(200).send({
+      orders: await getOrdersWithOffers(
+        db,
+        await db
+          .collection('orders')
+          .find(query)
+          .sort({ date: -1 })
+          .skip(+req.query.offset || 0)
+          .limit(+req.query.limit || 0)
+          .toArray()
+      ),
+      totalCount: await db.collection('orders').countDocuments(query),
+    });
+  }
+);
 
 /* This is a PUT request that adds a order to an offer. */
 router.put(

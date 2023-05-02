@@ -153,6 +153,7 @@ describe('Orders route', async function () {
       });
     });
   });
+
   describe('GET by orderId', async function () {
     beforeEach(async function () {
       await collectionOffers.insertOne(offer);
@@ -326,11 +327,12 @@ describe('Orders route', async function () {
       const res = await chai
         .request(app)
         .get(pathOrders_Get_LiquidityProvider)
-        .set('Authorization', `Bearer ${mockedToken}`);
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ limit: 0 });
       chai.expect(res).to.have.status(200);
 
       const orderTmp = await collectionOffers.findOne({
-        offerId: res.body[0].offerId,
+        offerId: res.body.orders[0].offerId,
       });
 
       chai.expect(orderTmp).to.be.an('object');
@@ -344,7 +346,7 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
-      res.body.forEach((order) => {
+      res.body.orders.forEach((order) => {
         chai.expect(order.offer.isActive).to.be.true;
       });
     });
@@ -356,8 +358,35 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
-      res.body.forEach((order) => {
+      res.body.orders.forEach((order) => {
         chai.expect(order.offer.userId).to.equal(order.userId);
+      });
+    });
+
+    it('Should show only orders with proper fields and offer information', async function () {
+      const offerTmp = await collectionOffers.findOne({});
+      const orderTmp = await collectionOrders.findOne({
+        userId: process.env.USER_ID_TEST,
+      });
+
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_LiquidityProvider)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      chai.expect(res.body).to.deep.equal({
+        orders: [
+          {
+            ...orderTmp,
+            _id: orderTmp._id.toString(),
+            offer: {
+              ...offerTmp,
+              _id: offerTmp._id.toString(),
+            },
+          },
+        ],
+        totalCount: 1,
       });
     });
   });
