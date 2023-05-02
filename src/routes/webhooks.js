@@ -10,6 +10,7 @@ import {
 } from '../validators/webhook.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { Database } from '../db/conn.js';
+import { dispatch } from '../utils/websocket-utils.js';
 
 const router = express.Router();
 
@@ -34,8 +35,15 @@ router.put(
         },
       });
       if (response.modifiedCount > 0)
-        // trigger('offer', { offerId: req.body._idOffer });
-        return res.status(200).send(response);
+        dispatch({
+          method: 'update',
+          params: {
+            type: 'offer',
+            _id: req.body._idOffer,
+          },
+          id: req.body._idOffer,
+        });
+      return res.status(200).send(response);
     }
   }
 );
@@ -61,8 +69,15 @@ router.put(
         },
       });
       if (response.modifiedCount > 0)
-        // trigger('offer', { offerId: req.body._idOffer });
-        return res.status(200).send(response);
+        dispatch({
+          method: 'update',
+          params: {
+            type: 'offer',
+            _id: req.body._idOffer,
+          },
+          id: req.body._idOffer,
+        });
+      return res.status(200).send(response);
     }
     res.status(400).send({
       msg: 'Not found.',
@@ -87,8 +102,15 @@ router.put('/offer/token', updateTokenOfferValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      // trigger('offer', { offerId: req.body._idOffer });
-      return res.status(200).send(response);
+      dispatch({
+        method: 'update',
+        params: {
+          type: 'offer',
+          _id: req.body._idOffer,
+        },
+        id: req.body._idOffer,
+      });
+    return res.status(200).send(response);
   }
   res.status(400).send({
     msg: 'Not found.',
@@ -112,8 +134,15 @@ router.put('/offer/chain', updateChainIdOfferValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      // trigger('offer', { offerId: req.body._idOffer });
-      return res.status(200).send(response);
+      dispatch({
+        method: 'update',
+        params: {
+          type: 'offer',
+          _id: req.body._idOffer,
+        },
+        id: req.body._idOffer,
+      });
+    return res.status(200).send(response);
   }
   res.status(400).send({
     msg: 'Not found.',
@@ -140,8 +169,15 @@ router.put('/offer/status', updateStatusOfferValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      // trigger('offer', { offerId: req.body._idOffer });
-      return res.status(200).send(response);
+      dispatch({
+        method: 'update',
+        params: {
+          type: 'offer',
+          _id: req.body._idOffer,
+        },
+        id: req.body._idOffer,
+      });
+    return res.status(200).send(response);
   }
   res.status(404).send({
     msg: 'Not found.',
@@ -165,8 +201,15 @@ router.put('/offer', updateOfferValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      // trigger('offer', { offerId: req.body._idOffer });
-      return res.status(200).send(response);
+      dispatch({
+        method: 'update',
+        params: {
+          type: 'offer',
+          _id: req.body._idOffer,
+        },
+        id: req.body._idOffer,
+      });
+    return res.status(200).send(response);
   }
   res.status(404).send({
     msg: 'Not found.',
@@ -190,8 +233,15 @@ router.put('/order', updateOrderValidator, async (req, res) => {
       },
     });
     if (response.modifiedCount > 0)
-      // trigger('order', { orderId: req.body._idTrade });
-      return res.status(200).send(response);
+      dispatch({
+        method: 'update',
+        params: {
+          type: 'order',
+          _id: req.body._idTrade,
+        },
+        id: req.body._idTrade,
+      });
+    return res.status(200).send(response);
   }
   res.status(404).send({
     msg: 'Not found.',
