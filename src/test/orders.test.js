@@ -23,7 +23,7 @@ chai.use(chaiHttp);
  * This function creates a base order or offer in a MongoDB collection and returns the response.
  * @returns the response object from the POST request made using chai.request.
  */
-async function createBaseOrderOrOffer({ collection, path, body }) {
+async function createBaseOrderOrOffer({ path, body }) {
   const res = await chai
     .request(app)
     .post(path)
@@ -47,7 +47,6 @@ describe('Orders route', async function () {
 
     it('Should POST a new order', async function () {
       await createBaseOrderOrOffer({
-        collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
@@ -55,13 +54,11 @@ describe('Orders route', async function () {
 
     it('Should POST multiple new orders with empty orderId', async function () {
       await createBaseOrderOrOffer({
-        collection: collectionOrders,
         path: pathOrders_Post,
         body: { ...order, orderId: '' },
       });
 
       await createBaseOrderOrOffer({
-        collection: collectionOrders,
         path: pathOrders_Post,
         body: { ...order, orderId: '' },
       });
@@ -69,7 +66,6 @@ describe('Orders route', async function () {
 
     it('Should POST a new order with relevant fields', async function () {
       await createBaseOrderOrOffer({
-        collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
@@ -93,7 +89,6 @@ describe('Orders route', async function () {
     });
     it('Should fail if same orderId exists', async function () {
       await createBaseOrderOrOffer({
-        collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
@@ -671,7 +666,6 @@ describe('Orders route', async function () {
     });
     it('Should delete one order', async function () {
       await createBaseOrderOrOffer({
-        collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
@@ -685,7 +679,6 @@ describe('Orders route', async function () {
     });
     it('Should delete the appropriate order', async function () {
       const createResponse = await createBaseOrderOrOffer({
-        collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
@@ -723,7 +716,6 @@ describe('Orders route', async function () {
     });
     it('Should modify one order if the order was previously not completed', async function () {
       const createResponse = await createBaseOrderOrOffer({
-        collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
@@ -751,7 +743,6 @@ describe('Orders route', async function () {
     });
     it('Should modify no order if the order was previously completed', async function () {
       await createBaseOrderOrOffer({
-        collection: collectionOrders,
         path: pathOrders_Post,
         body: order,
       });
