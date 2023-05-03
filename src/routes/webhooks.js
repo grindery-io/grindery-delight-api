@@ -99,6 +99,7 @@ router.put(
   authenticateApiKey,
   updateTokenOfferValidator,
   async (req, res) => {
+    const validator = validateResult(req, res);
     const db = await Database.getInstance(req);
     const collection = db.collection('offers');
     if (validator.length) {
@@ -137,6 +138,7 @@ router.put(
   authenticateApiKey,
   updateChainIdOfferValidator,
   async (req, res) => {
+    const validator = validateResult(req, res);
     const db = await Database.getInstance(req);
     const collection = db.collection('offers');
     if (validator.length) {
@@ -175,6 +177,7 @@ router.put(
   authenticateApiKey,
   updateStatusOfferValidator,
   async (req, res) => {
+    const validator = validateResult(req, res);
     const db = await Database.getInstance(req);
     const collection = db.collection('offers');
     if (validator.length) {
@@ -216,6 +219,7 @@ router.put(
   authenticateApiKey,
   updateOfferValidator,
   async (req, res) => {
+    const validator = validateResult(req, res);
     const db = await Database.getInstance(req);
     const collection = db.collection('offers');
     if (validator.length) {
@@ -255,6 +259,7 @@ router.put(
   authenticateApiKey,
   updateOrderValidator,
   async (req, res) => {
+    const validator = validateResult(req, res);
     const db = await Database.getInstance(req);
     const collection = db.collection('orders');
     if (validator.length) {
