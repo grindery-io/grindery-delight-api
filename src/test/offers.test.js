@@ -326,6 +326,88 @@ describe('Offers route', async function () {
 
   describe('GET all active offers with filters', async function () {
     beforeEach(async function () {
+      await collectionOffers.insertMany([
+        {
+          ...offer,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+          isActive: true,
+          exchangeRate: '2',
+          shouldBeInResult: true,
+        },
+        {
+          ...offer,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+          isActive: true,
+          exchangeRate: '2',
+          shouldBeInResult: true,
+        },
+        {
+          ...offer,
+          exchangeChainId: 'anotherExchangeChainId',
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+          isActive: true,
+          exchangeRate: '2',
+        },
+        {
+          ...offer,
+          exchangeToken: 'anotherExchangeToken',
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+          isActive: true,
+          exchangeRate: '2',
+        },
+        {
+          ...offer,
+          chainId: 'anotherChainId',
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+          isActive: true,
+          exchangeRate: '2',
+        },
+        {
+          ...offer,
+          token: 'anotherToken',
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+          isActive: true,
+          exchangeRate: '2',
+        },
+        {
+          ...offer,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'pending',
+          amount: '8',
+          isActive: true,
+          exchangeRate: '2',
+        },
+        {
+          ...offer,
+          offerId: '',
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+          isActive: true,
+          exchangeRate: '2',
+        },
+      ]);
+
       await collectionLiquidityWallet.insertOne({
         chainId: offer.chainId,
         walletAddress: offer.provider,
@@ -333,32 +415,17 @@ describe('Offers route', async function () {
     });
 
     it('Should not fail if no token is provided', async function () {
-      const query = {
+      const res = await chai.request(app).get(pathOffers_Get_Search).query({
         exchangeChainId: 'myExchangeChainId',
         exchangeToken: 'myExchangeToken',
         chainId: 'myChainId',
         token: 'myToken',
         depositAmount: '1',
-      };
-
-      const res = await chai
-        .request(app)
-        .get(pathOffers_Get_Search)
-        .query(query);
+      });
       chai.expect(res).to.have.status(200);
     });
 
     it('Should return an array of active offers', async function () {
-      await collectionOffers.insertOne({
-        ...offer,
-        date: new Date(),
-        userId: process.env.USER_ID_TEST,
-        status: 'success',
-        amount: '8',
-        isActive: true,
-        exchangeRate: '2',
-      });
-
       const res = await chai
         .request(app)
         .get(pathOffers_Get_Search)
@@ -381,16 +448,6 @@ describe('Offers route', async function () {
     });
 
     it('Should return only offers with proper exchangeChainId', async function () {
-      await collectionOffers.insertOne({
-        ...offer,
-        date: new Date(),
-        userId: process.env.USER_ID_TEST,
-        status: 'success',
-        amount: '8',
-        isActive: true,
-        exchangeRate: '2',
-      });
-
       const res = await chai
         .request(app)
         .get(pathOffers_Get_Search)
@@ -411,16 +468,6 @@ describe('Offers route', async function () {
     });
 
     it('Should return only offers with proper exchangeToken', async function () {
-      await collectionOffers.insertOne({
-        ...offer,
-        date: new Date(),
-        userId: process.env.USER_ID_TEST,
-        status: 'success',
-        amount: '8',
-        isActive: true,
-        exchangeRate: '2',
-      });
-
       const res = await chai
         .request(app)
         .get(pathOffers_Get_Search)
@@ -442,16 +489,6 @@ describe('Offers route', async function () {
     });
 
     it('Should return only offers with proper chainId', async function () {
-      await collectionOffers.insertOne({
-        ...offer,
-        date: new Date(),
-        userId: process.env.USER_ID_TEST,
-        status: 'success',
-        amount: '8',
-        isActive: true,
-        exchangeRate: '2',
-      });
-
       const res = await chai
         .request(app)
         .get(pathOffers_Get_Search)
@@ -473,16 +510,6 @@ describe('Offers route', async function () {
     });
 
     it('Should return only offers with proper token', async function () {
-      await collectionOffers.insertOne({
-        ...offer,
-        date: new Date(),
-        userId: process.env.USER_ID_TEST,
-        status: 'success',
-        amount: '8',
-        isActive: true,
-        exchangeRate: '2',
-      });
-
       const res = await chai
         .request(app)
         .get(pathOffers_Get_Search)
@@ -504,16 +531,6 @@ describe('Offers route', async function () {
     });
 
     it('Should return only offers with min less than depositAmount/exchangeRate', async function () {
-      await collectionOffers.insertOne({
-        ...offer,
-        date: new Date(),
-        userId: process.env.USER_ID_TEST,
-        status: 'success',
-        amount: '8',
-        isActive: true,
-        exchangeRate: '2',
-      });
-
       const query = {
         exchangeChainId: offer.exchangeChainId,
         exchangeToken: offer.exchangeToken,
@@ -538,16 +555,6 @@ describe('Offers route', async function () {
     });
 
     it('Should return only offers with max greater than depositAmount/exchangeRate', async function () {
-      await collectionOffers.insertOne({
-        ...offer,
-        date: new Date(),
-        userId: process.env.USER_ID_TEST,
-        status: 'success',
-        amount: '8',
-        isActive: true,
-        exchangeRate: '2',
-      });
-
       const query = {
         exchangeChainId: offer.exchangeChainId,
         exchangeToken: offer.exchangeToken,
@@ -572,16 +579,6 @@ describe('Offers route', async function () {
     });
 
     it('Should return offers with proper liquidy wallet information', async function () {
-      await collectionOffers.insertOne({
-        ...offer,
-        date: new Date(),
-        userId: process.env.USER_ID_TEST,
-        status: 'success',
-        amount: '8',
-        isActive: true,
-        exchangeRate: '2',
-      });
-
       const res = await chai
         .request(app)
         .get(pathOffers_Get_Search)
@@ -597,13 +594,104 @@ describe('Offers route', async function () {
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.offers).to.not.be.empty;
 
-      const liquidityWallet = await collectionLiquidityWallet.findOne({});
+      const liquidityWalletFromInMemoryDB =
+        await collectionLiquidityWallet.findOne({});
 
       for (const offer of res.body.offers) {
         chai.expect(offer.liquidityWallet).to.deep.equal({
-          ...liquidityWallet,
-          _id: liquidityWallet._id.toString(),
+          chainId: offer.chainId,
+          walletAddress: offer.provider,
+          _id: liquidityWalletFromInMemoryDB._id.toString(),
         });
+      }
+    });
+
+    it('Should set a proper totalCount', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_Search)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({
+          exchangeChainId: offer.exchangeChainId,
+          exchangeToken: offer.exchangeToken,
+          chainId: offer.chainId,
+          token: offer.token,
+          depositAmount: '1',
+          limit: 1,
+        });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.totalCount).to.be.equal(2);
+    });
+
+    it('Should set a proper limit', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_Search)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({
+          exchangeChainId: offer.exchangeChainId,
+          exchangeToken: offer.exchangeToken,
+          chainId: offer.chainId,
+          token: offer.token,
+          depositAmount: '1',
+          limit: 1,
+        });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.totalCount).to.be.equal(2);
+      chai.expect(res.body.offers.length).to.be.equal(1);
+    });
+
+    it('Should set a proper offset', async function () {
+      const offerFromInMemoryDB = await collectionOffers
+        .find({
+          shouldBeInResult: true,
+        })
+        .sort({ date: -1 })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_Search)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({
+          exchangeChainId: offer.exchangeChainId,
+          exchangeToken: offer.exchangeToken,
+          chainId: offer.chainId,
+          token: offer.token,
+          depositAmount: '1',
+          offset: 1,
+        });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.totalCount).to.be.equal(2);
+      chai
+        .expect(res.body.offers[0]._id)
+        .to.equal(offerFromInMemoryDB[1]._id.toString());
+    });
+
+    it('Should sort by date', async function () {
+      const offerFromInMemoryDB = await collectionOffers
+        .find({
+          shouldBeInResult: true,
+        })
+        .sort({ date: -1 })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_Search)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({
+          exchangeChainId: offer.exchangeChainId,
+          exchangeToken: offer.exchangeToken,
+          chainId: offer.chainId,
+          token: offer.token,
+          depositAmount: '1',
+        });
+      chai.expect(res).to.have.status(200);
+      for (let i = 0; i < res.body.offers.length; i++) {
+        chai
+          .expect(res.body.offers[i].date)
+          .to.equal(offerFromInMemoryDB[i].date.toISOString());
       }
     });
 
