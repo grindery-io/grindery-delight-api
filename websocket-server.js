@@ -31,8 +31,10 @@ function onConnection(ws, req) {
       console.log('Client authenticated');
     } catch (error) {
       console.error(error);
+      const message = 'Client connection closed due to invalid token';
+      ws.send(JSON.stringify({ result: message }));
       ws.close();
-      console.log('Client connection closed due to server error');
+      console.log(message);
     }
   });
 }
