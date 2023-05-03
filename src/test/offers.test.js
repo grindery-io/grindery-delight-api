@@ -97,13 +97,52 @@ describe('Offers route', async function () {
 
   describe('GET all offers', async function () {
     beforeEach(async function () {
-      await collectionOffers.insertOne({
-        ...offer,
-        date: new Date(),
-        userId: process.env.USER_ID_TEST,
-        status: 'success',
-        amount: '8',
-      });
+      await collectionOffers.insertMany([
+        {
+          ...offer,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+        },
+        {
+          ...offer,
+          date: new Date(),
+          userId: 'anotherUserId',
+          status: 'success',
+          amount: '8',
+        },
+        {
+          ...offer,
+          isActive: false,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+        },
+        {
+          ...offer,
+          offerId: '',
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '8',
+        },
+        {
+          ...offer,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'success',
+          amount: '',
+        },
+        {
+          ...offer,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: 'pending',
+          amount: '8',
+        },
+      ]);
 
       await collectionLiquidityWallet.insertOne({
         chainId: offer.chainId,
@@ -116,9 +155,134 @@ describe('Offers route', async function () {
       chai.expect(res).to.have.status(200);
     });
 
+    it('Should return offers with amount not empty', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((offer) => {
+        chai.expect(offer.amount).that.is.not.empty;
+      });
+    });
+
+    it('Should return offers with offerId not empty', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((offer) => {
+        chai.expect(offer.offerId).that.is.not.empty;
+      });
+    });
+
+    it('Should return offers with success status', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((offer) => {
+        chai.expect(offer.status).to.equal('success');
+      });
+    });
+
+    it('Should return active offers', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((offer) => {
+        chai.expect(offer.isActive).to.be.true;
+      });
+    });
+
+    it('Should return the correct total count', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.totalCount).to.be.equal(2);
+    });
+
+    it('Should set a proper limit', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ limit: 1 });
+
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.offers.length).to.be.equal(1);
+    });
+
+    it('Should set a proper offset', async function () {
+      const offerFromInMemoryDB = await collectionOffers
+        .find({
+          isActive: true,
+          amount: { $exists: true, $ne: '' },
+          status: 'success',
+          offerId: { $exists: true, $ne: '' },
+        })
+        .sort({ date: -1 })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ offset: 1 });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.offers.length).to.be.equal(1);
+      chai
+        .expect(res.body.offers[0]._id)
+        .to.equal(offerFromInMemoryDB[1]._id.toString());
+    });
+
+    it('Should sort by date', async function () {
+      const offerFromInMemoryDB = await collectionOffers
+        .find({
+          isActive: true,
+          amount: { $exists: true, $ne: '' },
+          status: 'success',
+          offerId: { $exists: true, $ne: '' },
+        })
+        .sort({ date: -1 })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ offset: 1 });
+      chai.expect(res).to.have.status(200);
+
+      for (let i = 0; i < res.body.offers.length; i++) {
+        chai
+          .expect(res.body.offers[i].date)
+          .to.equal(offerFromInMemoryDB[i].date.toISOString());
+      }
+    });
+
     it('Should return an array with the correct MongoDB elements', async function () {
-      const offerTmp = await collectionOffers.findOne({});
-      const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
+      const offerFromInMemoryDB = await collectionOffers
+        .find({
+          isActive: true,
+          amount: { $exists: true, $ne: '' },
+          status: 'success',
+          offerId: { $exists: true, $ne: '' },
+        })
+        .sort({ date: -1 })
+        .toArray();
+      const liquidityWalletFromInMemoryDB =
+        await collectionLiquidityWallet.findOne({});
 
       const res = await chai
         .request(app)
@@ -129,16 +293,33 @@ describe('Offers route', async function () {
       chai.expect(res.body).to.deep.equal({
         offers: [
           {
-            ...offerTmp,
-            _id: offerTmp._id.toString(),
-            date: offerTmp.date.toISOString(),
+            ...offer,
+            userId: process.env.USER_ID_TEST,
+            status: 'success',
+            amount: '8',
+            _id: offerFromInMemoryDB[0]._id.toString(),
+            date: offerFromInMemoryDB[0].date.toISOString(),
             liquidityWallet: {
-              ...liquidityWalletTmp,
-              _id: liquidityWalletTmp._id.toString(),
+              chainId: offer.chainId,
+              walletAddress: offer.provider,
+              _id: liquidityWalletFromInMemoryDB._id.toString(),
+            },
+          },
+          {
+            ...offer,
+            userId: 'anotherUserId',
+            status: 'success',
+            amount: '8',
+            _id: offerFromInMemoryDB[1]._id.toString(),
+            date: offerFromInMemoryDB[1].date.toISOString(),
+            liquidityWallet: {
+              chainId: offer.chainId,
+              walletAddress: offer.provider,
+              _id: liquidityWalletFromInMemoryDB._id.toString(),
             },
           },
         ],
-        totalCount: 1,
+        totalCount: 2,
       });
     });
   });
@@ -494,8 +675,9 @@ describe('Offers route', async function () {
     });
 
     it('Should offers with the proper information', async function () {
-      const offerTmp = await collectionOffers.findOne({});
-      const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
+      const offerFromInMemoryDB = await collectionOffers.findOne({});
+      const liquidityWalletFromInMemoryDB =
+        await collectionLiquidityWallet.findOne({});
 
       const res = await chai
         .request(app)
@@ -506,12 +688,12 @@ describe('Offers route', async function () {
       chai.expect(res.body).to.deep.equal({
         offers: [
           {
-            ...offerTmp,
-            _id: offerTmp._id.toString(),
-            date: offerTmp.date.toISOString(),
+            ...offerFromInMemoryDB,
+            _id: offerFromInMemoryDB._id.toString(),
+            date: offerFromInMemoryDB.date.toISOString(),
             liquidityWallet: {
-              ...liquidityWalletTmp,
-              _id: liquidityWalletTmp._id.toString(),
+              ...liquidityWalletFromInMemoryDB,
+              _id: liquidityWalletFromInMemoryDB._id.toString(),
             },
           },
         ],
@@ -550,16 +732,17 @@ describe('Offers route', async function () {
         walletAddress: offer.provider,
       });
 
-      const offerTmp = await collectionOffers.findOne({});
-      const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
+      const offerFromInMemoryDB = await collectionOffers.findOne({});
+      const liquidityWalletFromInMemoryDB =
+        await collectionLiquidityWallet.findOne({});
 
       const formattedData = {
-        ...offerTmp,
-        _id: offerTmp._id.toString(),
-        date: offerTmp.date.toISOString(),
+        ...offerFromInMemoryDB,
+        _id: offerFromInMemoryDB._id.toString(),
+        date: offerFromInMemoryDB.date.toISOString(),
         liquidityWallet: {
-          ...liquidityWalletTmp,
-          _id: liquidityWalletTmp._id.toString(),
+          ...liquidityWalletFromInMemoryDB,
+          _id: liquidityWalletFromInMemoryDB._id.toString(),
         },
       };
 
@@ -626,16 +809,17 @@ describe('Offers route', async function () {
         walletAddress: offer.provider,
       });
 
-      const offerTmp = await collectionOffers.findOne({});
-      const liquidityWalletTmp = await collectionLiquidityWallet.findOne({});
+      const offerFromInMemoryDB = await collectionOffers.findOne({});
+      const liquidityWalletFromInMemoryDB =
+        await collectionLiquidityWallet.findOne({});
 
       const formattedData = {
-        ...offerTmp,
-        _id: offerTmp._id.toString(),
-        date: offerTmp.date.toISOString(),
+        ...offerFromInMemoryDB,
+        _id: offerFromInMemoryDB._id.toString(),
+        date: offerFromInMemoryDB.date.toISOString(),
         liquidityWallet: {
-          ...liquidityWalletTmp,
-          _id: liquidityWalletTmp._id.toString(),
+          ...liquidityWalletFromInMemoryDB,
+          _id: liquidityWalletFromInMemoryDB._id.toString(),
         },
       };
 
@@ -643,7 +827,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_MongoDBId)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ id: offerTmp._id.toString() });
+        .query({ id: offerFromInMemoryDB._id.toString() });
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.deep.equal(formattedData);
