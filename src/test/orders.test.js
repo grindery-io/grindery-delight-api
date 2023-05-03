@@ -147,7 +147,7 @@ describe('Orders route', async function () {
     });
 
     it('Should return proper offer information in orders', async function () {
-      const offerTmp = await collectionOffers.findOne({
+      const offerFromInMemoryDB = await collectionOffers.findOne({
         offerId: offer.offerId,
       });
 
@@ -159,8 +159,8 @@ describe('Orders route', async function () {
 
       res.body.orders.map((order) => {
         chai.expect(order.offer).to.deep.equal({
-          ...offerTmp,
-          _id: offerTmp._id.toString(),
+          ...offerFromInMemoryDB,
+          _id: offerFromInMemoryDB._id.toString(),
         });
       });
     });
@@ -228,7 +228,7 @@ describe('Orders route', async function () {
     });
 
     it('Should return only orders for the given user and proper fields', async function () {
-      const offerTmp = await collectionOffers.findOne({
+      const offerFromInMemoryDB = await collectionOffers.findOne({
         offerId: offer.offerId,
       });
       const orderFromInMemoryDB = await collectionOrders
@@ -251,8 +251,8 @@ describe('Orders route', async function () {
             orderId: orderFromInMemoryDB[0].orderId,
             date: orderFromInMemoryDB[0].date.toISOString(),
             offer: {
-              ...offerTmp,
-              _id: offerTmp._id.toString(),
+              ...offerFromInMemoryDB,
+              _id: offerFromInMemoryDB._id.toString(),
             },
           },
           {
@@ -261,8 +261,8 @@ describe('Orders route', async function () {
             orderId: orderFromInMemoryDB[1].orderId,
             date: orderFromInMemoryDB[1].date.toISOString(),
             offer: {
-              ...offerTmp,
-              _id: offerTmp._id.toString(),
+              ...offerFromInMemoryDB,
+              _id: offerFromInMemoryDB._id.toString(),
             },
           },
         ],
@@ -381,11 +381,25 @@ describe('Orders route', async function () {
 
   describe('GET by MongoDbId', async function () {
     beforeEach(async function () {
-      await collectionOffers.insertOne(offer);
+      await collectionOffers.insertOne({ ...offer });
       await collectionOrders.insertOne({
         ...order,
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
+      });
+
+      await collectionOffers.insertOne({ ...offer });
+      await collectionOffers.insertOne({ ...offer, offerId: 'anotherOfferId' });
+
+      await collectionOrders.insertOne({
+        ...order,
+        offerId: offer.offerId,
+        userId: process.env.USER_ID_TEST,
+      });
+      await collectionOrders.insertOne({
+        ...order,
+        offerId: offer.offerId,
+        userId: 'anotherUserId',
       });
     });
 
@@ -422,11 +436,11 @@ describe('Orders route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ id: orderFromInMemoryDB._id.toString() });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.userId).to.equal(orderFromInMemoryDB.userId);
+      chai.expect(res.body.userId).to.equal(process.env.USER_ID_TEST);
     });
 
     it('Should return the order with all the proper fields', async function () {
-      const offerTmp = await collectionOffers.findOne({});
+      const offerFromInMemoryDB = await collectionOffers.findOne({});
       const orderFromInMemoryDB = await collectionOrders.findOne({
         userId: process.env.USER_ID_TEST,
       });
@@ -438,11 +452,13 @@ describe('Orders route', async function () {
         .query({ id: orderFromInMemoryDB._id.toString() });
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.deep.equal({
-        ...orderFromInMemoryDB,
+        ...order,
+        offerId: offer.offerId,
+        userId: process.env.USER_ID_TEST,
         _id: orderFromInMemoryDB._id.toString(),
         offer: {
-          ...offerTmp,
-          _id: offerTmp._id.toString(),
+          ...offer,
+          _id: offerFromInMemoryDB._id.toString(),
         },
       });
     });
@@ -529,7 +545,7 @@ describe('Orders route', async function () {
     });
 
     it('Should show only orders with proper fields and offer information', async function () {
-      const offerTmp = await collectionOffers.findOne({});
+      const offerFromInMemoryDB = await collectionOffers.findOne({});
       const orderFromInMemoryDB = await collectionOrders.findOne({
         userId: process.env.USER_ID_TEST,
       });
@@ -546,8 +562,8 @@ describe('Orders route', async function () {
             ...orderFromInMemoryDB,
             _id: orderFromInMemoryDB._id.toString(),
             offer: {
-              ...offerTmp,
-              _id: offerTmp._id.toString(),
+              ...offerFromInMemoryDB,
+              _id: offerFromInMemoryDB._id.toString(),
             },
           },
         ],
