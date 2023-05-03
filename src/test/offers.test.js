@@ -15,6 +15,7 @@ import {
   pathOffers_Delete_MongoDBId,
   pathOffers_Put,
   pathOffers_Get_All,
+  pathLiquidityWallets_Post_NewLiquidityWallet,
   collectionLiquidityWallet,
 } from './utils/variables.js';
 

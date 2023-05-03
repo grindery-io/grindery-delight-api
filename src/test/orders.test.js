@@ -111,27 +111,131 @@ describe('Orders route', async function () {
 
   describe('GET by user', async function () {
     beforeEach(async function () {
-      await collectionOffers.insertOne(offer);
+      await collectionOffers.insertOne({
+        ...offer,
+      });
+      await collectionOffers.insertOne({
+        ...offer,
+        offerId: 'anotherOfferId',
+      });
+
       await collectionOrders.insertOne({
         ...order,
+        orderId: 'myOrderId1',
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
+        date: new Date(),
+      });
+      await collectionOrders.insertOne({
+        ...order,
+        orderId: 'myOrderId2',
+        offerId: offer.offerId,
+        userId: process.env.USER_ID_TEST,
+        date: new Date(),
       });
       await collectionOrders.insertOne({
         ...order,
         offerId: offer.offerId,
         userId: 'anotherUserId',
+        date: new Date(),
       });
     });
+
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).get(pathOrders_Get_User);
       chai.expect(res).to.have.status(403);
     });
-    it('Should return only orders for the given user and proper fields', async function () {
-      const offerTmp = await collectionOffers.findOne({});
-      const orderTmp = await collectionOrders.findOne({
-        userId: process.env.USER_ID_TEST,
+
+    it('Should return proper offer information in orders', async function () {
+      const offerTmp = await collectionOffers.findOne({
+        offerId: offer.offerId,
       });
+
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_User)
+        .set({ Authorization: `Bearer ${mockedToken}` });
+      chai.expect(res).to.have.status(200);
+
+      res.body.orders.map((order) => {
+        chai.expect(order.offer).to.deep.equal({
+          ...offerTmp,
+          _id: offerTmp._id.toString(),
+        });
+      });
+    });
+
+    it('Should sort by date', async function () {
+      const orderTmp = await collectionOrders
+        .find({
+          userId: process.env.USER_ID_TEST,
+        })
+        .sort({ date: -1 })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_User)
+        .set({ Authorization: `Bearer ${mockedToken}` });
+      chai.expect(res).to.have.status(200);
+
+      for (let i = 0; i < res.body.orders.length; i++) {
+        chai
+          .expect(res.body.orders[i].date)
+          .to.equal(orderTmp[i].date.toISOString());
+      }
+    });
+
+    it('Should set a proper limit', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_User)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ limit: 1 });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.orders.length).to.equal(1);
+    });
+
+    it('Should set a proper offset', async function () {
+      const orderTmp = await collectionOrders
+        .find({
+          userId: process.env.USER_ID_TEST,
+        })
+        .sort({ date: -1 })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_User)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ offset: 1 });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.orders.length).to.equal(1);
+      chai.expect(res.body.orders[0]._id).to.equal(orderTmp[1]._id.toString());
+    });
+
+    it('Should set a totalCount', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_User)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ offset: 1 });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.orders.length).to.equal(1);
+      chai.expect(res.body.totalCount).to.equal(2);
+    });
+
+    it('Should return only orders for the given user and proper fields', async function () {
+      const offerTmp = await collectionOffers.findOne({
+        offerId: offer.offerId,
+      });
+      const orderTmp = await collectionOrders
+        .find({
+          userId: process.env.USER_ID_TEST,
+        })
+        .sort({ date: -1 })
+        .toArray();
+
       const res = await chai
         .request(app)
         .get(pathOrders_Get_User)
@@ -140,15 +244,27 @@ describe('Orders route', async function () {
       chai.expect(res.body).to.deep.equal({
         orders: [
           {
-            ...orderTmp,
-            _id: orderTmp._id.toString(),
+            ...orderTmp[0],
+            _id: orderTmp[0]._id.toString(),
+            orderId: orderTmp[0].orderId,
+            date: orderTmp[0].date.toISOString(),
+            offer: {
+              ...offerTmp,
+              _id: offerTmp._id.toString(),
+            },
+          },
+          {
+            ...orderTmp[1],
+            _id: orderTmp[1]._id.toString(),
+            orderId: orderTmp[1].orderId,
+            date: orderTmp[1].date.toISOString(),
             offer: {
               ...offerTmp,
               _id: offerTmp._id.toString(),
             },
           },
         ],
-        totalCount: 1,
+        totalCount: 2,
       });
     });
   });
