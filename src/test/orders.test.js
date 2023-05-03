@@ -478,23 +478,37 @@ describe('Orders route', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         { ...offer, userId: process.env.USER_ID_TEST },
+        { ...offer, isActive: false },
+        { ...offer, offerId: 'anotherOfferId' },
+        { ...offer, userId: 'anotherUserId' },
       ]);
 
       await collectionOrders.insertMany([
         {
           ...order,
+          orderId: 'myOrderId1',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
+          date: new Date(),
+        },
+        {
+          ...order,
+          orderId: 'myOrderId2',
+          offerId: offer.offerId,
+          userId: process.env.USER_ID_TEST,
+          date: new Date(),
         },
         {
           ...order,
           offerId: 'offerId1',
           userId: process.env.USER_ID_TEST,
+          date: new Date(),
         },
         {
           ...order,
           offerId: 'offerId2',
           userId: 'anotherUserId',
+          date: new Date(),
         },
       ]);
     });
@@ -508,8 +522,7 @@ describe('Orders route', async function () {
       const res = await chai
         .request(app)
         .get(pathOrders_Get_LiquidityProvider)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ limit: 0 });
+        .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
       const orderFromInMemoryDB = await collectionOffers.findOne({
@@ -540,15 +553,80 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(200);
 
       res.body.orders.forEach((order) => {
-        chai.expect(order.offer.userId).to.equal(order.userId);
+        chai.expect(order.offer.userId).to.equal(process.env.USER_ID_TEST);
       });
+    });
+
+    it('Should sort by date', async function () {
+      const orderFromInMemoryDB = await collectionOrders
+        .find({
+          userId: process.env.USER_ID_TEST,
+        })
+        .sort({ date: -1 })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_LiquidityProvider)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      for (let i = 0; i < res.body.orders.length; i++) {
+        chai
+          .expect(res.body.orders[i].date)
+          .to.equal(orderFromInMemoryDB[i].date.toISOString());
+      }
+    });
+
+    it('Should set a proper limit', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_LiquidityProvider)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ limit: 1 });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.orders.length).to.equal(1);
+    });
+
+    it('Should set a proper offset', async function () {
+      const orderFromInMemoryDB = await collectionOrders
+        .find({
+          userId: process.env.USER_ID_TEST,
+        })
+        .sort({ date: -1 })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_LiquidityProvider)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offset: 1 });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.orders.length).to.equal(1);
+      chai
+        .expect(res.body.orders[0]._id)
+        .to.equal(orderFromInMemoryDB[1]._id.toString());
+    });
+
+    it('Should set a totalCount', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_LiquidityProvider)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offset: 1 });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.orders.length).to.equal(1);
+      chai.expect(res.body.totalCount).to.equal(2);
     });
 
     it('Should show only orders with proper fields and offer information', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({});
-      const orderFromInMemoryDB = await collectionOrders.findOne({
-        userId: process.env.USER_ID_TEST,
-      });
+      const orderFromInMemoryDB = await collectionOrders
+        .find({
+          userId: process.env.USER_ID_TEST,
+        })
+        .sort({ date: -1 })
+        .toArray();
 
       const res = await chai
         .request(app)
@@ -559,15 +637,27 @@ describe('Orders route', async function () {
       chai.expect(res.body).to.deep.equal({
         orders: [
           {
-            ...orderFromInMemoryDB,
-            _id: orderFromInMemoryDB._id.toString(),
+            ...orderFromInMemoryDB[0],
+            _id: orderFromInMemoryDB[0]._id.toString(),
+            orderId: orderFromInMemoryDB[0].orderId,
+            date: orderFromInMemoryDB[0].date.toISOString(),
+            offer: {
+              ...offerFromInMemoryDB,
+              _id: offerFromInMemoryDB._id.toString(),
+            },
+          },
+          {
+            ...orderFromInMemoryDB[1],
+            _id: orderFromInMemoryDB[1]._id.toString(),
+            orderId: orderFromInMemoryDB[1].orderId,
+            date: orderFromInMemoryDB[1].date.toISOString(),
             offer: {
               ...offerFromInMemoryDB,
               _id: offerFromInMemoryDB._id.toString(),
             },
           },
         ],
-        totalCount: 1,
+        totalCount: 2,
       });
     });
   });
