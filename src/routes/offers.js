@@ -159,12 +159,11 @@ router.get(
     }
 
     const db = await Database.getInstance(req);
-    const collection = db.collection('offers');
 
     res.status(200).send(
       await getOneOfferWithLiquidityWallet(
         db.collection('liquidity-wallets'),
-        await collection.findOne({
+        await db.collection('offers').findOne({
           offerId: req.query.offerId,
         })
       )

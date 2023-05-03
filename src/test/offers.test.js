@@ -868,6 +868,23 @@ describe('Offers route', async function () {
   });
 
   describe('GET offer by offerId', async function () {
+    beforeEach(async function () {
+      await collectionOffers.insertMany([
+        {
+          ...offer,
+        },
+        {
+          ...offer,
+          offerId: 'anotherOfferId',
+        },
+      ]);
+
+      await collectionLiquidityWallet.insertOne({
+        chainId: offer.chainId,
+        walletAddress: offer.provider,
+      });
+    });
+
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -877,8 +894,6 @@ describe('Offers route', async function () {
     });
 
     it('Should return the offer with the proper offerId', async function () {
-      await createBaseOffer(offer);
-
       const res = await chai
         .request(app)
         .get(pathOffers_Get_OfferId)
@@ -891,25 +906,16 @@ describe('Offers route', async function () {
     });
 
     it('Should return the offer with the proper fields', async function () {
-      await createBaseOffer(offer);
       await collectionLiquidityWallet.insertOne({
         chainId: offer.chainId,
         walletAddress: offer.provider,
       });
 
-      const offerFromInMemoryDB = await collectionOffers.findOne({});
+      const offerFromInMemoryDB = await collectionOffers.findOne({
+        offerId: offer.offerId,
+      });
       const liquidityWalletFromInMemoryDB =
         await collectionLiquidityWallet.findOne({});
-
-      const formattedData = {
-        ...offerFromInMemoryDB,
-        _id: offerFromInMemoryDB._id.toString(),
-        date: offerFromInMemoryDB.date.toISOString(),
-        liquidityWallet: {
-          ...liquidityWalletFromInMemoryDB,
-          _id: liquidityWalletFromInMemoryDB._id.toString(),
-        },
-      };
 
       const res = await chai
         .request(app)
@@ -919,7 +925,15 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
-      chai.expect(res.body).to.deep.equal(formattedData);
+      chai.expect(res.body).to.deep.equal({
+        ...offer,
+        _id: offerFromInMemoryDB._id.toString(),
+        liquidityWallet: {
+          chainId: offer.chainId,
+          walletAddress: offer.provider,
+          _id: liquidityWalletFromInMemoryDB._id.toString(),
+        },
+      });
     });
 
     it('Should return an empty object if offerId doesnt exist', async function () {
