@@ -179,12 +179,11 @@ router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   }
 
   const db = await Database.getInstance(req);
-  const collection = db.collection('offers');
 
   res.status(200).send(
     await getOneOfferWithLiquidityWallet(
       db.collection('liquidity-wallets'),
-      await collection.findOne({
+      await db.collection('offers').findOne({
         _id: new ObjectId(req.query.id),
         userId: { $regex: res.locals.userId, $options: 'i' },
       })

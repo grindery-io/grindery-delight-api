@@ -949,6 +949,24 @@ describe('Offers route', async function () {
   });
 
   describe('GET offer by MongoDB id', async function () {
+    beforeEach(async function () {
+      await collectionOffers.insertMany([
+        {
+          ...offer,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          userId: 'anotherUserId',
+        },
+      ]);
+
+      await collectionLiquidityWallet.insertOne({
+        chainId: offer.chainId,
+        walletAddress: offer.provider,
+      });
+    });
+
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -958,49 +976,25 @@ describe('Offers route', async function () {
     });
 
     it('Should return the offer with the proper userId', async function () {
-      const createResponse = await chai
-        .request(app)
-        .post(pathOffers_Post)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send(offer);
-      chai.expect(createResponse).to.have.status(200);
-
-      const userId = (
-        await collectionOffers.findOne({
-          _id: new ObjectId(createResponse.body.insertedId),
-        })
-      ).userId;
+      const offerFromInMemoryDB = await collectionOffers.findOne({
+        userId: process.env.USER_ID_TEST,
+      });
 
       const res = await chai
         .request(app)
         .get(pathOffers_Get_MongoDBId)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ id: createResponse.body.insertedId });
-
+        .query({ id: offerFromInMemoryDB._id.toString() });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.userId).to.equal(userId);
+      chai.expect(res.body.userId).to.equal(process.env.USER_ID_TEST);
     });
 
     it('Should return the offer with the proper fields', async function () {
-      await createBaseOffer(offer);
-      await collectionLiquidityWallet.insertOne({
-        chainId: offer.chainId,
-        walletAddress: offer.provider,
+      const offerFromInMemoryDB = await collectionOffers.findOne({
+        userId: process.env.USER_ID_TEST,
       });
-
-      const offerFromInMemoryDB = await collectionOffers.findOne({});
       const liquidityWalletFromInMemoryDB =
         await collectionLiquidityWallet.findOne({});
-
-      const formattedData = {
-        ...offerFromInMemoryDB,
-        _id: offerFromInMemoryDB._id.toString(),
-        date: offerFromInMemoryDB.date.toISOString(),
-        liquidityWallet: {
-          ...liquidityWalletFromInMemoryDB,
-          _id: liquidityWalletFromInMemoryDB._id.toString(),
-        },
-      };
 
       const res = await chai
         .request(app)
@@ -1009,7 +1003,16 @@ describe('Offers route', async function () {
         .query({ id: offerFromInMemoryDB._id.toString() });
 
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.deep.equal(formattedData);
+      chai.expect(res.body).to.deep.equal({
+        ...offer,
+        userId: process.env.USER_ID_TEST,
+        _id: offerFromInMemoryDB._id.toString(),
+        liquidityWallet: {
+          chainId: offer.chainId,
+          walletAddress: offer.provider,
+          _id: liquidityWalletFromInMemoryDB._id.toString(),
+        },
+      });
     });
 
     it('Should return an empty object if MongoDB id doesnt exist', async function () {
