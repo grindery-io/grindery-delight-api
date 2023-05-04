@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { checkToken } from './src/utils/auth-utils.js';
+import { checkToken } from './utils/auth-utils.js';
 import jwt_decode from 'jwt-decode';
 
 function onConnection(ws, req) {
