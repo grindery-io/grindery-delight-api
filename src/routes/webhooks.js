@@ -37,7 +37,7 @@ router.put(
 
     const response = await collection.updateOne(offer, {
       $set: {
-        max: req.body._upperLimitFn ?? offer.min,
+        max: req.body._upperMaxFn ?? offer.max,
       },
     });
     if (response.modifiedCount > 0)

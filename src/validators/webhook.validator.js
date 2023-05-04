@@ -17,7 +17,7 @@ export const updateMaxPriceOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_upperLimitFn')
+  body('_upperMaxFn')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -29,7 +29,7 @@ export const updateMaxPriceOfferValidator = [
         '_grinderyChainId',
         '_grinderyTransactionHash',
         '_idOffer',
-        '_upperLimitFn',
+        '_upperMaxFn',
       ],
       'body'
     );
