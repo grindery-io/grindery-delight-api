@@ -37,7 +37,7 @@ router.put(
 
     const response = await collection.updateOne(offer, {
       $set: {
-        max: req.body._upperMaxFn ?? offer.max,
+        max: req.body._upperMaxFn,
       },
     });
     if (response.modifiedCount > 0)
@@ -78,7 +78,7 @@ router.put(
 
     const response = await collection.updateOne(offer, {
       $set: {
-        min: req.body._lowerLimitFn ?? offer.min,
+        min: req.body._lowerLimitFn,
       },
     });
     if (response.modifiedCount > 0)
@@ -119,7 +119,7 @@ router.put(
 
     const response = await collection.updateOne(offer, {
       $set: {
-        tokenAddress: req.body._token ?? offer.tokenAddress,
+        tokenAddress: req.body._token,
       },
     });
     if (response.modifiedCount > 0)
@@ -160,7 +160,7 @@ router.put(
 
     const response = await collection.updateOne(offer, {
       $set: {
-        chainId: req.body._chainId ?? offer.chainId,
+        chainId: req.body._chainId,
       },
     });
     if (response.modifiedCount > 0)
@@ -201,7 +201,7 @@ router.put(
 
     const response = await collection.updateOne(offer, {
       $set: {
-        isActive: req.body._isActive ?? offer.isActive,
+        isActive: req.body._isActive,
       },
     });
     if (response.modifiedCount > 0)
