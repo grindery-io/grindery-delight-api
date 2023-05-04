@@ -180,7 +180,7 @@ router.put(
 
     if (!order) {
       return res.status(404).send({
-        msg: 'No order found.',
+        msg: 'No order found',
       });
     }
 

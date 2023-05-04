@@ -779,7 +779,7 @@ describe('Orders route', async function () {
           orderId: order.orderId,
         });
       chai.expect(res).to.have.status(404);
-      chai.expect(res.body).to.deep.equal({ msg: 'No order found.' });
+      chai.expect(res.body).to.deep.equal({ msg: 'No order found' });
     });
   });
 });

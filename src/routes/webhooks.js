@@ -22,33 +22,33 @@ router.put(
   updateMaxPriceOfferValidator,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     const offer = await collection.findOne({
       offerId: req.body._idOffer,
     });
-    if (offer) {
-      const response = await collection.updateOne(offer, {
-        $set: {
-          max: req.body._upperLimitFn ? req.body._upperLimitFn : offer.min,
+
+    if (!offer) return res.status(400).send({ msg: 'No offer found' });
+
+    const response = await collection.updateOne(offer, {
+      $set: {
+        max: req.body._upperLimitFn ?? offer.min,
+      },
+    });
+    if (response.modifiedCount > 0)
+      dispatch({
+        method: 'maxPrice',
+        params: {
+          type: 'offer',
+          id: req.body._idOffer,
         },
       });
-      if (response.modifiedCount > 0)
-        dispatch({
-          method: 'maxPrice',
-          params: {
-            type: 'offer',
-            id: req.body._idOffer,
-          },
-        });
-      return res.status(200).send(response);
-    }
-    res.status(400).send({
-      msg: 'Not found.',
-    });
+    return res.status(200).send(response);
   }
 );
 
@@ -59,33 +59,37 @@ router.put(
   updateMinPriceOfferValidator,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     const offer = await collection.findOne({
       offerId: req.body._idOffer,
     });
-    if (offer) {
-      const response = await collection.updateOne(offer, {
-        $set: {
-          min: req.body._lowerLimitFn ? req.body._lowerLimitFn : offer.min,
+
+    if (!offer) {
+      res.status(400).send({
+        msg: 'No offer found',
+      });
+    }
+
+    const response = await collection.updateOne(offer, {
+      $set: {
+        min: req.body._lowerLimitFn ?? offer.min,
+      },
+    });
+    if (response.modifiedCount > 0)
+      dispatch({
+        method: 'minPrice',
+        params: {
+          type: 'offer',
+          id: req.body._idOffer,
         },
       });
-      if (response.modifiedCount > 0)
-        dispatch({
-          method: 'minPrice',
-          params: {
-            type: 'offer',
-            id: req.body._idOffer,
-          },
-        });
-      return res.status(200).send(response);
-    }
-    res.status(400).send({
-      msg: 'Not found.',
-    });
+    return res.status(200).send(response);
   }
 );
 
@@ -96,33 +100,37 @@ router.put(
   updateTokenOfferValidator,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     const offer = await collection.findOne({
       offerId: req.body._idOffer,
     });
-    if (offer) {
-      const response = await collection.updateOne(offer, {
-        $set: {
-          tokenAddress: req.body._token ? req.body._token : offer.tokenAddress,
+
+    if (!offer) {
+      res.status(400).send({
+        msg: 'No offer found',
+      });
+    }
+
+    const response = await collection.updateOne(offer, {
+      $set: {
+        tokenAddress: req.body._token ?? offer.tokenAddress,
+      },
+    });
+    if (response.modifiedCount > 0)
+      dispatch({
+        method: 'token',
+        params: {
+          type: 'offer',
+          id: req.body._idOffer,
         },
       });
-      if (response.modifiedCount > 0)
-        dispatch({
-          method: 'token',
-          params: {
-            type: 'offer',
-            id: req.body._idOffer,
-          },
-        });
-      return res.status(200).send(response);
-    }
-    res.status(400).send({
-      msg: 'Not found.',
-    });
+    return res.status(200).send(response);
   }
 );
 
@@ -133,33 +141,37 @@ router.put(
   updateChainIdOfferValidator,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     const offer = await collection.findOne({
       offerId: req.body._idOffer,
     });
-    if (offer) {
-      const response = await collection.updateOne(offer, {
-        $set: {
-          chainId: req.body._chainId ? req.body._chainId : offer.chainId,
+
+    if (!offer) {
+      res.status(400).send({
+        msg: 'No offer found',
+      });
+    }
+
+    const response = await collection.updateOne(offer, {
+      $set: {
+        chainId: req.body._chainId ?? offer.chainId,
+      },
+    });
+    if (response.modifiedCount > 0)
+      dispatch({
+        method: 'chain',
+        params: {
+          type: 'offer',
+          id: req.body._idOffer,
         },
       });
-      if (response.modifiedCount > 0)
-        dispatch({
-          method: 'chain',
-          params: {
-            type: 'offer',
-            id: req.body._idOffer,
-          },
-        });
-      return res.status(200).send(response);
-    }
-    res.status(400).send({
-      msg: 'Not found.',
-    });
+    return res.status(200).send(response);
   }
 );
 
@@ -170,36 +182,37 @@ router.put(
   updateStatusOfferValidator,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     const offer = await collection.findOne({
       offerId: req.body._idOffer,
     });
-    if (offer) {
-      const response = await collection.updateOne(offer, {
-        $set: {
-          isActive:
-            req.body._isActive === undefined
-              ? offer.isActive
-              : req.body._isActive,
+
+    if (!offer) {
+      res.status(404).send({
+        msg: 'Not found.',
+      });
+    }
+
+    const response = await collection.updateOne(offer, {
+      $set: {
+        isActive: req.body._isActive ?? offer.isActive,
+      },
+    });
+    if (response.modifiedCount > 0)
+      dispatch({
+        method: 'status',
+        params: {
+          type: 'offer',
+          id: req.body._idOffer,
         },
       });
-      if (response.modifiedCount > 0)
-        dispatch({
-          method: 'status',
-          params: {
-            type: 'offer',
-            id: req.body._idOffer,
-          },
-        });
-      return res.status(200).send(response);
-    }
-    res.status(404).send({
-      msg: 'Not found.',
-    });
+    return res.status(200).send(response);
   }
 );
 
@@ -210,34 +223,38 @@ router.put(
   updateOfferValidator,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('offers');
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
     const offer = await collection.findOne({
       hash: req.body._grinderyTransactionHash,
     });
-    if (offer) {
-      const response = await collection.updateOne(offer, {
-        $set: {
-          offerId: req.body._idOffer,
-          status: 'sucess',
+
+    if (!offer) {
+      res.status(404).send({
+        msg: 'No offer found',
+      });
+    }
+
+    const response = await collection.updateOne(offer, {
+      $set: {
+        offerId: req.body._idOffer,
+        status: 'success',
+      },
+    });
+    if (response.modifiedCount > 0)
+      dispatch({
+        method: 'success',
+        params: {
+          type: 'offer',
+          id: req.body._idOffer,
         },
       });
-      if (response.modifiedCount > 0)
-        dispatch({
-          method: 'success',
-          params: {
-            type: 'offer',
-            id: req.body._idOffer,
-          },
-        });
-      return res.status(200).send(response);
-    }
-    res.status(404).send({
-      msg: 'Not found.',
-    });
+    return res.status(200).send(response);
   }
 );
 
@@ -248,34 +265,38 @@ router.put(
   updateOrderValidator,
   async (req, res) => {
     const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('orders');
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('orders');
+
     const order = await collection.findOne({
       hash: req.body._grinderyTransactionHash,
     });
-    if (order) {
-      const response = await collection.updateOne(order, {
-        $set: {
-          orderId: req.body._idTrade,
-          status: 'sucess',
+
+    if (!order) {
+      res.status(404).send({
+        msg: 'No order found',
+      });
+    }
+
+    const response = await collection.updateOne(order, {
+      $set: {
+        orderId: req.body._idTrade,
+        status: 'success',
+      },
+    });
+    if (response.modifiedCount > 0)
+      dispatch({
+        method: 'success',
+        params: {
+          type: 'order',
+          id: req.body._idTrade,
         },
       });
-      if (response.modifiedCount > 0)
-        dispatch({
-          method: 'sucess',
-          params: {
-            type: 'order',
-            id: req.body._idTrade,
-          },
-        });
-      return res.status(200).send(response);
-    }
-    res.status(404).send({
-      msg: 'Not found.',
-    });
+    return res.status(200).send(response);
   }
 );
 
