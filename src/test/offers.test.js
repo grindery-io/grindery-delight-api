@@ -1371,6 +1371,7 @@ describe('Offers route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ isActive: modifiedOffer.isActive });
 
+      console.log(modifyOffer.body);
       chai.expect(modifyOffer).to.have.status(200);
 
       const getOffer = await chai
@@ -1382,6 +1383,8 @@ describe('Offers route', async function () {
       delete getOffer.body._id;
       delete getOffer.body.date;
       delete getOffer.body.userId;
+
+      console.log(getOffer.body);
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({

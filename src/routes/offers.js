@@ -221,16 +221,19 @@ router.delete(
 /* This is a PUT request that updates an offer by id. */
 router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
-  const db = await Database.getInstance(req);
-  const collection = db.collection('offers');
-
   if (validator.length) {
     return res.status(400).send(validator);
   }
+
+  const db = await Database.getInstance(req);
+  const collection = db.collection('offers');
+
   const offer = await collection.findOne({
     offerId: req.params.offerId,
     userId: { $regex: res.locals.userId, $options: 'i' },
   });
+
+  console.log(req.body.isActive);
   if (offer) {
     res.status(200).send(
       await collection.updateOne(offer, {

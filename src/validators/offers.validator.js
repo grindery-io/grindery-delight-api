@@ -39,6 +39,9 @@ export const createOfferValidator = [
     .withMessage('must not be empty'),
   body('offerId').isString().withMessage('must be string value'),
   body('isActive')
+    .not()
+    .isString()
+    .withMessage('must not be string value')
     .isBoolean()
     .withMessage('must be boolean value')
     .notEmpty()
@@ -215,6 +218,9 @@ export const updateOfferValidator = [
     .withMessage('must not be empty'),
   body('isActive')
     .optional()
+    .not()
+    .isString()
+    .withMessage('must not be string value')
     .isBoolean()
     .withMessage('must be boolean value')
     .notEmpty()
