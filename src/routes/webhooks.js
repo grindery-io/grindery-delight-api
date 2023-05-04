@@ -38,13 +38,11 @@ router.put(
       });
       if (response.modifiedCount > 0)
         dispatch({
-          method: 'update',
+          method: 'maxPrice',
           params: {
             type: 'offer',
             id: req.body._idOffer,
-            userId: offer.userId,
           },
-          id: req.body._idOffer,
         });
       return res.status(200).send(response);
     }
@@ -77,13 +75,11 @@ router.put(
       });
       if (response.modifiedCount > 0)
         dispatch({
-          method: 'update',
+          method: 'minPrice',
           params: {
             type: 'offer',
             id: req.body._idOffer,
-            userId: offer.userId,
           },
-          id: req.body._idOffer,
         });
       return res.status(200).send(response);
     }
@@ -116,13 +112,11 @@ router.put(
       });
       if (response.modifiedCount > 0)
         dispatch({
-          method: 'update',
+          method: 'token',
           params: {
             type: 'offer',
             id: req.body._idOffer,
-            userId: offer.userId,
           },
-          id: req.body._idOffer,
         });
       return res.status(200).send(response);
     }
@@ -155,13 +149,11 @@ router.put(
       });
       if (response.modifiedCount > 0)
         dispatch({
-          method: 'update',
+          method: 'chain',
           params: {
             type: 'offer',
             id: req.body._idOffer,
-            userId: offer.userId,
           },
-          id: req.body._idOffer,
         });
       return res.status(200).send(response);
     }
@@ -197,13 +189,11 @@ router.put(
       });
       if (response.modifiedCount > 0)
         dispatch({
-          method: 'update',
+          method: 'status',
           params: {
             type: 'offer',
             id: req.body._idOffer,
-            userId: offer.userId,
           },
-          id: req.body._idOffer,
         });
       return res.status(200).send(response);
     }
@@ -237,13 +227,11 @@ router.put(
       });
       if (response.modifiedCount > 0)
         dispatch({
-          method: 'update',
+          method: 'success',
           params: {
             type: 'offer',
             id: req.body._idOffer,
-            userId: offer.userId,
           },
-          id: req.body._idOffer,
         });
       return res.status(200).send(response);
     }
@@ -277,13 +265,11 @@ router.put(
       });
       if (response.modifiedCount > 0)
         dispatch({
-          method: 'update',
+          method: 'sucess',
           params: {
             type: 'order',
             id: req.body._idTrade,
-            userId: order.userId,
           },
-          id: req.body._idTrade,
         });
       return res.status(200).send(response);
     }
