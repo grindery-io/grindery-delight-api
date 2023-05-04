@@ -187,7 +187,10 @@ export const updateStatusOfferValidator = [
     .isString()
     .withMessage('must be string value')
     .notEmpty()
-    .withMessage('must not be empty'),
+    .withMessage('must not be empty')
+    .customSanitizer((value) => {
+      return value == 'true';
+    }),
   body().custom((value, { req }) => {
     validateFields(
       req.body,
