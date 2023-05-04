@@ -10,8 +10,8 @@ export const dispatch = (data) => {
       client.send(
         JSON.stringify({
           jsonrpc: '2.0',
-          data,
           id: data.params.id,
+          ...data,
         })
       );
     }
