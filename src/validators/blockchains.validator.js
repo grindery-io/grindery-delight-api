@@ -58,6 +58,9 @@ export const createBlockchainValidator = [
     .notEmpty()
     .withMessage('must not be empty'),
   body('isActive')
+    .not()
+    .isString()
+    .withMessage('must not be string value')
     .isBoolean()
     .withMessage('must be boolean value')
     .notEmpty()
@@ -174,6 +177,9 @@ export const modifyBlockchainValidator = [
     .withMessage('must not be empty'),
   body('isActive')
     .optional()
+    .not()
+    .isString()
+    .withMessage('must not be string value')
     .isBoolean()
     .withMessage('must be boolean value')
     .notEmpty()
