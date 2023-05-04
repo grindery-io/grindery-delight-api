@@ -177,7 +177,7 @@ router.put(
 
 /* This is a PUT request that updates status offer. */
 router.put(
-  '/offer/status',
+  '/offer/activation-deactivation',
   authenticateApiKey,
   updateStatusOfferValidator,
   async (req, res) => {
