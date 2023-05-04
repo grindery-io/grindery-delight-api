@@ -210,6 +210,21 @@ export const updateStatusOfferValidator = [
 ];
 
 export const updateOfferValidator = [
+  body('_idOffer')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_token')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_chainId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body('_grinderyChainId')
     .isString()
     .withMessage('must be string value')
@@ -220,42 +235,15 @@ export const updateOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_idOffer')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('_amount')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('_idTrade')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('_offerer')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('_token')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(
       req.body,
       [
+        '_idOffer',
+        '_token',
+        '_chainId',
         '_grinderyChainId',
         '_grinderyTransactionHash',
-        '_idOffer',
-        '_amount',
-        '_idTrade',
-        '_offerer',
-        '_token',
       ],
       'body'
     );
