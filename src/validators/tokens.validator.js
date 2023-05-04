@@ -33,6 +33,9 @@ export const createTokenValidator = [
     .notEmpty()
     .withMessage('must not be empty'),
   body('isActive')
+    .not()
+    .isString()
+    .withMessage('must not be string value')
     .isBoolean()
     .withMessage('must be boolean value')
     .notEmpty()
@@ -115,6 +118,9 @@ export const modifyTokenValidator = [
     .withMessage('must not be empty'),
   body('isActive')
     .optional()
+    .not()
+    .isString()
+    .withMessage('must not be string value')
     .isBoolean()
     .withMessage('must be boolean value')
     .notEmpty()
