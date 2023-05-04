@@ -69,6 +69,10 @@ export const pathTokens_Get_MongoDBId = '/unit-test/tokens/';
 export const pathTokens_Put_MongoDBId = '/unit-test/tokens/';
 export const pathTokens_Delete_MongoDBId = '/unit-test/tokens/';
 
+// View blockchain paths
+export const pathViewBlockchain_Put_OrdersUser =
+  '/unit-test/view-blockchains/update-order-user';
+
 export const order = {
   amountTokenDeposit: '0.34',
   addressTokenDeposit: '0x0',
@@ -195,4 +199,18 @@ export const updateTokenLiquidityWallet = {
   chainId: 'myNewChainId',
   tokenId: 'myNewTokenId',
   amount: '2121212',
+};
+
+export const blockchainGoerli = {
+  caipId: 'eip155:5',
+  chainId: '5',
+  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-5.png',
+  isActive: true,
+  isEvm: true,
+  isTestnet: true,
+  label: 'Goerli',
+  nativeTokenSymbol: 'ETH',
+  rpc: ['https://rpc.ankr.com/eth_goerli'],
+  transactionExplorerUrl: 'https://goerli.etherscan.io/tx/{hash}',
+  addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',
 };
