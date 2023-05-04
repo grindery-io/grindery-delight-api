@@ -128,6 +128,7 @@ router.put(
         params: {
           type: 'offer',
           id: req.body._idOffer,
+          userId: offer.userId,
         },
       });
     return res.status(200).send(response);
@@ -169,6 +170,7 @@ router.put(
         params: {
           type: 'offer',
           id: req.body._idOffer,
+          userId: offer.userId,
         },
       });
     return res.status(200).send(response);
@@ -210,6 +212,7 @@ router.put(
         params: {
           type: 'offer',
           id: req.body._idOffer,
+          userId: offer.userId,
         },
       });
     return res.status(200).send(response);
@@ -252,6 +255,7 @@ router.put(
         params: {
           type: 'offer',
           id: req.body._idOffer,
+          userId: offer.userId,
         },
       });
     return res.status(200).send(response);
@@ -294,6 +298,7 @@ router.put(
         params: {
           type: 'order',
           id: req.body._idTrade,
+          userId: offer.userId,
         },
       });
     return res.status(200).send(response);
