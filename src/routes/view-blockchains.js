@@ -120,4 +120,25 @@ router.put('/update-order-all', isRequired, async (req, res) => {
   );
 });
 
+router.put('/update-completion-user', isRequired, async (req, res) => {
+  const db = await Database.getInstance(req);
+
+  res.status(200).send(
+    await Promise.all(
+      (
+        await db
+          .collection('orders')
+          .find({ userId: res.locals.userId })
+          .toArray()
+      ).map(async (order) => {
+        await db
+          .collection('orders')
+          .updateOne(order, { $set: await updateOrderFromDb(db, order) });
+
+        return order;
+      })
+    )
+  );
+});
+
 export default router;

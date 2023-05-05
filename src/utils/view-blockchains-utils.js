@@ -3,6 +3,49 @@ import axios from 'axios';
 
 export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
 
+export async function updateCompletionOrder(db, order) {
+  const chain = await db.collection('blockchains').findOne({
+    chainId: order.chainId,
+  });
+  const offer = await db
+    .collection('offers')
+    .findOne({ offerId: order.offerId });
+  const destinationChainId = offer.chainId;
+  const hashCompletion = order.hashCompletion;
+  const GrtPoolContract = new ethers.Contract(
+    GrtPoolAddress,
+    (await getAbis()).poolAbi,
+    getProviderFromRpc(chain.rpc[0])
+  );
+
+  const orderId = await getOrderIdFromHash(chain.rpc[0], order.hash);
+
+  if (orderId === '') {
+    order.status = 'failure';
+  } else {
+    const onChainOrder = await getOrderInformation(
+      new ethers.Contract(
+        GrtPoolAddress,
+        (
+          await getAbis()
+        ).poolAbi,
+        getProviderFromRpc(chain.rpc[0])
+      ),
+      orderId
+    );
+
+    order.amountTokenDeposit = onChainOrder.depositAmount;
+    order.addressTokenDeposit = onChainOrder.depositToken;
+    order.chainIdTokenDeposit = onChainOrder.depositChainId;
+    order.destAddr = onChainOrder.destAddr;
+    order.offerId = onChainOrder.offerId;
+    order.amountTokenOffer = onChainOrder.amountTokenOffer;
+    order.status = 'success';
+  }
+
+  return order;
+}
+
 /**
  * This function updates an order's information from a database based on its chain ID and hash.
  * @param db - The database object used to interact with the database.
@@ -85,6 +128,24 @@ export async function getOrderIdFromHash(rpc, hash) {
   const provider = getProviderFromRpc(rpc);
   const txReceipt = await provider.getTransactionReceipt(hash);
   return txReceipt.status === 0 ? '' : txReceipt.logs[0].topics[2];
+}
+
+export async function isPaidOrderFromHash(rpc, hash) {
+  const provider = getProviderFromRpc(rpc);
+  const txReceipt = await provider.getTransactionReceipt(hash);
+  const iface = new ethers.utils.Interface(
+    (await getAbis()).liquidityWalletAbi
+  );
+
+  if (txReceipt.status === 0) {
+    return false;
+  }
+
+  return (
+    txReceipt.logs.find(
+      (log) => iface.parseLog(log).name === 'LogOfferPaid'
+    ) !== undefined
+  );
 }
 
 /**

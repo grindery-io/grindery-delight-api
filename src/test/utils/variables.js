@@ -219,3 +219,20 @@ export const blockchainGoerli = {
   transactionExplorerUrl: 'https://goerli.etherscan.io/tx/{hash}',
   addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',
 };
+
+export const blockchainBscTestnet = {
+  caipId: 'eip155:97',
+  chainId: '97',
+  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-97.svg',
+  isActive: true,
+  isEvm: true,
+  isTestnet: true,
+  label: 'BSC Testnet',
+  nativeTokenSymbol: 'BNB',
+  rpc: [
+    'https://bsc-testnet.public.blastapi.io',
+    'https://data-seed-prebsc-1-s3.binance.org:8545',
+  ],
+  transactionExplorerUrl: 'https://testnet.bscscan.com/tx/{hash}',
+  addressExplorerUrl: 'https://testnet.bscscan.com/address/{hash}',
+};
