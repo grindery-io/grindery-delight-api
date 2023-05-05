@@ -5,6 +5,7 @@ import {
   blockchainGoerli,
   collectionBlockchains,
   collectionOrders,
+  pathViewBlockchain_Put_OrdersAll,
   pathViewBlockchain_Put_OrdersUser,
 } from './utils/variables.js';
 import {
@@ -260,6 +261,175 @@ describe('Update orders via on-chain', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersUser)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hash == txHashFailed) {
+          chai.expect(order).to.deep.equal({
+            ...order,
+            chainId: blockchainGoerli.chainId,
+            hash: txHashFailed,
+            userId: process.env.USER_ID_TEST,
+            status: 'failure',
+          });
+        }
+      });
+    });
+  });
+
+  describe('Update database - all orders', async function () {
+    beforeEach(async function () {
+      await collectionOrders.insertMany([
+        {
+          ...order,
+          chainId: blockchainGoerli.chainId,
+          hash: txHashNewOrder,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...order,
+          chainId: blockchainGoerli.chainId,
+          hash: txHashNewOrder,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...order,
+          chainId: blockchainGoerli.chainId,
+          hash: txHashFailed,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...order,
+          chainId: blockchainGoerli.chainId,
+          hash: txHashNewOrder,
+          orderId: orderId,
+          userId: 'anotherUserId',
+        },
+      ]);
+
+      onChainOrderInfo = await getOrderInformation(GrtPoolContract, orderId);
+    });
+
+    it('Should modify all orders', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.length).to.equal(4);
+    });
+
+    it('Should modify order - amountTokenDeposit', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hash == txHashNewOrder) {
+          chai
+            .expect(order.amountTokenDeposit)
+            .to.equal(onChainOrderInfo.depositAmount);
+        }
+      });
+    });
+
+    it('Should modify order - addressTokenDeposit', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hash == txHashNewOrder) {
+          chai
+            .expect(order.addressTokenDeposit)
+            .to.equal(onChainOrderInfo.depositToken);
+        }
+      });
+    });
+
+    it('Should modify order - chainIdTokenDeposit', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hash == txHashNewOrder) {
+          chai
+            .expect(order.chainIdTokenDeposit)
+            .to.equal(onChainOrderInfo.depositChainId);
+        }
+      });
+    });
+
+    it('Should modify order - destAddr', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hash == txHashNewOrder) {
+          chai.expect(order.destAddr).to.equal(onChainOrderInfo.destAddr);
+        }
+      });
+    });
+
+    it('Should modify order - offerId', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hash == txHashNewOrder) {
+          chai.expect(order.offerId).to.equal(onChainOrderInfo.offerId);
+        }
+      });
+    });
+
+    it('Should modify order - amountTokenOffer', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hash == txHashNewOrder) {
+          chai
+            .expect(order.amountTokenOffer)
+            .to.equal(onChainOrderInfo.amountTokenOffer);
+        }
+      });
+    });
+
+    it('Should modify order - status', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hash == txHashNewOrder) {
+          chai.expect(order.status).to.equal('success');
+        }
+      });
+    });
+
+    it('Should only modify status if order creation failed', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersAll)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 

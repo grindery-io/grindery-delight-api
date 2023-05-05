@@ -72,6 +72,8 @@ export const pathTokens_Delete_MongoDBId = '/unit-test/tokens/';
 // View blockchain paths
 export const pathViewBlockchain_Put_OrdersUser =
   '/unit-test/view-blockchains/update-order-user';
+export const pathViewBlockchain_Put_OrdersAll =
+  '/unit-test/view-blockchains/update-order-all';
 
 export const order = {
   amountTokenDeposit: '0.34',
@@ -210,7 +212,10 @@ export const blockchainGoerli = {
   isTestnet: true,
   label: 'Goerli',
   nativeTokenSymbol: 'ETH',
-  rpc: ['https://rpc.ankr.com/eth_goerli'],
+  rpc: [
+    'https://goerli.blockpi.network/v1/rpc/public',
+    'https://rpc.ankr.com/eth_goerli',
+  ],
   transactionExplorerUrl: 'https://goerli.etherscan.io/tx/{hash}',
   addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',
 };
