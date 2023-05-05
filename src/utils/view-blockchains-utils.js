@@ -3,45 +3,29 @@ import axios from 'axios';
 
 export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
 
+/**
+ * This function updates the completion order status of an offer based on whether or not the payment
+ * has been made.
+ * @param db - The `db` parameter is likely a database object or connection that is used to interact
+ * with a database. It is used to query the `offers` and `blockchains` collections in the code snippet.
+ * @param order - The `order` parameter is an object that represents an order and contains properties
+ * such as `offerId`, `hashCompletion`, `isComplete`, and `status`. The function updates the
+ * `isComplete` and `status` properties of the `order` object based on whether the payment for the
+ * order
+ * @returns the updated `order` object with the `isComplete` and `status` properties based on the
+ * result of the `isPaidOrderFromHash` function.
+ */
 export async function updateCompletionOrder(db, order) {
-  const chain = await db.collection('blockchains').findOne({
-    chainId: order.chainId,
-  });
-  const offer = await db
+  const { chainId } = await db
     .collection('offers')
     .findOne({ offerId: order.offerId });
-  const destinationChainId = offer.chainId;
-  const hashCompletion = order.hashCompletion;
-  const GrtPoolContract = new ethers.Contract(
-    GrtPoolAddress,
-    (await getAbis()).poolAbi,
-    getProviderFromRpc(chain.rpc[0])
+  const chain = await db.collection('blockchains').findOne({ chainId });
+
+  order.isComplete = await isPaidOrderFromHash(
+    chain.rpc[0],
+    order.hashCompletion
   );
-
-  const orderId = await getOrderIdFromHash(chain.rpc[0], order.hash);
-
-  if (orderId === '') {
-    order.status = 'failure';
-  } else {
-    const onChainOrder = await getOrderInformation(
-      new ethers.Contract(
-        GrtPoolAddress,
-        (
-          await getAbis()
-        ).poolAbi,
-        getProviderFromRpc(chain.rpc[0])
-      ),
-      orderId
-    );
-
-    order.amountTokenDeposit = onChainOrder.depositAmount;
-    order.addressTokenDeposit = onChainOrder.depositToken;
-    order.chainIdTokenDeposit = onChainOrder.depositChainId;
-    order.destAddr = onChainOrder.destAddr;
-    order.offerId = onChainOrder.offerId;
-    order.amountTokenOffer = onChainOrder.amountTokenOffer;
-    order.status = 'success';
-  }
+  order.status = order.isComplete ? 'complete' : 'paymentFailure';
 
   return order;
 }
@@ -130,6 +114,16 @@ export async function getOrderIdFromHash(rpc, hash) {
   return txReceipt.status === 0 ? '' : txReceipt.logs[0].topics[2];
 }
 
+/**
+ * This function checks if a transaction hash corresponds to a paid order using Ethereum blockchain and
+ * ethers.js library.
+ * @param rpc - The RPC (Remote Procedure Call) endpoint is a URL that allows the code to communicate
+ * with the Ethereum network. It is used to send and receive data from the blockchain.
+ * @param hash - The hash parameter is a string representing the transaction hash of a blockchain
+ * transaction.
+ * @returns a boolean value. It will return `true` if the transaction with the given hash is a paid
+ * order, and `false` if it is not a paid order or if the transaction failed (status is 0).
+ */
 export async function isPaidOrderFromHash(rpc, hash) {
   const provider = getProviderFromRpc(rpc);
   const txReceipt = await provider.getTransactionReceipt(hash);

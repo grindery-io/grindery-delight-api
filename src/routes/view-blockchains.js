@@ -9,10 +9,8 @@ import { ethers } from 'ethers';
 import { createRequire } from 'node:module';
 import { Database } from '../db/conn.js';
 import {
-  getAbis,
-  getOrderIdFromHash,
-  getOrderInformation,
   getProviderFromRpc,
+  updateCompletionOrder,
   updateOrderFromDb,
 } from '../utils/view-blockchains-utils.js';
 const require = createRequire(import.meta.url);
@@ -120,7 +118,7 @@ router.put('/update-order-all', isRequired, async (req, res) => {
   );
 });
 
-router.put('/update-completion-user', isRequired, async (req, res) => {
+router.put('/update-order-completion-user', isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
 
   res.status(200).send(
@@ -128,12 +126,16 @@ router.put('/update-completion-user', isRequired, async (req, res) => {
       (
         await db
           .collection('orders')
-          .find({ userId: res.locals.userId })
+          .find({
+            userId: res.locals.userId,
+            orderId: { $exists: true, $ne: '' },
+            isComplete: false,
+          })
           .toArray()
       ).map(async (order) => {
         await db
           .collection('orders')
-          .updateOne(order, { $set: await updateOrderFromDb(db, order) });
+          .updateOne(order, { $set: await updateCompletionOrder(db, order) });
 
         return order;
       })
