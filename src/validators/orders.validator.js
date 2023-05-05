@@ -73,11 +73,10 @@ export const getOrdersPaginationValidator = [
 export const getOrdersLiquidityProviderValidator = [
   query('isActiveOffers')
     .optional()
-    .not()
     .isString()
-    .withMessage('must not be string value')
-    .isBoolean()
-    .withMessage('must be boolean value'),
+    .withMessage('must be string value')
+    .isIn(['true', 'false'])
+    .withMessage('must be either true or false'),
   query('limit').optional().isInt().withMessage('must be int value'),
   query('offset').optional().isInt().withMessage('must be int value'),
 ];

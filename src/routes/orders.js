@@ -137,7 +137,7 @@ router.get(
       .find({
         userId: { $regex: res.locals.userId, $options: 'i' },
         ...(req.query.isActiveOffers
-          ? req.query.isActiveOffers
+          ? JSON.parse(req.query.isActiveOffers)
             ? { isActive: true }
             : { isActive: false }
           : {}),

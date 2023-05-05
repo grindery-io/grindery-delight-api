@@ -577,6 +577,19 @@ describe('Orders route', async function () {
       });
     });
 
+    it('Should show only orders corresponding to inactive offers if specified', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_LiquidityProvider)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ isActiveOffers: false });
+      chai.expect(res).to.have.status(200);
+
+      res.body.orders.forEach((order) => {
+        chai.expect(order.offer.isActive).to.be.false;
+      });
+    });
+
     it('Should show only orders corresponding offers created by the user', async function () {
       const res = await chai
         .request(app)
