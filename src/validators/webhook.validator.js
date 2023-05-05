@@ -191,10 +191,21 @@ export const updateStatusOfferValidator = [
     .customSanitizer((value) => {
       return value == 'true';
     }),
+  body('apiKey')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(
       req.body,
-      ['_grinderyChainId', '_grinderyTransactionHash', '_idOffer', '_isActive'],
+      [
+        '_grinderyChainId',
+        '_grinderyTransactionHash',
+        '_idOffer',
+        '_isActive',
+        'apiKey',
+      ],
       'body'
     );
     return true;
@@ -235,6 +246,11 @@ export const updateOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body('apiKey')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(
       req.body,
@@ -244,6 +260,7 @@ export const updateOfferValidator = [
         '_chainId',
         '_grinderyChainId',
         '_grinderyTransactionHash',
+        'apiKey',
       ],
       'body'
     );
@@ -295,6 +312,11 @@ export const updateOrderValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body('apiKey')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
     validateFields(
       req.body,
@@ -306,6 +328,7 @@ export const updateOrderValidator = [
         '_idTrade',
         '_offerer',
         '_token',
+        'apiKey',
       ],
       'body'
     );
