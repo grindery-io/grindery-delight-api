@@ -1,6 +1,41 @@
 import { ethers } from 'ethers';
 import axios from 'axios';
 
+export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
+
+export async function updateOrderFromDb(db, order) {
+  const chain = await db.collection('blockchains').findOne({
+    chainId: order.chainId,
+  });
+
+  const orderId = await getOrderIdFromHash(chain.rpc[0], order.hash);
+
+  if (orderId === '') {
+    order.status = 'failure';
+  } else {
+    const onChainOrder = await getOrderInformation(
+      new ethers.Contract(
+        GrtPoolAddress,
+        (
+          await getAbis()
+        ).poolAbi,
+        getProviderFromRpc(chain.rpc[0])
+      ),
+      orderId
+    );
+
+    order.amountTokenDeposit = onChainOrder.depositAmount;
+    order.addressTokenDeposit = onChainOrder.depositToken;
+    order.chainIdTokenDeposit = onChainOrder.depositChainId;
+    order.destAddr = onChainOrder.destAddr;
+    order.offerId = onChainOrder.offerId;
+    order.amountTokenOffer = onChainOrder.amountTokenOffer;
+    order.status = 'success';
+  }
+
+  return order;
+}
+
 export async function getOrderInformation(contract, orderId) {
   return {
     depositAmount: ethers.utils
