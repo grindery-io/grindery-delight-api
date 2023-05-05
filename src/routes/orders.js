@@ -8,6 +8,7 @@ import {
   getOrderByOrderIdValidator,
   deleteOrderValidator,
   getOrdersPaginationValidator,
+  getOrdersLiquidityProviderValidator,
 } from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -126,7 +127,7 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
 is a liquidity provider. */
 router.get(
   '/liquidity-provider',
-  getOrdersPaginationValidator,
+  getOrdersLiquidityProviderValidator,
   isRequired,
   async (req, res) => {
     const db = await Database.getInstance(req);
@@ -135,7 +136,11 @@ router.get(
       .collection('offers')
       .find({
         userId: { $regex: res.locals.userId, $options: 'i' },
-        isActive: true,
+        ...(req.query.isActiveOffers
+          ? req.query.isActiveOffers
+            ? { isActive: true }
+            : { isActive: false }
+          : {}),
       })
       .toArray();
 

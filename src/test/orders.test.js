@@ -473,8 +473,17 @@ describe('Orders route', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         { ...offer, userId: process.env.USER_ID_TEST },
-        { ...offer, isActive: false },
-        { ...offer, offerId: 'anotherOfferId' },
+        {
+          ...offer,
+          offerId: 'myDeactivateoffer',
+          isActive: false,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          offerId: 'anotherOfferId',
+          userId: process.env.USER_ID_TEST,
+        },
         { ...offer, userId: 'anotherUserId' },
       ]);
 
@@ -488,6 +497,13 @@ describe('Orders route', async function () {
         },
         {
           ...order,
+          orderId: 'myOrderId1',
+          offerId: 'myDeactivateoffer',
+          userId: process.env.USER_ID_TEST,
+          date: new Date(),
+        },
+        {
+          ...order,
           orderId: 'myOrderId2',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
@@ -495,12 +511,14 @@ describe('Orders route', async function () {
         },
         {
           ...order,
+          orderId: 'myOrderId3',
           offerId: 'offerId1',
           userId: process.env.USER_ID_TEST,
           date: new Date(),
         },
         {
           ...order,
+          orderId: 'myOrderId4',
           offerId: 'offerId2',
           userId: 'anotherUserId',
           date: new Date(),
@@ -520,19 +538,38 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
-      const orderFromInMemoryDB = await collectionOffers.findOne({
-        offerId: res.body.orders[0].offerId,
-      });
-
-      chai.expect(orderFromInMemoryDB).to.be.an('object');
-      chai.expect(orderFromInMemoryDB).to.have.property('_id');
+      await Promise.all(
+        res.body.orders.map(async (order) => {
+          const offerFromInMemoryDB = await collectionOffers.findOne({
+            offerId: order.offerId,
+          });
+          chai.expect(offerFromInMemoryDB).to.be.an('object');
+          chai.expect(offerFromInMemoryDB).to.have.property('_id');
+        })
+      );
     });
 
-    it('Should show only orders corresponding to active offers', async function () {
+    it('Should show orders corresponding to both active and inactive offers (if no parameter in query)', async function () {
       const res = await chai
         .request(app)
         .get(pathOrders_Get_LiquidityProvider)
         .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      chai.expect(
+        res.body.orders.some((order) => order.offer.isActive === true)
+      ).to.be.true;
+      chai.expect(
+        res.body.orders.some((order) => order.offer.isActive === false)
+      ).to.be.true;
+    });
+
+    it('Should show only orders corresponding to active offers if specified', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOrders_Get_LiquidityProvider)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ isActiveOffers: true });
       chai.expect(res).to.have.status(200);
 
       res.body.orders.forEach((order) => {
@@ -597,7 +634,7 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ offset: 1 });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.orders.length).to.equal(1);
+      chai.expect(res.body.orders.length).to.equal(2);
       chai
         .expect(res.body.orders[0]._id)
         .to.equal(orderFromInMemoryDB[1]._id.toString());
@@ -610,18 +647,20 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ offset: 1 });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.orders.length).to.equal(1);
-      chai.expect(res.body.totalCount).to.equal(2);
+      chai.expect(res.body.orders.length).to.equal(2);
+      chai.expect(res.body.totalCount).to.equal(3);
     });
 
     it('Should show only orders with proper fields and offer information', async function () {
-      const offerFromInMemoryDB = await collectionOffers.findOne({});
-      const orderFromInMemoryDB = await collectionOrders
-        .find({
-          userId: process.env.USER_ID_TEST,
-        })
-        .sort({ date: -1 })
-        .toArray();
+      const offerFromInMemoryDB = await collectionOffers.findOne({
+        offerId: offer.offerId,
+        userId: process.env.USER_ID_TEST,
+      });
+      const orderFromInMemoryDB = await collectionOrders.findOne({
+        orderId: 'myOrderId1',
+        offerId: offer.offerId,
+        userId: process.env.USER_ID_TEST,
+      });
 
       const res = await chai
         .request(app)
@@ -629,30 +668,15 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
-      chai.expect(res.body).to.deep.equal({
-        orders: [
-          {
-            ...orderFromInMemoryDB[0],
-            _id: orderFromInMemoryDB[0]._id.toString(),
-            orderId: orderFromInMemoryDB[0].orderId,
-            date: orderFromInMemoryDB[0].date.toISOString(),
-            offer: {
-              ...offerFromInMemoryDB,
-              _id: offerFromInMemoryDB._id.toString(),
-            },
-          },
-          {
-            ...orderFromInMemoryDB[1],
-            _id: orderFromInMemoryDB[1]._id.toString(),
-            orderId: orderFromInMemoryDB[1].orderId,
-            date: orderFromInMemoryDB[1].date.toISOString(),
-            offer: {
-              ...offerFromInMemoryDB,
-              _id: offerFromInMemoryDB._id.toString(),
-            },
-          },
-        ],
-        totalCount: 2,
+      chai.expect(res.body.orders).to.deep.include({
+        ...orderFromInMemoryDB,
+        _id: orderFromInMemoryDB._id.toString(),
+        orderId: orderFromInMemoryDB.orderId,
+        date: orderFromInMemoryDB.date.toISOString(),
+        offer: {
+          ...offerFromInMemoryDB,
+          _id: offerFromInMemoryDB._id.toString(),
+        },
       });
     });
   });
