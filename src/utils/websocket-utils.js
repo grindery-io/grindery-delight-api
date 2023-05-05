@@ -1,17 +1,19 @@
 import { wss } from '../index.js';
 import WebSocket from 'ws';
 
-export const dispatch = (data) => {
+export const dispatch = (method, params) => {
   wss.clients.forEach(function each(client) {
     if (
       client.readyState === WebSocket.OPEN &&
-      client.userId == data.params.userId
+      client.userId == params.userId
     ) {
       client.send(
         JSON.stringify({
           jsonrpc: '2.0',
-          id: data.params.id,
-          ...data,
+          data: {
+            method,
+            params,
+          },
         })
       );
     }

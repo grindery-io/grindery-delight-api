@@ -41,12 +41,10 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch({
-        method: 'maxPrice',
-        params: {
-          type: 'offer',
-          id: req.body._idOffer,
-        },
+      dispatch('maxPrice', {
+        type: 'offer',
+        id: req.body._idOffer,
+        userId: offer.userId,
       });
     return res.status(200).send(response);
   }
@@ -82,12 +80,10 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch({
-        method: 'minPrice',
-        params: {
-          type: 'offer',
-          id: req.body._idOffer,
-        },
+      dispatch('minPrice', {
+        type: 'offer',
+        id: req.body._idOffer,
+        userId: offer.userId,
       });
     return res.status(200).send(response);
   }
@@ -123,13 +119,10 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch({
-        method: 'token',
-        params: {
-          type: 'offer',
-          id: req.body._idOffer,
-          userId: offer.userId,
-        },
+      dispatch('token', {
+        type: 'offer',
+        id: req.body._idOffer,
+        userId: offer.userId,
       });
     return res.status(200).send(response);
   }
@@ -165,13 +158,10 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch({
-        method: 'chain',
-        params: {
-          type: 'offer',
-          id: req.body._idOffer,
-          userId: offer.userId,
-        },
+      dispatch('chain', {
+        type: 'offer',
+        id: req.body._idOffer,
+        userId: offer.userId,
       });
     return res.status(200).send(response);
   }
@@ -207,13 +197,10 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch({
-        method: 'status',
-        params: {
-          type: 'offer',
-          id: req.body._idOffer,
-          userId: offer.userId,
-        },
+      dispatch('activationDeactivation', {
+        type: 'offer',
+        id: req.body._idOffer,
+        userId: offer.userId,
       });
     return res.status(200).send(response);
   }
@@ -250,13 +237,10 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch({
-        method: 'success',
-        params: {
-          type: 'offer',
-          id: req.body._idOffer,
-          userId: offer.userId,
-        },
+      dispatch('success', {
+        type: 'offer',
+        id: req.body._idOffer,
+        userId: offer.userId,
       });
     return res.status(200).send(response);
   }
@@ -293,13 +277,10 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch({
-        method: 'success',
-        params: {
-          type: 'order',
-          id: req.body._idTrade,
-          userId: offer.userId,
-        },
+      dispatch('success', {
+        type: 'order',
+        id: req.body._idTrade,
+        userId: order.userId,
       });
     return res.status(200).send(response);
   }
