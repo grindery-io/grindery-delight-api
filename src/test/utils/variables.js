@@ -71,13 +71,13 @@ export const pathTokens_Delete_MongoDBId = '/unit-test/tokens/';
 
 // View blockchain paths
 export const pathViewBlockchain_Put_OrdersUser =
-  '/unit-test/view-blockchains/update-order-user';
+  '/unit-test/orders-onchain/update-order-user';
 export const pathViewBlockchain_Put_OrdersAll =
-  '/unit-test/view-blockchains/update-order-all';
+  '/unit-test/orders-onchain/update-order-all';
 export const pathViewBlockchain_Put_OrdersCompleteUser =
-  '/unit-test/view-blockchains/update-order-completion-user';
+  '/unit-test/orders-onchain/update-order-completion-user';
 export const pathViewBlockchain_Put_OrdersCompleteAll =
-  '/unit-test/view-blockchains/update-order-completion-all';
+  '/unit-test/orders-onchain/update-order-completion-all';
 
 export const order = {
   amountTokenDeposit: '0.34',
