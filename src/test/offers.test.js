@@ -17,6 +17,7 @@ import {
   pathOffers_Get_All,
   pathLiquidityWallets_Post_NewLiquidityWallet,
   collectionLiquidityWallet,
+  pathOffers_Put_Activation,
 } from './utils/variables.js';
 
 chai.use(chaiHttp);
@@ -1083,6 +1084,116 @@ describe('Offers route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(404);
       chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
+    });
+  });
+
+  describe('PUT offer by offerId', async function () {
+    beforeEach(async function () {
+      await collectionOffers.insertMany([
+        {
+          ...offer,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          offerId: 'anotherOfferId',
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          userId: 'anotherUserId',
+        },
+      ]);
+    });
+
+    it('Should return 403 if no token is provided', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .send({ chainId: '232323' });
+      chai.expect(res).to.have.status(403);
+    });
+
+    it('Should return 404 if no offer found', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: 'notAnOfferId',
+          activating: true,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(404);
+      chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
+    });
+
+    it('Should update offer only for current userId and proper offerId', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: offer.offerId,
+          activating: true,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.matchedCount).to.equal(1);
+    });
+
+    it('Should push activation hash', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: offer.offerId,
+          activating: true,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(200);
+
+      const modifOffer = await collectionOffers.findOne({
+        offerId: offer.offerId,
+      });
+      chai.expect(modifOffer.activationHash).to.equal('myHashForActivation');
+    });
+
+    it('Should set status activating if activating is true', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: offer.offerId,
+          activating: true,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(200);
+
+      const modifOffer = await collectionOffers.findOne({
+        offerId: offer.offerId,
+      });
+      chai.expect(modifOffer.status).to.equal('activating');
+    });
+
+    it('Should set status deactivating if activating is false', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: offer.offerId,
+          activating: false,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(200);
+
+      const modifOffer = await collectionOffers.findOne({
+        offerId: offer.offerId,
+      });
+      chai.expect(modifOffer.status).to.equal('deactivating');
     });
   });
 

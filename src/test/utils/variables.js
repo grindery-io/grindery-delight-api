@@ -50,6 +50,7 @@ export const pathOffers_Get_User = '/unit-test/offers/user';
 export const pathOffers_Get_MongoDBId = '/unit-test/offers/id';
 export const pathOffers_Delete_MongoDBId = '/unit-test/offers/';
 export const pathOffers_Put = '/unit-test/offers/';
+export const pathOffers_Put_Activation = '/unit-test/offers/activation';
 
 // Orders paths
 export const pathOrders_Post = '/unit-test/orders';

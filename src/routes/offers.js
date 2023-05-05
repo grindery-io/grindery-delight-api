@@ -9,6 +9,7 @@ import {
   getOfferByIdValidator,
   getOffersValidator,
   getOffersPaginationValidator,
+  validationOfferValidator,
 } from '../validators/offers.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
@@ -219,6 +220,42 @@ router.delete(
 );
 
 /* This is a PUT request that updates an offer by id. */
+router.put(
+  '/activation',
+  validationOfferValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('offers');
+
+    const offer = await collection.findOne({
+      offerId: req.body.offerId,
+      userId: { $regex: res.locals.userId, $options: 'i' },
+    });
+
+    if (!offer) {
+      res.status(404).send({
+        msg: 'No offer found',
+      });
+    }
+
+    res.status(200).send(
+      await collection.updateOne(offer, {
+        $set: {
+          status: req.body.activating ? 'activating' : 'deactivating',
+          activationHash: req.body.hash,
+        },
+      })
+    );
+  }
+);
+
+/* This is a PUT request that updates an offer by id. */
 router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   if (validator.length) {
@@ -233,33 +270,33 @@ router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
     userId: { $regex: res.locals.userId, $options: 'i' },
   });
 
-  if (offer) {
-    res.status(200).send(
-      await collection.updateOne(offer, {
-        $set: {
-          chainId: req.body.chainId ?? offer.chainId,
-          min: req.body.min ?? offer.min,
-          max: req.body.max ?? offer.max,
-          tokenId: req.body.tokenId ?? offer.tokenId,
-          token: req.body.token ?? offer.token,
-          tokenAddress: req.body.tokenAddress ?? offer.tokenAddress,
-          exchangeRate: req.body.exchangeRate ?? offer.exchangeRate,
-          exchangeToken: req.body.exchangeToken ?? offer.exchangeToken,
-          exchangeChainId: req.body.exchangeChainId ?? offer.exchangeChainId,
-          estimatedTime: req.body.estimatedTime ?? offer.estimatedTime,
-          provider: req.body.provider ?? offer.provider,
-          title: req.body.title ?? offer.title,
-          image: req.body.image ?? offer.image,
-          amount: req.body.amount ?? offer.amount,
-          offerId: req.body.offerId ?? offer.offerId,
-        },
-      })
-    );
-  } else {
+  if (!offer) {
     res.status(404).send({
       msg: 'No offer found',
     });
   }
+
+  res.status(200).send(
+    await collection.updateOne(offer, {
+      $set: {
+        chainId: req.body.chainId ?? offer.chainId,
+        min: req.body.min ?? offer.min,
+        max: req.body.max ?? offer.max,
+        tokenId: req.body.tokenId ?? offer.tokenId,
+        token: req.body.token ?? offer.token,
+        tokenAddress: req.body.tokenAddress ?? offer.tokenAddress,
+        exchangeRate: req.body.exchangeRate ?? offer.exchangeRate,
+        exchangeToken: req.body.exchangeToken ?? offer.exchangeToken,
+        exchangeChainId: req.body.exchangeChainId ?? offer.exchangeChainId,
+        estimatedTime: req.body.estimatedTime ?? offer.estimatedTime,
+        provider: req.body.provider ?? offer.provider,
+        title: req.body.title ?? offer.title,
+        image: req.body.image ?? offer.image,
+        amount: req.body.amount ?? offer.amount,
+        offerId: req.body.offerId ?? offer.offerId,
+      },
+    })
+  );
 });
 
 export default router;

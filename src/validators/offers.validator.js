@@ -168,6 +168,27 @@ export const deleteOfferValidator = [
     .withMessage('must not be empty'),
 ];
 
+export const validationOfferValidator = [
+  body('activating')
+    .not()
+    .isString()
+    .withMessage('must not be string value')
+    .isBoolean()
+    .withMessage('must be boolean value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('offerId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('hash')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+];
+
 export const updateOfferValidator = [
   body('offerId')
     .optional()
