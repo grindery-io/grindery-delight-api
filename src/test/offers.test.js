@@ -1147,6 +1147,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...modifiedOffer,
+        isActive: true,
         hash: offer.hash,
         offerId: offer.offerId,
         status: 'pending',
@@ -1355,39 +1356,6 @@ describe('Offers route', async function () {
         status: 'pending',
         liquidityWallet: null,
         tokenAddress: modifiedOffer.tokenAddress,
-      });
-    });
-
-    it('Should modify isActive field', async function () {
-      await createBaseOffer(offer);
-
-      const modifiedOffer = {
-        isActive: false,
-      };
-
-      const modifyOffer = await chai
-        .request(app)
-        .put(pathOffers_Put + offer.offerId)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send({ isActive: modifiedOffer.isActive });
-      chai.expect(modifyOffer).to.have.status(200);
-
-      const getOffer = await chai
-        .request(app)
-        .get(pathOffers_Get_OfferId)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
-
-      delete getOffer.body._id;
-      delete getOffer.body.date;
-      delete getOffer.body.userId;
-
-      chai.expect(getOffer).to.have.status(200);
-      chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
-        status: 'pending',
-        liquidityWallet: null,
-        isActive: modifiedOffer.isActive,
       });
     });
 

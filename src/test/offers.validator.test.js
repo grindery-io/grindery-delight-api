@@ -159,17 +159,15 @@ describe('Offers route - Validators', async function () {
 
   describe('PUT offer by offerId', async function () {
     for (const testCase of Object.keys(modifyOfferValidator)) {
-      if (testCase !== 'isActive') {
-        testNonString({
-          method: 'put',
-          path: pathOffers_Put + 'myOfferId',
-          body: {
-            [testCase]: 123,
-          },
-          query: {},
-          field: testCase,
-        });
-      }
+      testNonString({
+        method: 'put',
+        path: pathOffers_Put + 'myOfferId',
+        body: {
+          [testCase]: 123,
+        },
+        query: {},
+        field: testCase,
+      });
 
       if (
         testCase !== 'title' &&

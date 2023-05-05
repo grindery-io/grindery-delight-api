@@ -243,7 +243,6 @@ router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
           tokenId: req.body.tokenId ?? offer.tokenId,
           token: req.body.token ?? offer.token,
           tokenAddress: req.body.tokenAddress ?? offer.tokenAddress,
-          isActive: req.body.isActive ?? offer.isActive,
           exchangeRate: req.body.exchangeRate ?? offer.exchangeRate,
           exchangeToken: req.body.exchangeToken ?? offer.exchangeToken,
           exchangeChainId: req.body.exchangeChainId ?? offer.exchangeChainId,

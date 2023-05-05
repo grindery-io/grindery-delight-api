@@ -216,15 +216,6 @@ export const updateOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('isActive')
-    .optional()
-    .not()
-    .isString()
-    .withMessage('must not be string value')
-    .isBoolean()
-    .withMessage('must be boolean value')
-    .notEmpty()
-    .withMessage('must not be empty'),
   body('estimatedTime')
     .optional()
     .isString()
@@ -274,7 +265,6 @@ export const updateOfferValidator = [
         'exchangeChainId',
         'estimatedTime',
         'provider',
-        'isActive',
         'title',
         'image',
         'amount',
