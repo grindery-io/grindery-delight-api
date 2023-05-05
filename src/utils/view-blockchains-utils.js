@@ -6,14 +6,14 @@ export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
 /**
  * This function updates the completion order status of an offer based on whether or not the payment
  * has been made.
- * @param db - The `db` parameter is likely a database object or connection that is used to interact
- * with a database. It is used to query the `offers` and `blockchains` collections in the code snippet.
- * @param order - The `order` parameter is an object that represents an order and contains properties
- * such as `offerId`, `hashCompletion`, `isComplete`, and `status`. The function updates the
+ * @param db - The `db` parameter is likely a database object that is used to interact with a database,
+ * possibly a MongoDB database based on the use of `db.collection` in the code.
+ * @param order - The `order` parameter is an object that represents an order and contains various
+ * properties such as `offerId`, `hashCompletion`, `isComplete`, and `status`. The function updates the
  * `isComplete` and `status` properties of the `order` object based on whether the payment for the
- * order
- * @returns the updated `order` object with the `isComplete` and `status` properties based on the
- * result of the `isPaidOrderFromHash` function.
+ * @returns an object with two properties: `status` and `isComplete`. The `status` property indicates
+ * the status of the order, which can be either `'complete'` or `'paymentFailure'`. The `isComplete`
+ * property is a boolean value that indicates whether the order has been paid or not.
  */
 export async function updateCompletionOrder(db, order) {
   const { chainId } = await db
@@ -27,17 +27,15 @@ export async function updateCompletionOrder(db, order) {
   );
   order.status = order.isComplete ? 'complete' : 'paymentFailure';
 
-  return order;
+  return { status: order.status, isComplete: order.isComplete };
 }
 
 /**
  * This function updates an order's information from a database based on its chain ID and hash.
  * @param db - The database object used to interact with the database.
- * @param order - The order object contains information about an order, including its chainId and hash,
- * as well as other properties such as amountTokenDeposit, addressTokenDeposit, destAddr, offerId,
+ * @param order - The order parameter is an object that contains information about an order, such as
+ * the chainId, hash, amountTokenDeposit, addressTokenDeposit, chainIdTokenDeposit, destAddr, offerId,
  * amountTokenOffer, and status.
- * @returns the updated order object with additional properties such as amountTokenDeposit,
- * addressTokenDeposit, chainIdTokenDeposit, destAddr, offerId, amountTokenOffer, and status.
  */
 export async function updateOrderFromDb(db, order) {
   const chain = await db.collection('blockchains').findOne({
@@ -69,7 +67,15 @@ export async function updateOrderFromDb(db, order) {
     order.status = 'success';
   }
 
-  return order;
+  return {
+    amountTokenDeposit: order.amountTokenDeposit,
+    addressTokenDeposit: order.addressTokenDeposit,
+    chainIdTokenDeposit: order.chainIdTokenDeposit,
+    destAddr: order.destAddr,
+    offerId: order.offerId,
+    amountTokenOffer: order.amountTokenOffer,
+    status: order.status,
+  };
 }
 
 /**

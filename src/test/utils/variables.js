@@ -76,6 +76,8 @@ export const pathViewBlockchain_Put_OrdersAll =
   '/unit-test/view-blockchains/update-order-all';
 export const pathViewBlockchain_Put_OrdersCompleteUser =
   '/unit-test/view-blockchains/update-order-completion-user';
+export const pathViewBlockchain_Put_OrdersCompleteAll =
+  '/unit-test/view-blockchains/update-order-completion-all';
 
 export const order = {
   amountTokenDeposit: '0.34',
