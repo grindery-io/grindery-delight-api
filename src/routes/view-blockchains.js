@@ -75,7 +75,7 @@ router.get(
         await new ethers.Contract(
           process.env.EVM_HUB_ADDRESS,
           GrinderyNexusHub,
-          new ethers.providers.JsonRpcProvider(chain.rpc[0])
+          getProviderFromRpc(chain.rpc[0])
         ).getUserDroneAddress(res.locals.userId.split(':').pop())
       )
       .status(200);
