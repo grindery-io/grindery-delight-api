@@ -58,7 +58,7 @@ const isRequired = async (req, res, next) => {
 };
 
 export const authenticateApiKey = (req, res, next) => {
-  const apiKey = req.headers['api-key'];
+  const apiKey = req.body.apiKey;
   if (!apiKey) {
     return res.status(401).send({
       msg: 'Missing API key',
