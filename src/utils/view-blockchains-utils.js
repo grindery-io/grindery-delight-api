@@ -3,6 +3,17 @@ import axios from 'axios';
 
 export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
 
+export async function updateOfferId(db, offer) {
+  const chain = await db
+    .collection('blockchains')
+    .findOne({ chainId: offer.chainId });
+
+  offer.offerId = await getOfferIdFromHash(chain.rpc[0], offer.hash);
+  offer.status = offer.offerId !== '' ? 'success' : 'failure';
+
+  return { offerId: offer.offerId, status: offer.status };
+}
+
 /**
  * This function updates the completion order status of an offer based on whether or not the payment
  * has been made.
@@ -118,6 +129,12 @@ export async function getOrderIdFromHash(rpc, hash) {
   const provider = getProviderFromRpc(rpc);
   const txReceipt = await provider.getTransactionReceipt(hash);
   return txReceipt.status === 0 ? '' : txReceipt.logs[0].topics[2];
+}
+
+export async function getOfferIdFromHash(rpc, hash) {
+  const provider = getProviderFromRpc(rpc);
+  const txReceipt = await provider.getTransactionReceipt(hash);
+  return txReceipt.status === 0 ? '' : txReceipt.logs[0].topics[1];
 }
 
 /**

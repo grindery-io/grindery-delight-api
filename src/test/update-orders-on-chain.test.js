@@ -171,16 +171,19 @@ describe('Update orders via on-chain', async function () {
     });
 
     it('Should not modify orders with non pending status', async function () {
+      const unmodifiedOrder = await collectionOrders.findOne({
+        status: 'success',
+      });
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
-      const unmodifiedOrder = await collectionOrders.findOne({
-        status: 'success',
+      const unmodifiedOrderAfter = await collectionOrders.findOne({
+        _id: unmodifiedOrder._id,
       });
-      chai.expect(unmodifiedOrder.orderId).to.equal(order.orderId);
+      chai.expect(unmodifiedOrderAfter.orderId).to.not.equal(orderId);
     });
 
     it('Should only modify orders for the current userId', async function () {

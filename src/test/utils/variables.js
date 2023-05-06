@@ -70,7 +70,7 @@ export const pathTokens_Get_MongoDBId = '/unit-test/tokens/';
 export const pathTokens_Put_MongoDBId = '/unit-test/tokens/';
 export const pathTokens_Delete_MongoDBId = '/unit-test/tokens/';
 
-// View blockchain paths
+// Modify orders blockchain paths
 export const pathViewBlockchain_Put_OrdersUser =
   '/unit-test/orders-onchain/update-order-user';
 export const pathViewBlockchain_Put_OrdersAll =
@@ -79,6 +79,10 @@ export const pathViewBlockchain_Put_OrdersCompleteUser =
   '/unit-test/orders-onchain/update-order-completion-user';
 export const pathViewBlockchain_Put_OrdersCompleteAll =
   '/unit-test/orders-onchain/update-order-completion-all';
+
+// Modify offers blockchain paths
+export const pathBlockchain_Put_OffersUser =
+  '/unit-test/offers-onchain/update-offer-user';
 
 export const order = {
   amountTokenDeposit: '0.34',

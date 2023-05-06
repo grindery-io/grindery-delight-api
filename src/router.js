@@ -11,6 +11,7 @@ import view_blockchains from './routes/view-blockchains.js';
 import webhooks from './routes/webhooks.js';
 import g_sheets from './routes/g-sheets.js';
 import orders_onchain from './routes/update-orders-onchain.js';
+import offers_onchain from './routes/update-offers-onchain.js';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/view-blockchains', view_blockchains);
 router.use('/webhooks', webhooks);
 router.use('/gsheets', g_sheets);
 router.use('/orders-onchain', orders_onchain);
+router.use('/offers-onchain', offers_onchain);
 
 export default router;
