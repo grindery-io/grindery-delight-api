@@ -6,6 +6,7 @@ import {
   collectionBlockchains,
   collectionOffers,
   offer,
+  pathBlockchain_Put_OffersAll,
   pathBlockchain_Put_OffersUser,
 } from './utils/variables.js';
 import {
@@ -162,6 +163,117 @@ describe('Update offers via on-chain', async function () {
       const res = await chai
         .request(app)
         .put(pathBlockchain_Put_OffersUser)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+      res.body.forEach((offer) => {
+        if (offer.hash == txHashFailed) {
+          chai.expect(offer.status).to.equal('failure');
+        }
+      });
+    });
+  });
+
+  describe('Update database - All', async function () {
+    beforeEach(async function () {
+      await collectionOffers.insertMany([
+        {
+          ...offer,
+          status: 'pending',
+          chainId: blockchainGoerli.chainId,
+          hash: txHashNewOffer,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          status: 'pending',
+          chainId: blockchainGoerli.chainId,
+          hash: txHashNewOffer,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          status: 'success',
+          chainId: blockchainGoerli.chainId,
+          hash: txHashNewOffer,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          status: 'pending',
+          chainId: blockchainGoerli.chainId,
+          hash: txHashFailed,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          status: 'pending',
+          chainId: blockchainGoerli.chainId,
+          hash: txHashNewOffer,
+          userId: 'anotherUserId',
+        },
+      ]);
+    });
+
+    it('Should not modify offers with non pending status', async function () {
+      const unmodifiedOffer = await collectionOffers.findOne({
+        status: 'success',
+      });
+
+      const res = await chai
+        .request(app)
+        .put(pathBlockchain_Put_OffersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      const unmodifiedOfferAfter = await collectionOffers.findOne({
+        _id: unmodifiedOffer._id,
+      });
+      chai.expect(unmodifiedOfferAfter.offerId).to.not.equal(offerId);
+    });
+
+    it('Should only modify all offers', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathBlockchain_Put_OffersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+      chai.expect(
+        res.body.some((offer) => offer.userId === process.env.USER_ID_TEST)
+      ).to.be.true;
+      chai.expect(res.body.some((offer) => offer.userId === 'anotherUserId')).to
+        .be.true;
+    });
+
+    it('Should modify offer - offerId', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathBlockchain_Put_OffersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+      res.body.forEach((offer) => {
+        if (offer.hash == txHashNewOffer) {
+          chai.expect(offer.offerId).to.equal(offerId);
+        }
+      });
+    });
+
+    it('Should modify offer status to succes if new Offer', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathBlockchain_Put_OffersAll)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+      res.body.forEach((offer) => {
+        if (offer.hash == txHashNewOffer) {
+          chai.expect(offer.status).to.equal('success');
+        }
+      });
+    });
+
+    it('Should modify offer status to failure if no new Offer', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathBlockchain_Put_OffersAll)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((offer) => {

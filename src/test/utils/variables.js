@@ -83,6 +83,8 @@ export const pathViewBlockchain_Put_OrdersCompleteAll =
 // Modify offers blockchain paths
 export const pathBlockchain_Put_OffersUser =
   '/unit-test/offers-onchain/update-offer-user';
+export const pathBlockchain_Put_OffersAll =
+  '/unit-test/offers-onchain/update-offer-all';
 
 export const order = {
   amountTokenDeposit: '0.34',

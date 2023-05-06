@@ -381,6 +381,7 @@ describe('Update orders via on-chain', async function () {
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.length).to.equal(4);
     });
+
     it('Should modify order - amountTokenDeposit', async function () {
       const res = await chai
         .request(app)
