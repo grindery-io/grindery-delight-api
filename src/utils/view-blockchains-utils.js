@@ -3,6 +3,19 @@ import axios from 'axios';
 
 export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
 
+/**
+ * This function updates the offer ID and status of an offer in a database based on its chain ID and
+ * hash.
+ * @param db - The `db` parameter is likely a database object or connection that is used to interact
+ * with a database. It is used in this function to query a collection named "blockchains" in the
+ * database.
+ * @param offer - The `offer` parameter is an object that represents an offer. It likely contains
+ * properties such as `chainId`, `hash`, `offerId`, and `status`. The function updates the `offerId`
+ * and `status` properties based on the `hash` and `chainId` values.
+ * @returns An object with the properties `offerId` and `status`. The `offerId` property contains the
+ * offer ID obtained from the hash, and the `status` property indicates whether the offer ID was
+ * successfully obtained (`'success'`) or not (`'failure'`).
+ */
 export async function updateOfferId(db, offer) {
   const chain = await db
     .collection('blockchains')
@@ -39,6 +52,41 @@ export async function updateCompletionOrder(db, order) {
   order.status = order.isComplete ? 'complete' : 'paymentFailure';
 
   return { status: order.status, isComplete: order.isComplete };
+}
+
+/**
+ * This function updates the activation offer status and checks if the activation event was successful.
+ * @param db - The database object used to interact with the database.
+ * @param offer - The `offer` parameter is an object that represents an activation offer. It contains
+ * properties such as `chainId`, `hashActivation`, `status`, and `isActive`. The function updates the
+ * `status` and `isActive` properties of the `offer` object based on the result of a blockchain query
+ * @returns an object with two properties: "status" and "isActive". The "status" property contains a
+ * string value indicating the status of the offer (either "success", "activationFailure", or
+ * "deactivationFailure"). The "isActive" property contains a boolean value indicating whether the
+ * offer is currently active or not.
+ */
+export async function updateActivationOffer(db, offer) {
+  const chain = await db
+    .collection('blockchains')
+    .findOne({ chainId: offer.chainId });
+
+  const isActivationEvent = await isSetStatusFromHash(
+    chain.rpc[0],
+    offer.hashActivation
+  );
+
+  if (!isActivationEvent.isSetStatus) {
+    offer.status =
+      offer.status === 'activation'
+        ? 'activationFailure'
+        : 'deactivationFailure';
+    return { status: offer.status, isActive: offer.isActive };
+  }
+
+  offer.isActive = isActivationEvent.isActive;
+  offer.status = 'success';
+
+  return { status: offer.status, isActive: offer.isActive };
 }
 
 /**
@@ -131,6 +179,15 @@ export async function getOrderIdFromHash(rpc, hash) {
   return txReceipt.status === 0 ? '' : txReceipt.logs[0].topics[2];
 }
 
+/**
+ * This function retrieves an offer ID from a transaction hash using a specified RPC provider.
+ * @param rpc - The RPC (Remote Procedure Call) endpoint that the function will use to interact with
+ * the blockchain.
+ * @param hash - The hash parameter is a string representing the transaction hash of a previously
+ * executed Ethereum transaction.
+ * @returns the offer ID extracted from the logs of a transaction with the given hash. If the
+ * transaction failed (status = 0), an empty string is returned.
+ */
 export async function getOfferIdFromHash(rpc, hash) {
   const provider = getProviderFromRpc(rpc);
   const txReceipt = await provider.getTransactionReceipt(hash);
@@ -163,6 +220,42 @@ export async function isPaidOrderFromHash(rpc, hash) {
       (log) => iface.parseLog(log).name === 'LogOfferPaid'
     ) !== undefined
   );
+}
+
+/**
+ * This function checks if a transaction has successfully set a status and returns whether it is active
+ * or not.
+ * @param rpc - The RPC (Remote Procedure Call) endpoint used to communicate with the Ethereum network.
+ * It is used to retrieve the transaction receipt for a given hash.
+ * @param hash - The `hash` parameter is a string representing the transaction hash of a transaction on
+ * the Ethereum blockchain.
+ * @returns An object with two properties: "isSetStatus" and "isActive". The "isSetStatus" property is
+ * a boolean indicating whether the transaction with the given hash resulted in a successful status
+ * change. The "isActive" property is a boolean indicating whether the status change resulted in the
+ * offer being active or inactive.
+ */
+export async function isSetStatusFromHash(rpc, hash) {
+  const provider = getProviderFromRpc(rpc);
+  const txReceipt = await provider.getTransactionReceipt(hash);
+  const iface = new ethers.utils.Interface((await getAbis()).poolAbi);
+
+  let isActive = undefined;
+
+  const isSetStatus =
+    txReceipt.status !== 0 &&
+    txReceipt.logs.find((log) => {
+      const parsedLog = iface.parseLog(log);
+      if (parsedLog.name === 'LogSetStatusOffer') {
+        isActive = parsedLog.args[1];
+        return true;
+      }
+      return false;
+    }) !== undefined;
+
+  return {
+    isSetStatus: isSetStatus,
+    isActive: isActive,
+  };
 }
 
 /**

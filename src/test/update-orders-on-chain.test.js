@@ -48,6 +48,8 @@ const txHashOrderPaid =
   '0xa1415d8bd24714ef91d7dd6d8290e6d1f822b8b20897f7642858a10dbc056ffc';
 const txHashNotOrderPaid =
   '0xea914a21c9949f9185afa79865ddb651186223bffc552719e0ddb14ad24207ab';
+const txHashFailedOnBSC =
+  '0xf2da1f454e228f1a95398d0b1d38131cc79893a5f49b2dc94825df2cd8011bf2';
 const GrtLiquidityWallet = '0x4ffd49c7832870be704143a10049970670ff8d01';
 
 beforeEach(async function () {
@@ -512,7 +514,6 @@ describe('Update orders via on-chain', async function () {
         {
           ...order,
           status: 'success',
-          test: 'teeeeeeeeeeeest',
           offerId: offer.offerId,
           isComplete: false,
           hashCompletion: txHashOrderPaid,
@@ -569,6 +570,15 @@ describe('Update orders via on-chain', async function () {
           await isPaidOrderFromHash(
             blockchainDBBscTesnet.rpc[0],
             txHashNotOrderPaid
+          )
+        ).to.be.false;
+      });
+
+      it('Should return false for a transaction that failed', async function () {
+        chai.expect(
+          await isPaidOrderFromHash(
+            blockchainDBBscTesnet.rpc[0],
+            txHashFailedOnBSC
           )
         ).to.be.false;
       });
