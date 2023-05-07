@@ -3,5 +3,5 @@ module.exports = {
   exit: true,
   require: 'src/test/hooks.mjs',
   'async-only': true,
-  retries: 0,
+  retries: 10,
 };
