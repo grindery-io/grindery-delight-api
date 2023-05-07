@@ -51,7 +51,7 @@ const txHashNotOrderPaid =
 const GrtLiquidityWallet = '0x4ffd49c7832870be704143a10049970670ff8d01';
 
 beforeEach(async function () {
-  await collectionBlockchains.insertOne(blockchainGoerli);
+  await collectionBlockchains.insertOne({ ...blockchainGoerli });
   blockchainDBGoerli = await collectionBlockchains.findOne({
     chainId: blockchainGoerli.chainId,
   });

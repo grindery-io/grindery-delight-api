@@ -33,7 +33,7 @@ const abis = await getAbis();
 const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
 
 beforeEach(async function () {
-  await collectionBlockchains.insertOne(blockchainGoerli);
+  await collectionBlockchains.insertOne({ ...blockchainGoerli });
   blockchainDBGoerli = await collectionBlockchains.findOne({
     chainId: blockchainGoerli.chainId,
   });
