@@ -196,9 +196,7 @@ router.put(
     const response = await collection.updateOne(offer, {
       $set: {
         isActive: req.body._isActive,
-        status: req.body._isActive
-          ? OFFER_STATUS.ACTIVATION
-          : OFFER_STATUS.DEACTIVATION,
+        status: OFFER_STATUS.SUCCESS,
       },
     });
     if (response.modifiedCount > 0)
