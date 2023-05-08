@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import axios from 'axios';
 import { ORDER_STATUS } from './orders-utils.js';
+import { OFFER_STATUS } from './offers-utils.js';
 
 /**
  * This function updates the offer ID and status of an offer in a database based on its chain ID and
@@ -17,7 +18,8 @@ import { ORDER_STATUS } from './orders-utils.js';
  */
 export async function updateOfferId(req, offer) {
   offer.offerId = await getOfferIdFromHash(req.body.rpc, offer.hash);
-  offer.status = offer.offerId !== '' ? 'success' : 'failure';
+  offer.status =
+    offer.offerId !== '' ? OFFER_STATUS.SUCCESS : OFFER_STATUS.FAILURE;
 
   return { offerId: offer.offerId, status: offer.status };
 }
@@ -65,14 +67,14 @@ export async function updateActivationOffer(req, db, offer) {
 
   if (!isActivationEvent.isSetStatus) {
     offer.status =
-      offer.status === 'activation'
-        ? 'activationFailure'
-        : 'deactivationFailure';
+      offer.status === OFFER_STATUS.ACTIVATION
+        ? OFFER_STATUS.ACTIVATION_FAILURE
+        : OFFER_STATUS.DEACTIVATION_FAILURE;
     return { status: offer.status, isActive: offer.isActive };
   }
 
   offer.isActive = isActivationEvent.isActive;
-  offer.status = 'success';
+  offer.status = OFFER_STATUS.SUCCESS;
 
   return { status: offer.status, isActive: offer.isActive };
 }

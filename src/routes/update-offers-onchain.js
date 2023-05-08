@@ -7,6 +7,7 @@ import {
 } from '../utils/view-blockchains-utils.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { updateOfferOnChainValidator } from '../validators/update-offers-onchain.validator.js';
+import { OFFER_STATUS } from '../utils/offers-utils.js';
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.put(
         (
           await db
             .collection('offers')
-            .find({ userId: res.locals.userId, status: 'pending' })
+            .find({ userId: res.locals.userId, status: OFFER_STATUS.PENDING })
             .toArray()
         ).map(async (offer) => {
           await db
@@ -59,7 +60,10 @@ router.put(
     res.status(200).send(
       await Promise.all(
         (
-          await db.collection('offers').find({ status: 'pending' }).toArray()
+          await db
+            .collection('offers')
+            .find({ status: OFFER_STATUS.PENDING })
+            .toArray()
         ).map(async (offer) => {
           await db
             .collection('offers')
@@ -96,8 +100,8 @@ router.put(
               userId: res.locals.userId,
               offerId: { $exists: true, $ne: '' },
               $or: [
-                { isActive: false, status: 'activation' },
-                { isActive: true, status: 'deactivation' },
+                { isActive: false, status: OFFER_STATUS.ACTIVATION },
+                { isActive: true, status: OFFER_STATUS.DEACTIVATION },
               ],
             })
             .toArray()
@@ -136,8 +140,8 @@ router.put(
             .find({
               offerId: { $exists: true, $ne: '' },
               $or: [
-                { isActive: false, status: 'activation' },
-                { isActive: true, status: 'deactivation' },
+                { isActive: false, status: OFFER_STATUS.ACTIVATION },
+                { isActive: true, status: OFFER_STATUS.DEACTIVATION },
               ],
             })
             .toArray()

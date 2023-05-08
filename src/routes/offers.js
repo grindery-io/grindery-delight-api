@@ -14,6 +14,7 @@ import {
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
 import {
+  OFFER_STATUS,
   getOffersWithLiquidityWallets,
   getOneOfferWithLiquidityWallet,
 } from '../utils/offers-utils.js';
@@ -45,7 +46,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   let newDocument = req.body;
   newDocument.date = new Date();
   newDocument.userId = res.locals.userId;
-  newDocument.status = 'pending';
+  newDocument.status = OFFER_STATUS.PENDING;
   res.send(await collection.insertOne(newDocument)).status(201);
 });
 
@@ -56,7 +57,7 @@ router.get('/', getOffersPaginationValidator, async (req, res) => {
   const query = {
     isActive: true,
     amount: { $exists: true, $ne: '' },
-    status: 'success',
+    status: OFFER_STATUS.SUCCESS,
     offerId: { $exists: true, $ne: '' },
   };
 
@@ -97,7 +98,7 @@ router.get('/search', getOffersValidator, async (req, res) => {
         exchangeToken: req.query.exchangeToken,
         chainId: req.query.chainId,
         token: req.query.token,
-        status: 'success',
+        status: OFFER_STATUS.SUCCESS,
         offerId: { $exists: true, $ne: '' },
       })
       .sort({ date: -1 })

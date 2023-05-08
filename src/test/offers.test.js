@@ -19,6 +19,7 @@ import {
   collectionLiquidityWallet,
   pathOffers_Put_Activation,
 } from './utils/variables.js';
+import { OFFER_STATUS } from '../utils/offers-utils.js';
 
 chai.use(chaiHttp);
 
@@ -76,9 +77,11 @@ describe('Offers route', async function () {
       delete getOffer.body.userId;
       delete getOffer.body.date;
 
-      chai
-        .expect(getOffer.body)
-        .to.deep.equal({ ...offer, status: 'pending', liquidityWallet: null });
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+      });
     });
 
     it('Should fail if same offerId exists', async function () {
@@ -103,14 +106,14 @@ describe('Offers route', async function () {
           ...offer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
         },
         {
           ...offer,
           date: new Date(),
           userId: 'anotherUserId',
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
         },
         {
@@ -118,7 +121,7 @@ describe('Offers route', async function () {
           isActive: false,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
         },
         {
@@ -126,21 +129,21 @@ describe('Offers route', async function () {
           offerId: '',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
         },
         {
           ...offer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '',
         },
         {
           ...offer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           amount: '8',
         },
       ]);
@@ -188,7 +191,7 @@ describe('Offers route', async function () {
       chai.expect(res).to.have.status(200);
 
       res.body.offers.forEach((offer) => {
-        chai.expect(offer.status).to.equal('success');
+        chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
       });
     });
 
@@ -229,7 +232,7 @@ describe('Offers route', async function () {
         .find({
           isActive: true,
           amount: { $exists: true, $ne: '' },
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           offerId: { $exists: true, $ne: '' },
         })
         .sort({ date: -1 })
@@ -252,7 +255,7 @@ describe('Offers route', async function () {
         .find({
           isActive: true,
           amount: { $exists: true, $ne: '' },
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           offerId: { $exists: true, $ne: '' },
         })
         .sort({ date: -1 })
@@ -277,7 +280,7 @@ describe('Offers route', async function () {
         .find({
           isActive: true,
           amount: { $exists: true, $ne: '' },
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           offerId: { $exists: true, $ne: '' },
         })
         .sort({ date: -1 })
@@ -296,7 +299,7 @@ describe('Offers route', async function () {
           {
             ...offer,
             userId: process.env.USER_ID_TEST,
-            status: 'success',
+            status: OFFER_STATUS.SUCCESS,
             amount: '8',
             _id: offerFromInMemoryDB[0]._id.toString(),
             date: offerFromInMemoryDB[0].date.toISOString(),
@@ -309,7 +312,7 @@ describe('Offers route', async function () {
           {
             ...offer,
             userId: 'anotherUserId',
-            status: 'success',
+            status: OFFER_STATUS.SUCCESS,
             amount: '8',
             _id: offerFromInMemoryDB[1]._id.toString(),
             date: offerFromInMemoryDB[1].date.toISOString(),
@@ -332,7 +335,7 @@ describe('Offers route', async function () {
           ...offer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
           isActive: true,
           exchangeRate: '2',
@@ -342,7 +345,7 @@ describe('Offers route', async function () {
           ...offer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
           isActive: true,
           exchangeRate: '2',
@@ -353,7 +356,7 @@ describe('Offers route', async function () {
           exchangeChainId: 'anotherExchangeChainId',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
           isActive: true,
           exchangeRate: '2',
@@ -363,7 +366,7 @@ describe('Offers route', async function () {
           exchangeToken: 'anotherExchangeToken',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
           isActive: true,
           exchangeRate: '2',
@@ -373,7 +376,7 @@ describe('Offers route', async function () {
           chainId: 'anotherChainId',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
           isActive: true,
           exchangeRate: '2',
@@ -383,7 +386,7 @@ describe('Offers route', async function () {
           token: 'anotherToken',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
           isActive: true,
           exchangeRate: '2',
@@ -392,7 +395,7 @@ describe('Offers route', async function () {
           ...offer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           amount: '8',
           isActive: true,
           exchangeRate: '2',
@@ -402,7 +405,7 @@ describe('Offers route', async function () {
           offerId: '',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           amount: '8',
           isActive: true,
           exchangeRate: '2',
@@ -721,19 +724,19 @@ describe('Offers route', async function () {
           ...offer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
         },
         {
           ...offer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
         },
         {
           ...offer,
           date: new Date(),
           userId: 'anotherUser',
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
         },
       ]);
 
@@ -840,7 +843,7 @@ describe('Offers route', async function () {
             ...offer,
             date: new Date(),
             userId: process.env.USER_ID_TEST,
-            status: 'pending',
+            status: OFFER_STATUS.PENDING,
             _id: offerFromInMemoryDB[0]._id.toString(),
             date: offerFromInMemoryDB[0].date.toISOString(),
             liquidityWallet: {
@@ -853,7 +856,7 @@ describe('Offers route', async function () {
             ...offer,
             date: new Date(),
             userId: process.env.USER_ID_TEST,
-            status: 'pending',
+            status: OFFER_STATUS.PENDING,
             _id: offerFromInMemoryDB[1]._id.toString(),
             date: offerFromInMemoryDB[1].date.toISOString(),
             liquidityWallet: {
@@ -1261,7 +1264,7 @@ describe('Offers route', async function () {
         isActive: true,
         hash: offer.hash,
         offerId: offer.offerId,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
       });
     });
@@ -1294,7 +1297,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         ...modifiedOffer,
       });
@@ -1328,7 +1331,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         min: modifiedOffer.min,
       });
@@ -1362,7 +1365,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         max: modifiedOffer.max,
       });
@@ -1396,7 +1399,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         tokenId: modifiedOffer.tokenId,
       });
@@ -1430,7 +1433,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         token: modifiedOffer.token,
       });
@@ -1464,7 +1467,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         tokenAddress: modifiedOffer.tokenAddress,
       });
@@ -1498,7 +1501,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         exchangeRate: modifiedOffer.exchangeRate,
       });
@@ -1532,7 +1535,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         exchangeToken: modifiedOffer.exchangeToken,
       });
@@ -1566,7 +1569,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         exchangeChainId: modifiedOffer.exchangeChainId,
       });
@@ -1600,7 +1603,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         estimatedTime: modifiedOffer.estimatedTime,
       });
@@ -1634,7 +1637,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         provider: modifiedOffer.provider,
       });
@@ -1668,7 +1671,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         title: modifiedOffer.title,
       });
@@ -1702,7 +1705,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         image: modifiedOffer.image,
       });
@@ -1736,7 +1739,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
-        status: 'pending',
+        status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         amount: modifiedOffer.amount,
       });

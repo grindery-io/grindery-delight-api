@@ -21,6 +21,7 @@ import {
 } from '../utils/view-blockchains-utils.js';
 import { ethers } from 'ethers';
 import { mockedToken } from './utils/utils.js';
+import { OFFER_STATUS } from '../utils/offers-utils.js';
 
 chai.use(chaiHttp);
 
@@ -77,35 +78,35 @@ describe('Update offers via on-chain', async function () {
       await collectionOffers.insertMany([
         {
           ...offer,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...offer,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...offer,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...offer,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...offer,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: 'anotherUserId',
@@ -115,7 +116,7 @@ describe('Update offers via on-chain', async function () {
 
     it('Should not modify offers with non pending status', async function () {
       const unmodifiedOffer = await collectionOffers.findOne({
-        status: 'success',
+        status: OFFER_STATUS.SUCCESS,
       });
 
       const res = await chai
@@ -166,7 +167,7 @@ describe('Update offers via on-chain', async function () {
       chai.expect(res).to.have.status(200);
       res.body.forEach((offer) => {
         if (offer.hash == txHashNewOffer) {
-          chai.expect(offer.status).to.equal('success');
+          chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
         }
       });
     });
@@ -180,7 +181,7 @@ describe('Update offers via on-chain', async function () {
       chai.expect(res).to.have.status(200);
       res.body.forEach((offer) => {
         if (offer.hash == txHashFailed) {
-          chai.expect(offer.status).to.equal('failure');
+          chai.expect(offer.status).to.equal(OFFER_STATUS.FAILURE);
         }
       });
     });
@@ -191,35 +192,35 @@ describe('Update offers via on-chain', async function () {
       await collectionOffers.insertMany([
         {
           ...offer,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...offer,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...offer,
-          status: 'success',
+          status: OFFER_STATUS.SUCCESS,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...offer,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...offer,
-          status: 'pending',
+          status: OFFER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: 'anotherUserId',
@@ -229,7 +230,7 @@ describe('Update offers via on-chain', async function () {
 
     it('Should not modify offers with non pending status', async function () {
       const unmodifiedOffer = await collectionOffers.findOne({
-        status: 'success',
+        status: OFFER_STATUS.SUCCESS,
       });
 
       const res = await chai
@@ -282,7 +283,7 @@ describe('Update offers via on-chain', async function () {
       chai.expect(res).to.have.status(200);
       res.body.forEach((offer) => {
         if (offer.hash == txHashNewOffer) {
-          chai.expect(offer.status).to.equal('success');
+          chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
         }
       });
     });
@@ -296,7 +297,7 @@ describe('Update offers via on-chain', async function () {
       chai.expect(res).to.have.status(200);
       res.body.forEach((offer) => {
         if (offer.hash == txHashFailed) {
-          chai.expect(offer.status).to.equal('failure');
+          chai.expect(offer.status).to.equal(OFFER_STATUS.FAILURE);
         }
       });
     });
@@ -308,7 +309,7 @@ describe('Update offers via on-chain', async function () {
         {
           ...offer,
           chainId: blockchainDBGoerli.chainId,
-          status: 'activation',
+          status: OFFER_STATUS.ACTIVATION,
           isActive: false,
           hashActivation: txHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
@@ -316,7 +317,7 @@ describe('Update offers via on-chain', async function () {
         {
           ...offer,
           chainId: blockchainDBGoerli.chainId,
-          status: 'deactivation',
+          status: OFFER_STATUS.DEACTIVATION,
           isActive: true,
           hashActivation: txHashSetStatusDeactivation,
           userId: process.env.USER_ID_TEST,
@@ -324,7 +325,7 @@ describe('Update offers via on-chain', async function () {
         {
           ...offer,
           chainId: blockchainDBGoerli.chainId,
-          status: 'activation',
+          status: OFFER_STATUS.ACTIVATION,
           isActive: false,
           hashActivation: txHashFailed,
           userId: process.env.USER_ID_TEST,
@@ -332,7 +333,7 @@ describe('Update offers via on-chain', async function () {
         {
           ...offer,
           chainId: blockchainDBGoerli.chainId,
-          status: 'deactivation',
+          status: OFFER_STATUS.DEACTIVATION,
           isActive: true,
           hashActivation: txHashFailed,
           userId: process.env.USER_ID_TEST,
@@ -340,7 +341,7 @@ describe('Update offers via on-chain', async function () {
         {
           ...offer,
           chainId: blockchainDBGoerli.chainId,
-          status: 'activation',
+          status: OFFER_STATUS.ACTIVATION,
           isActive: false,
           hashActivation: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
@@ -348,7 +349,7 @@ describe('Update offers via on-chain', async function () {
         {
           ...offer,
           chainId: blockchainDBGoerli.chainId,
-          status: 'activation',
+          status: OFFER_STATUS.ACTIVATION,
           isActive: true,
           hashActivation: txHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
@@ -357,7 +358,7 @@ describe('Update offers via on-chain', async function () {
         {
           ...offer,
           chainId: blockchainDBGoerli.chainId,
-          status: 'deactivation',
+          status: OFFER_STATUS.DEACTIVATION,
           isActive: false,
           hashActivation: txHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
@@ -366,7 +367,7 @@ describe('Update offers via on-chain', async function () {
         {
           ...offer,
           chainId: blockchainDBGoerli.chainId,
-          status: 'activation',
+          status: OFFER_STATUS.ACTIVATION,
           isActive: false,
           offerId: '',
           hashActivation: txHashSetStatusActivation,
@@ -376,7 +377,7 @@ describe('Update offers via on-chain', async function () {
         {
           ...offer,
           chainId: blockchainDBGoerli.chainId,
-          status: 'activation',
+          status: OFFER_STATUS.ACTIVATION,
           isActive: false,
           hashActivation: txHashFailed,
           userId: 'anotherUserId',
@@ -449,7 +450,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashSetStatusActivation,
             isActive: false,
-            status: 'activation',
+            status: OFFER_STATUS.ACTIVATION,
           })
           .toArray();
 
@@ -478,7 +479,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashSetStatusActivation,
             isActive: false,
-            status: 'activation',
+            status: OFFER_STATUS.ACTIVATION,
           })
           .toArray();
 
@@ -495,7 +496,7 @@ describe('Update offers via on-chain', async function () {
               (offerModif) => offerModif._id.toString() === offer._id
             )
           ) {
-            chai.expect(offer.status).to.equal('success');
+            chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
           }
         });
       });
@@ -507,7 +508,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashFailed,
             isActive: false,
-            status: 'activation',
+            status: OFFER_STATUS.ACTIVATION,
           })
           .toArray();
 
@@ -536,7 +537,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashFailed,
             isActive: false,
-            status: 'activation',
+            status: OFFER_STATUS.ACTIVATION,
           })
           .toArray();
 
@@ -553,7 +554,7 @@ describe('Update offers via on-chain', async function () {
               (offerModif) => offerModif._id.toString() === offer._id
             )
           ) {
-            chai.expect(offer.status).to.equal('activationFailure');
+            chai.expect(offer.status).to.equal(OFFER_STATUS.ACTIVATION_FAILURE);
           }
         });
       });
@@ -565,7 +566,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashSetStatusDeactivation,
             isActive: true,
-            status: 'deactivation',
+            status: OFFER_STATUS.DEACTIVATION,
           })
           .toArray();
 
@@ -594,7 +595,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashSetStatusDeactivation,
             isActive: true,
-            status: 'deactivation',
+            status: OFFER_STATUS.DEACTIVATION,
           })
           .toArray();
 
@@ -611,7 +612,7 @@ describe('Update offers via on-chain', async function () {
               (offerModif) => offerModif._id.toString() === offer._id
             )
           ) {
-            chai.expect(offer.status).to.equal('success');
+            chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
           }
         });
       });
@@ -623,7 +624,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashFailed,
             isActive: true,
-            status: 'deactivation',
+            status: OFFER_STATUS.DEACTIVATION,
           })
           .toArray();
 
@@ -652,7 +653,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashFailed,
             isActive: true,
-            status: 'deactivation',
+            status: OFFER_STATUS.DEACTIVATION,
           })
           .toArray();
 
@@ -669,7 +670,9 @@ describe('Update offers via on-chain', async function () {
               (offerModif) => offerModif._id.toString() === offer._id
             )
           ) {
-            chai.expect(offer.status).to.equal('deactivationFailure');
+            chai
+              .expect(offer.status)
+              .to.equal(OFFER_STATUS.DEACTIVATION_FAILURE);
           }
         });
       });
@@ -713,7 +716,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashSetStatusActivation,
             isActive: false,
-            status: 'activation',
+            status: OFFER_STATUS.ACTIVATION,
           })
           .toArray();
 
@@ -742,7 +745,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashSetStatusActivation,
             isActive: false,
-            status: 'activation',
+            status: OFFER_STATUS.ACTIVATION,
           })
           .toArray();
 
@@ -759,7 +762,7 @@ describe('Update offers via on-chain', async function () {
               (offerModif) => offerModif._id.toString() === offer._id
             )
           ) {
-            chai.expect(offer.status).to.equal('success');
+            chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
           }
         });
       });
@@ -771,7 +774,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashFailed,
             isActive: false,
-            status: 'activation',
+            status: OFFER_STATUS.ACTIVATION,
           })
           .toArray();
 
@@ -800,7 +803,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashFailed,
             isActive: false,
-            status: 'activation',
+            status: OFFER_STATUS.ACTIVATION,
           })
           .toArray();
 
@@ -817,7 +820,7 @@ describe('Update offers via on-chain', async function () {
               (offerModif) => offerModif._id.toString() === offer._id
             )
           ) {
-            chai.expect(offer.status).to.equal('activationFailure');
+            chai.expect(offer.status).to.equal(OFFER_STATUS.ACTIVATION_FAILURE);
           }
         });
       });
@@ -829,7 +832,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashSetStatusDeactivation,
             isActive: true,
-            status: 'deactivation',
+            status: OFFER_STATUS.DEACTIVATION,
           })
           .toArray();
 
@@ -858,7 +861,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashSetStatusDeactivation,
             isActive: true,
-            status: 'deactivation',
+            status: OFFER_STATUS.DEACTIVATION,
           })
           .toArray();
 
@@ -875,7 +878,7 @@ describe('Update offers via on-chain', async function () {
               (offerModif) => offerModif._id.toString() === offer._id
             )
           ) {
-            chai.expect(offer.status).to.equal('success');
+            chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
           }
         });
       });
@@ -887,7 +890,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashFailed,
             isActive: true,
-            status: 'deactivation',
+            status: OFFER_STATUS.DEACTIVATION,
           })
           .toArray();
 
@@ -916,7 +919,7 @@ describe('Update offers via on-chain', async function () {
             offerId: { $exists: true, $ne: '' },
             hashActivation: txHashFailed,
             isActive: true,
-            status: 'deactivation',
+            status: OFFER_STATUS.DEACTIVATION,
           })
           .toArray();
 
@@ -933,7 +936,9 @@ describe('Update offers via on-chain', async function () {
               (offerModif) => offerModif._id.toString() === offer._id
             )
           ) {
-            chai.expect(offer.status).to.equal('deactivationFailure');
+            chai
+              .expect(offer.status)
+              .to.equal(OFFER_STATUS.DEACTIVATION_FAILURE);
           }
         });
       });

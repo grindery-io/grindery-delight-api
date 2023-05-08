@@ -13,6 +13,7 @@ import {
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
 import {
+  ORDER_STATUS,
   getOneOrderWithOffer,
   getOrdersWithOffers,
 } from '../utils/orders-utils.js';
@@ -44,7 +45,7 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
   newDocument.date = new Date();
   newDocument.userId = res.locals.userId;
   newDocument.isComplete = false;
-  newDocument.status = 'pending';
+  newDocument.status = ORDER_STATUS.PENDING;
   res.send(await collection.insertOne(newDocument)).status(201);
 });
 

@@ -16,6 +16,7 @@ import {
   pathOrders_Put_Complete,
   pathOrders_Get_LiquidityProvider,
 } from './utils/variables.js';
+import { ORDER_STATUS } from '../utils/orders-utils.js';
 
 chai.use(chaiHttp);
 
@@ -83,7 +84,7 @@ describe('Orders route', async function () {
       chai.expect(getOrder.body).to.deep.equal({
         ...order,
         isComplete: false,
-        status: 'pending',
+        status: ORDER_STATUS.PENDING,
         offer: null,
       });
     });
