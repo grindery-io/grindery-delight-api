@@ -311,7 +311,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
-          hashActivation: txHashSetStatusActivation,
+          activationHash: txHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -319,7 +319,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.DEACTIVATION,
           isActive: true,
-          hashActivation: txHashSetStatusDeactivation,
+          activationHash: txHashSetStatusDeactivation,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -327,7 +327,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
-          hashActivation: txHashFailed,
+          activationHash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -335,7 +335,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.DEACTIVATION,
           isActive: true,
-          hashActivation: txHashFailed,
+          activationHash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -343,7 +343,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
-          hashActivation: txHashNewOffer,
+          activationHash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -351,7 +351,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: true,
-          hashActivation: txHashSetStatusActivation,
+          activationHash: txHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
           notToBeModified: 'notToBeModified',
         },
@@ -360,7 +360,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.DEACTIVATION,
           isActive: false,
-          hashActivation: txHashSetStatusActivation,
+          activationHash: txHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
           notToBeModified: 'notToBeModified',
         },
@@ -370,7 +370,7 @@ describe('Update offers via on-chain', async function () {
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
           offerId: '',
-          hashActivation: txHashSetStatusActivation,
+          activationHash: txHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
           notToBeModified: 'notToBeModified',
         },
@@ -379,7 +379,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
-          hashActivation: txHashFailed,
+          activationHash: txHashFailed,
           userId: 'anotherUserId',
           notToBeModified: 'notToBeModified',
         },
@@ -443,12 +443,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update isActive to true if status = activation & isActive = false & hashActivation contains LogSetStatusOffer', async function () {
+      it('Should update isActive to true if status = activation & isActive = false & activationHash contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashSetStatusActivation,
+            activationHash: txHashSetStatusActivation,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -472,12 +472,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update status to success if status = activation & isActive = false & hashActivation contains LogSetStatusOffer', async function () {
+      it('Should update status to success if status = activation & isActive = false & activationHash contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashSetStatusActivation,
+            activationHash: txHashSetStatusActivation,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -501,12 +501,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should not update isActive if status = activation & isActive = false & hashActivation doesnt contain LogSetStatusOffer', async function () {
+      it('Should not update isActive if status = activation & isActive = false & activationHash doesnt contain LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashFailed,
+            activationHash: txHashFailed,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -530,12 +530,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update status to activationFailure if status = activation & isActive = false & hashActivation doesnt contains LogSetStatusOffer', async function () {
+      it('Should update status to activationFailure if status = activation & isActive = false & activationHash doesnt contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashFailed,
+            activationHash: txHashFailed,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -559,12 +559,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update isActive to false if status = deactivation & isActive = true & hashActivation contains LogSetStatusOffer', async function () {
+      it('Should update isActive to false if status = deactivation & isActive = true & activationHash contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashSetStatusDeactivation,
+            activationHash: txHashSetStatusDeactivation,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -588,12 +588,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update status to success if status = deactivation & isActive = true & hashActivation contains LogSetStatusOffer', async function () {
+      it('Should update status to success if status = deactivation & isActive = true & activationHash contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashSetStatusDeactivation,
+            activationHash: txHashSetStatusDeactivation,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -617,12 +617,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should not update isActive if status = deactivation & isActive = true & hashActivation doesnt contain LogSetStatusOffer', async function () {
+      it('Should not update isActive if status = deactivation & isActive = true & activationHash doesnt contain LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashFailed,
+            activationHash: txHashFailed,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -646,12 +646,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update status to deactivationFailure if status = deactivation & isActive = true & hashActivation doesnt contains LogSetStatusOffer', async function () {
+      it('Should update status to deactivationFailure if status = deactivation & isActive = true & activationHash doesnt contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashFailed,
+            activationHash: txHashFailed,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -709,12 +709,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update isActive to true if status = activation & isActive = false & hashActivation contains LogSetStatusOffer', async function () {
+      it('Should update isActive to true if status = activation & isActive = false & activationHash contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashSetStatusActivation,
+            activationHash: txHashSetStatusActivation,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -738,12 +738,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update status to success if status = activation & isActive = false & hashActivation contains LogSetStatusOffer', async function () {
+      it('Should update status to success if status = activation & isActive = false & activationHash contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashSetStatusActivation,
+            activationHash: txHashSetStatusActivation,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -767,12 +767,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should not update isActive if status = activation & isActive = false & hashActivation doesnt contain LogSetStatusOffer', async function () {
+      it('Should not update isActive if status = activation & isActive = false & activationHash doesnt contain LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashFailed,
+            activationHash: txHashFailed,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -796,12 +796,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update status to activationFailure if status = activation & isActive = false & hashActivation doesnt contains LogSetStatusOffer', async function () {
+      it('Should update status to activationFailure if status = activation & isActive = false & activationHash doesnt contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashFailed,
+            activationHash: txHashFailed,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -825,12 +825,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update isActive to false if status = deactivation & isActive = true & hashActivation contains LogSetStatusOffer', async function () {
+      it('Should update isActive to false if status = deactivation & isActive = true & activationHash contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashSetStatusDeactivation,
+            activationHash: txHashSetStatusDeactivation,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -854,12 +854,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update status to success if status = deactivation & isActive = true & hashActivation contains LogSetStatusOffer', async function () {
+      it('Should update status to success if status = deactivation & isActive = true & activationHash contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashSetStatusDeactivation,
+            activationHash: txHashSetStatusDeactivation,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -883,12 +883,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should not update isActive if status = deactivation & isActive = true & hashActivation doesnt contain LogSetStatusOffer', async function () {
+      it('Should not update isActive if status = deactivation & isActive = true & activationHash doesnt contain LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashFailed,
+            activationHash: txHashFailed,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -912,12 +912,12 @@ describe('Update offers via on-chain', async function () {
         });
       });
 
-      it('Should update status to deactivationFailure if status = deactivation & isActive = true & hashActivation doesnt contains LogSetStatusOffer', async function () {
+      it('Should update status to deactivationFailure if status = deactivation & isActive = true & activationHash doesnt contains LogSetStatusOffer', async function () {
         const modifiedOffers = await collectionOffers
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            hashActivation: txHashFailed,
+            activationHash: txHashFailed,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })

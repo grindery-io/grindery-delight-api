@@ -52,7 +52,7 @@ export async function updateCompletionOrder(req, order) {
  * This function updates the activation offer status and checks if the activation event was successful.
  * @param db - The database object used to interact with the database.
  * @param offer - The `offer` parameter is an object that represents an activation offer. It contains
- * properties such as `chainId`, `hashActivation`, `status`, and `isActive`. The function updates the
+ * properties such as `chainId`, `activationHash`, `status`, and `isActive`. The function updates the
  * `status` and `isActive` properties of the `offer` object based on the result of a blockchain query
  * @returns an object with two properties: "status" and "isActive". The "status" property contains a
  * string value indicating the status of the offer (either "success", "activationFailure", or
@@ -62,7 +62,7 @@ export async function updateCompletionOrder(req, order) {
 export async function updateActivationOffer(req, db, offer) {
   const isActivationEvent = await isSetStatusFromHash(
     req.body.rpc,
-    offer.hashActivation
+    offer.activationHash
   );
 
   if (!isActivationEvent.isSetStatus) {
