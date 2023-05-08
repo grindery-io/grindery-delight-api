@@ -248,7 +248,9 @@ router.put(
     res.status(200).send(
       await collection.updateOne(offer, {
         $set: {
-          status: req.body.activating ? 'activating' : 'deactivating',
+          status: req.body.activating
+            ? OFFER_STATUS.ACTIVATION
+            : OFFER_STATUS.DEACTIVATION,
           activationHash: req.body.hash,
         },
       })

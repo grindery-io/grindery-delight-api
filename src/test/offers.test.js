@@ -1178,7 +1178,7 @@ describe('Offers route', async function () {
       const modifOffer = await collectionOffers.findOne({
         offerId: offer.offerId,
       });
-      chai.expect(modifOffer.status).to.equal('activating');
+      chai.expect(modifOffer.status).to.equal(OFFER_STATUS.ACTIVATION);
     });
 
     it('Should set status deactivating if activating is false', async function () {
@@ -1196,7 +1196,7 @@ describe('Offers route', async function () {
       const modifOffer = await collectionOffers.findOne({
         offerId: offer.offerId,
       });
-      chai.expect(modifOffer.status).to.equal('deactivating');
+      chai.expect(modifOffer.status).to.equal(OFFER_STATUS.DEACTIVATION);
     });
   });
 
