@@ -7,6 +7,7 @@ import {
   collectionOffers,
   offer,
   pathBlockchain_Put_OffersActivation,
+  pathBlockchain_Put_OffersActivationAll,
   pathBlockchain_Put_OffersAll,
   pathBlockchain_Put_OffersUser,
 } from './utils/variables.js';
@@ -638,6 +639,260 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        res.body.forEach((offer) => {
+          if (
+            modifiedOffers.some(
+              (offerModif) => offerModif._id.toString() === offer._id
+            )
+          ) {
+            chai.expect(offer.status).to.equal('deactivationFailure');
+          }
+        });
+      });
+    });
+
+    describe('Update activation in database - all', async function () {
+      it('Should update orders for the all userId', async function () {
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        chai.expect(
+          res.body.some((offer) => offer.userId === process.env.USER_ID_TEST)
+        ).to.be.true;
+        chai.expect(res.body.some((offer) => offer.userId === 'anotherUserId'))
+          .to.be.true;
+      });
+
+      it('Should not modified non appropriate offers', async function () {
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        res.body.forEach((offer) => {
+          if (offer.userId !== 'anotherUserId') {
+            chai.expect(offer).to.not.have.property('notToBeModified');
+          }
+        });
+      });
+
+      it('Should update isActive to true if status = activation & isActive = false & hashActivation contains LogSetStatusOffer', async function () {
+        const modifiedOffers = await collectionOffers
+          .find({
+            userId: process.env.USER_ID_TEST,
+            offerId: { $exists: true, $ne: '' },
+            hashActivation: txHashSetStatusActivation,
+            isActive: false,
+            status: 'activation',
+          })
+          .toArray();
+
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        res.body.forEach((offer) => {
+          if (
+            modifiedOffers.some(
+              (offerModif) => offerModif._id.toString() === offer._id
+            )
+          ) {
+            chai.expect(offer.isActive).to.be.true;
+          }
+        });
+      });
+
+      it('Should update status to success if status = activation & isActive = false & hashActivation contains LogSetStatusOffer', async function () {
+        const modifiedOffers = await collectionOffers
+          .find({
+            userId: process.env.USER_ID_TEST,
+            offerId: { $exists: true, $ne: '' },
+            hashActivation: txHashSetStatusActivation,
+            isActive: false,
+            status: 'activation',
+          })
+          .toArray();
+
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        res.body.forEach((offer) => {
+          if (
+            modifiedOffers.some(
+              (offerModif) => offerModif._id.toString() === offer._id
+            )
+          ) {
+            chai.expect(offer.status).to.equal('success');
+          }
+        });
+      });
+
+      it('Should not update isActive if status = activation & isActive = false & hashActivation doesnt contain LogSetStatusOffer', async function () {
+        const modifiedOffers = await collectionOffers
+          .find({
+            userId: process.env.USER_ID_TEST,
+            offerId: { $exists: true, $ne: '' },
+            hashActivation: txHashFailed,
+            isActive: false,
+            status: 'activation',
+          })
+          .toArray();
+
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        res.body.forEach((offer) => {
+          if (
+            modifiedOffers.some(
+              (offerModif) => offerModif._id.toString() === offer._id
+            )
+          ) {
+            chai.expect(offer.isActive).to.be.false;
+          }
+        });
+      });
+
+      it('Should update status to activationFailure if status = activation & isActive = false & hashActivation doesnt contains LogSetStatusOffer', async function () {
+        const modifiedOffers = await collectionOffers
+          .find({
+            userId: process.env.USER_ID_TEST,
+            offerId: { $exists: true, $ne: '' },
+            hashActivation: txHashFailed,
+            isActive: false,
+            status: 'activation',
+          })
+          .toArray();
+
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        res.body.forEach((offer) => {
+          if (
+            modifiedOffers.some(
+              (offerModif) => offerModif._id.toString() === offer._id
+            )
+          ) {
+            chai.expect(offer.status).to.equal('activationFailure');
+          }
+        });
+      });
+
+      it('Should update isActive to false if status = deactivation & isActive = true & hashActivation contains LogSetStatusOffer', async function () {
+        const modifiedOffers = await collectionOffers
+          .find({
+            userId: process.env.USER_ID_TEST,
+            offerId: { $exists: true, $ne: '' },
+            hashActivation: txHashSetStatusDeactivation,
+            isActive: true,
+            status: 'deactivation',
+          })
+          .toArray();
+
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        res.body.forEach((offer) => {
+          if (
+            modifiedOffers.some(
+              (offerModif) => offerModif._id.toString() === offer._id
+            )
+          ) {
+            chai.expect(offer.isActive).to.be.false;
+          }
+        });
+      });
+
+      it('Should update status to success if status = deactivation & isActive = true & hashActivation contains LogSetStatusOffer', async function () {
+        const modifiedOffers = await collectionOffers
+          .find({
+            userId: process.env.USER_ID_TEST,
+            offerId: { $exists: true, $ne: '' },
+            hashActivation: txHashSetStatusDeactivation,
+            isActive: true,
+            status: 'deactivation',
+          })
+          .toArray();
+
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        res.body.forEach((offer) => {
+          if (
+            modifiedOffers.some(
+              (offerModif) => offerModif._id.toString() === offer._id
+            )
+          ) {
+            chai.expect(offer.status).to.equal('success');
+          }
+        });
+      });
+
+      it('Should not update isActive if status = deactivation & isActive = true & hashActivation doesnt contain LogSetStatusOffer', async function () {
+        const modifiedOffers = await collectionOffers
+          .find({
+            userId: process.env.USER_ID_TEST,
+            offerId: { $exists: true, $ne: '' },
+            hashActivation: txHashFailed,
+            isActive: true,
+            status: 'deactivation',
+          })
+          .toArray();
+
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+
+        res.body.forEach((offer) => {
+          if (
+            modifiedOffers.some(
+              (offerModif) => offerModif._id.toString() === offer._id
+            )
+          ) {
+            chai.expect(offer.isActive).to.be.true;
+          }
+        });
+      });
+
+      it('Should update status to deactivationFailure if status = deactivation & isActive = true & hashActivation doesnt contains LogSetStatusOffer', async function () {
+        const modifiedOffers = await collectionOffers
+          .find({
+            userId: process.env.USER_ID_TEST,
+            offerId: { $exists: true, $ne: '' },
+            hashActivation: txHashFailed,
+            isActive: true,
+            status: 'deactivation',
+          })
+          .toArray();
+
+        const res = await chai
+          .request(app)
+          .put(pathBlockchain_Put_OffersActivationAll)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 

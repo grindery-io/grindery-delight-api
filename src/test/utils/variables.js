@@ -87,6 +87,8 @@ export const pathBlockchain_Put_OffersAll =
   '/unit-test/offers-onchain/update-offer-all';
 export const pathBlockchain_Put_OffersActivation =
   '/unit-test/offers-onchain/update-offer-activation-user';
+export const pathBlockchain_Put_OffersActivationAll =
+  '/unit-test/offers-onchain/update-offer-activation-all';
 
 export const order = {
   amountTokenDeposit: '0.34',
