@@ -253,7 +253,11 @@ export const blockchainBscTestnet = {
   addressExplorerUrl: 'https://testnet.bscscan.com/address/{hash}',
 };
 
-export const updateOrderUserBody = {
+export const updateOrderBody = {
   rpc: blockchainGoerli.rpc[0],
   grtPoolAddress: GrtPoolAddress,
+};
+
+export const updateOrderCompletionBody = {
+  rpc: blockchainBscTestnet.rpc[0],
 };

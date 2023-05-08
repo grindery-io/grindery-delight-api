@@ -39,14 +39,9 @@ export async function updateOfferId(db, offer) {
  * the status of the order, which can be either `'complete'` or `'paymentFailure'`. The `isComplete`
  * property is a boolean value that indicates whether the order has been paid or not.
  */
-export async function updateCompletionOrder(db, order) {
-  const { chainId } = await db
-    .collection('offers')
-    .findOne({ offerId: order.offerId });
-  const chain = await db.collection('blockchains').findOne({ chainId });
-
+export async function updateCompletionOrder(req, db, order) {
   order.isComplete = await isPaidOrderFromHash(
-    chain.rpc[0],
+    req.body.rpc,
     order.hashCompletion
   );
   order.status = order.isComplete ? 'complete' : 'paymentFailure';
@@ -207,6 +202,7 @@ export async function getOfferIdFromHash(rpc, hash) {
 export async function isPaidOrderFromHash(rpc, hash) {
   const provider = getProviderFromRpc(rpc);
   const txReceipt = await provider.getTransactionReceipt(hash);
+
   const iface = new ethers.utils.Interface(
     (await getAbis()).liquidityWalletAbi
   );
