@@ -1,13 +1,9 @@
 import express from 'express';
 import isRequired from '../utils/auth-utils.js';
-import { createRequire } from 'node:module';
 import { Database } from '../db/conn.js';
 import {
-  getOfferIdFromHash,
   updateActivationOffer,
-  updateCompletionOrder,
   updateOfferId,
-  updateOrderFromDb,
 } from '../utils/view-blockchains-utils.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { updateOfferOnChainValidator } from '../validators/update-offers-onchain.validator.js';
@@ -38,7 +34,7 @@ router.put(
             .collection('offers')
             .updateOne(
               { _id: offer._id },
-              { $set: await updateOfferId(req, db, offer) }
+              { $set: await updateOfferId(req, offer) }
             );
 
           return offer;
@@ -69,7 +65,7 @@ router.put(
             .collection('offers')
             .updateOne(
               { _id: offer._id },
-              { $set: await updateOfferId(req, db, offer) }
+              { $set: await updateOfferId(req, offer) }
             );
 
           return offer;

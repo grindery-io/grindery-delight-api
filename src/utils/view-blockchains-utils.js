@@ -1,8 +1,6 @@
 import { ethers } from 'ethers';
 import axios from 'axios';
 
-export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
-
 /**
  * This function updates the offer ID and status of an offer in a database based on its chain ID and
  * hash.
@@ -16,11 +14,7 @@ export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
  * offer ID obtained from the hash, and the `status` property indicates whether the offer ID was
  * successfully obtained (`'success'`) or not (`'failure'`).
  */
-export async function updateOfferId(req, db, offer) {
-  const chain = await db
-    .collection('blockchains')
-    .findOne({ chainId: offer.chainId });
-
+export async function updateOfferId(req, offer) {
   offer.offerId = await getOfferIdFromHash(req.body.rpc, offer.hash);
   offer.status = offer.offerId !== '' ? 'success' : 'failure';
 
@@ -61,10 +55,6 @@ export async function updateCompletionOrder(req, db, order) {
  * offer is currently active or not.
  */
 export async function updateActivationOffer(req, db, offer) {
-  // const chain = await db
-  //   .collection('blockchains')
-  //   .findOne({ chainId: offer.chainId });
-
   const isActivationEvent = await isSetStatusFromHash(
     req.body.rpc,
     offer.hashActivation

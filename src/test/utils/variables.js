@@ -1,7 +1,8 @@
 import { Database } from '../../db/conn.js';
 
 // On-chain addresses
-export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
+export const GrtPoolAddressGoerli =
+  '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
 
 const dbTests = await Database.getInstance({});
 
@@ -88,7 +89,7 @@ export const pathBlockchain_Put_OffersUser =
   '/unit-test/offers-onchain/update-offer-user';
 export const pathBlockchain_Put_OffersAll =
   '/unit-test/offers-onchain/update-offer-all';
-export const pathBlockchain_Put_OffersActivation =
+export const pathBlockchain_Put_OffersActivationUser =
   '/unit-test/offers-onchain/update-offer-activation-user';
 export const pathBlockchain_Put_OffersActivationAll =
   '/unit-test/offers-onchain/update-offer-activation-all';
@@ -255,7 +256,7 @@ export const blockchainBscTestnet = {
 
 export const updateOrderBody = {
   rpc: blockchainGoerli.rpc[0],
-  grtPoolAddress: GrtPoolAddress,
+  grtPoolAddress: GrtPoolAddressGoerli,
 };
 
 export const updateOrderCompletionBody = {

@@ -2,6 +2,7 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
 import {
+  GrtPoolAddressGoerli,
   blockchainBscTestnet,
   blockchainGoerli,
   collectionBlockchains,
@@ -43,7 +44,6 @@ const orderId =
 const offerId =
   '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec';
 const abis = await getAbis();
-const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
 
 // Order payment
 const txHashOrderPaid =
@@ -52,7 +52,6 @@ const txHashNotOrderPaid =
   '0xea914a21c9949f9185afa79865ddb651186223bffc552719e0ddb14ad24207ab';
 const txHashFailedOnBSC =
   '0xf2da1f454e228f1a95398d0b1d38131cc79893a5f49b2dc94825df2cd8011bf2';
-const GrtLiquidityWallet = '0x4ffd49c7832870be704143a10049970670ff8d01';
 
 beforeEach(async function () {
   await collectionBlockchains.insertOne({ ...blockchainGoerli });
@@ -66,7 +65,7 @@ beforeEach(async function () {
   });
 
   GrtPoolContract = new ethers.Contract(
-    GrtPoolAddress,
+    GrtPoolAddressGoerli,
     abis.poolAbi,
     getProviderFromRpc(blockchainDBGoerli.rpc[0])
   );

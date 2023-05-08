@@ -1,5 +1,4 @@
-import { body, param, query } from 'express-validator';
-import { validateFields } from '../utils/validators-utils.js';
+import { body } from 'express-validator';
 
 export const updateOfferOnChainValidator = [
   body('rpc')
