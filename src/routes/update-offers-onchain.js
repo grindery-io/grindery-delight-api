@@ -9,53 +9,75 @@ import {
   updateOfferId,
   updateOrderFromDb,
 } from '../utils/view-blockchains-utils.js';
+import { validateResult } from '../utils/validators-utils.js';
+import { updateOfferOnChainValidator } from '../validators/update-offers-onchain.validator.js';
 
 const router = express.Router();
 
-router.put('/update-offer-user', isRequired, async (req, res) => {
-  const db = await Database.getInstance(req);
+router.put(
+  '/update-offer-user',
+  updateOfferOnChainValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
 
-  res.status(200).send(
-    await Promise.all(
-      (
-        await db
-          .collection('offers')
-          .find({ userId: res.locals.userId, status: 'pending' })
-          .toArray()
-      ).map(async (offer) => {
-        await db
-          .collection('offers')
-          .updateOne(
-            { _id: offer._id },
-            { $set: await updateOfferId(db, offer) }
-          );
+    const db = await Database.getInstance(req);
 
-        return offer;
-      })
-    )
-  );
-});
+    res.status(200).send(
+      await Promise.all(
+        (
+          await db
+            .collection('offers')
+            .find({ userId: res.locals.userId, status: 'pending' })
+            .toArray()
+        ).map(async (offer) => {
+          await db
+            .collection('offers')
+            .updateOne(
+              { _id: offer._id },
+              { $set: await updateOfferId(req, db, offer) }
+            );
 
-router.put('/update-offer-all', isRequired, async (req, res) => {
-  const db = await Database.getInstance(req);
+          return offer;
+        })
+      )
+    );
+  }
+);
 
-  res.status(200).send(
-    await Promise.all(
-      (
-        await db.collection('offers').find({ status: 'pending' }).toArray()
-      ).map(async (offer) => {
-        await db
-          .collection('offers')
-          .updateOne(
-            { _id: offer._id },
-            { $set: await updateOfferId(db, offer) }
-          );
+router.put(
+  '/update-offer-all',
+  updateOfferOnChainValidator,
+  isRequired,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
 
-        return offer;
-      })
-    )
-  );
-});
+    const db = await Database.getInstance(req);
+
+    res.status(200).send(
+      await Promise.all(
+        (
+          await db.collection('offers').find({ status: 'pending' }).toArray()
+        ).map(async (offer) => {
+          await db
+            .collection('offers')
+            .updateOne(
+              { _id: offer._id },
+              { $set: await updateOfferId(req, db, offer) }
+            );
+
+          return offer;
+        })
+      )
+    );
+  }
+);
 
 router.put('/update-offer-activation-user', isRequired, async (req, res) => {
   const db = await Database.getInstance(req);

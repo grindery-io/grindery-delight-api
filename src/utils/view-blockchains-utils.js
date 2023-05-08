@@ -16,12 +16,12 @@ export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
  * offer ID obtained from the hash, and the `status` property indicates whether the offer ID was
  * successfully obtained (`'success'`) or not (`'failure'`).
  */
-export async function updateOfferId(db, offer) {
+export async function updateOfferId(req, db, offer) {
   const chain = await db
     .collection('blockchains')
     .findOne({ chainId: offer.chainId });
 
-  offer.offerId = await getOfferIdFromHash(chain.rpc[0], offer.hash);
+  offer.offerId = await getOfferIdFromHash(req.body.rpc, offer.hash);
   offer.status = offer.offerId !== '' ? 'success' : 'failure';
 
   return { offerId: offer.offerId, status: offer.status };

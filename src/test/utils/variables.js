@@ -261,3 +261,7 @@ export const updateOrderBody = {
 export const updateOrderCompletionBody = {
   rpc: blockchainBscTestnet.rpc[0],
 };
+
+export const updateOfferBody = {
+  rpc: blockchainGoerli.rpc[0],
+};
