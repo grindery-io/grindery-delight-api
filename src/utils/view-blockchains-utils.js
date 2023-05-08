@@ -60,13 +60,13 @@ export async function updateCompletionOrder(req, db, order) {
  * "deactivationFailure"). The "isActive" property contains a boolean value indicating whether the
  * offer is currently active or not.
  */
-export async function updateActivationOffer(db, offer) {
-  const chain = await db
-    .collection('blockchains')
-    .findOne({ chainId: offer.chainId });
+export async function updateActivationOffer(req, db, offer) {
+  // const chain = await db
+  //   .collection('blockchains')
+  //   .findOne({ chainId: offer.chainId });
 
   const isActivationEvent = await isSetStatusFromHash(
-    chain.rpc[0],
+    req.body.rpc,
     offer.hashActivation
   );
 

@@ -420,7 +420,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -432,7 +433,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -454,7 +456,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -482,7 +485,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -510,7 +514,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -538,7 +543,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -566,7 +572,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -594,7 +601,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -622,7 +630,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -650,7 +659,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivation)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -670,7 +680,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         chai.expect(
@@ -684,7 +695,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -708,7 +720,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -736,7 +749,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -764,7 +778,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -792,7 +807,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -820,7 +836,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -848,7 +865,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -876,7 +894,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
@@ -904,7 +923,8 @@ describe('Update offers via on-chain', async function () {
         const res = await chai
           .request(app)
           .put(pathBlockchain_Put_OffersActivationAll)
-          .set('Authorization', `Bearer ${mockedToken}`);
+          .set('Authorization', `Bearer ${mockedToken}`)
+          .send(updateOfferBody);
         chai.expect(res).to.have.status(200);
 
         res.body.forEach((offer) => {
