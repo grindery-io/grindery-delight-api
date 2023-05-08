@@ -96,23 +96,23 @@ export async function updateActivationOffer(db, offer) {
  * the chainId, hash, amountTokenDeposit, addressTokenDeposit, chainIdTokenDeposit, destAddr, offerId,
  * amountTokenOffer, and status.
  */
-export async function updateOrderFromDb(db, order) {
+export async function updateOrderFromDb(req, db, order) {
   const chain = await db.collection('blockchains').findOne({
     chainId: order.chainId,
   });
 
-  const orderId = await getOrderIdFromHash(chain.rpc[0], order.hash);
+  const orderId = await getOrderIdFromHash(req.body.rpc, order.hash);
 
   if (orderId === '') {
     order.status = 'failure';
   } else {
     const onChainOrder = await getOrderInformation(
       new ethers.Contract(
-        GrtPoolAddress,
+        req.body.grtPoolAddress,
         (
           await getAbis()
         ).poolAbi,
-        getProviderFromRpc(chain.rpc[0])
+        getProviderFromRpc(req.body.rpc)
       ),
       orderId
     );

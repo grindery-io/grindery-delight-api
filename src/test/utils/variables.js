@@ -1,5 +1,8 @@
 import { Database } from '../../db/conn.js';
 
+// On-chain addresses
+export const GrtPoolAddress = '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
+
 const dbTests = await Database.getInstance({});
 
 export const collectionAdmins = dbTests.collection('admins');
@@ -248,4 +251,9 @@ export const blockchainBscTestnet = {
   ],
   transactionExplorerUrl: 'https://testnet.bscscan.com/tx/{hash}',
   addressExplorerUrl: 'https://testnet.bscscan.com/address/{hash}',
+};
+
+export const updateOrderUserBody = {
+  rpc: blockchainGoerli.rpc[0],
+  grtPoolAddress: GrtPoolAddress,
 };
