@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import axios from 'axios';
+import { ORDER_STATUS } from './orders-utils.js';
 
 /**
  * This function updates the offer ID and status of an offer in a database based on its chain ID and
@@ -33,12 +34,14 @@ export async function updateOfferId(req, offer) {
  * the status of the order, which can be either `'complete'` or `'paymentFailure'`. The `isComplete`
  * property is a boolean value that indicates whether the order has been paid or not.
  */
-export async function updateCompletionOrder(req, db, order) {
+export async function updateCompletionOrder(req, order) {
   order.isComplete = await isPaidOrderFromHash(
     req.body.rpc,
     order.hashCompletion
   );
-  order.status = order.isComplete ? 'complete' : 'paymentFailure';
+  order.status = order.isComplete
+    ? ORDER_STATUS.COMPLETE
+    : ORDER_STATUS.COMPLETION_FAILURE;
 
   return { status: order.status, isComplete: order.isComplete };
 }
@@ -81,15 +84,11 @@ export async function updateActivationOffer(req, db, offer) {
  * the chainId, hash, amountTokenDeposit, addressTokenDeposit, chainIdTokenDeposit, destAddr, offerId,
  * amountTokenOffer, and status.
  */
-export async function updateOrderFromDb(req, db, order) {
-  const chain = await db.collection('blockchains').findOne({
-    chainId: order.chainId,
-  });
-
+export async function updateOrderFromDb(req, order) {
   const orderId = await getOrderIdFromHash(req.body.rpc, order.hash);
 
   if (orderId === '') {
-    order.status = 'failure';
+    order.status = ORDER_STATUS.FAILURE;
   } else {
     const onChainOrder = await getOrderInformation(
       new ethers.Contract(
@@ -108,7 +107,7 @@ export async function updateOrderFromDb(req, db, order) {
     order.destAddr = onChainOrder.destAddr;
     order.offerId = onChainOrder.offerId;
     order.amountTokenOffer = onChainOrder.amountTokenOffer;
-    order.status = 'success';
+    order.status = ORDER_STATUS.SUCCESS;
   }
 
   return {

@@ -26,6 +26,7 @@ import {
 import { ethers } from 'ethers';
 import { order } from './utils/variables.js';
 import { mockedToken } from './utils/utils.js';
+import { ORDER_STATUS } from '../utils/orders-utils.js';
 
 chai.use(chaiHttp);
 
@@ -136,35 +137,35 @@ describe('Update orders via on-chain', async function () {
       await collectionOrders.insertMany([
         {
           ...order,
-          status: 'pending',
+          status: ORDER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...order,
-          status: 'success',
+          status: ORDER_STATUS.SUCCESS,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...order,
-          status: 'pending',
+          status: ORDER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...order,
-          status: 'pending',
+          status: ORDER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...order,
-          status: 'pending',
+          status: ORDER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           orderId: orderId,
           userId: 'anotherUserId',
@@ -175,7 +176,7 @@ describe('Update orders via on-chain', async function () {
 
     it('Should not modify orders with non pending status', async function () {
       const unmodifiedOrder = await collectionOrders.findOne({
-        status: 'success',
+        status: ORDER_STATUS.SUCCESS,
       });
       const res = await chai
         .request(app)
@@ -303,7 +304,7 @@ describe('Update orders via on-chain', async function () {
       chai.expect(res).to.have.status(200);
       res.body.forEach((order) => {
         if (order.hash == txHashNewOrder) {
-          chai.expect(order.status).to.equal('success');
+          chai.expect(order.status).to.equal(ORDER_STATUS.SUCCESS);
         }
       });
     });
@@ -322,7 +323,7 @@ describe('Update orders via on-chain', async function () {
             chainId: blockchainGoerli.chainId,
             hash: txHashFailed,
             userId: process.env.USER_ID_TEST,
-            status: 'failure',
+            status: ORDER_STATUS.FAILURE,
           });
         }
       });
@@ -334,35 +335,35 @@ describe('Update orders via on-chain', async function () {
       await collectionOrders.insertMany([
         {
           ...order,
-          status: 'pending',
+          status: ORDER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...order,
-          status: 'success',
+          status: ORDER_STATUS.SUCCESS,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...order,
-          status: 'pending',
+          status: ORDER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...order,
-          status: 'pending',
+          status: ORDER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...order,
-          status: 'pending',
+          status: ORDER_STATUS.PENDING,
           chainId: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           orderId: orderId,
@@ -381,7 +382,7 @@ describe('Update orders via on-chain', async function () {
       chai.expect(res).to.have.status(200);
 
       const unmodifiedOrder = await collectionOrders.findOne({
-        status: 'success',
+        status: ORDER_STATUS.SUCCESS,
       });
 
       chai.expect(unmodifiedOrder.orderId).to.equal(order.orderId);
@@ -492,7 +493,7 @@ describe('Update orders via on-chain', async function () {
       chai.expect(res).to.have.status(200);
       res.body.forEach((order) => {
         if (order.hash == txHashNewOrder) {
-          chai.expect(order.status).to.equal('success');
+          chai.expect(order.status).to.equal(ORDER_STATUS.SUCCESS);
         }
       });
     });
@@ -510,7 +511,7 @@ describe('Update orders via on-chain', async function () {
             chainId: blockchainGoerli.chainId,
             hash: txHashFailed,
             userId: process.env.USER_ID_TEST,
-            status: 'failure',
+            status: ORDER_STATUS.FAILURE,
           });
         }
       });
@@ -526,7 +527,7 @@ describe('Update orders via on-chain', async function () {
       await collectionOrders.insertMany([
         {
           ...order,
-          status: 'completion',
+          status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
           hashCompletion: txHashOrderPaid,
@@ -534,7 +535,7 @@ describe('Update orders via on-chain', async function () {
         },
         {
           ...order,
-          status: 'success',
+          status: ORDER_STATUS.SUCCESS,
           offerId: offer.offerId,
           isComplete: false,
           hashCompletion: txHashOrderPaid,
@@ -542,7 +543,7 @@ describe('Update orders via on-chain', async function () {
         },
         {
           ...order,
-          status: 'completion',
+          status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
           hashCompletion: txHashOrderPaid,
@@ -550,7 +551,7 @@ describe('Update orders via on-chain', async function () {
         },
         {
           ...order,
-          status: 'completion',
+          status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
           hashCompletion: txHashNotOrderPaid,
@@ -558,7 +559,7 @@ describe('Update orders via on-chain', async function () {
         },
         {
           ...order,
-          status: 'completion',
+          status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: true,
           shouldNotAppear: 'shouldNotAppear',
@@ -567,7 +568,7 @@ describe('Update orders via on-chain', async function () {
         },
         {
           ...order,
-          status: 'completion',
+          status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
           hashCompletion: txHashOrderPaid,
@@ -615,7 +616,7 @@ describe('Update orders via on-chain', async function () {
         chai.expect(res).to.have.status(200);
 
         const unmodifiedOrder = await collectionOrders.findOne({
-          status: 'success',
+          status: ORDER_STATUS.SUCCESS,
         });
 
         chai.expect(unmodifiedOrder.isComplete).to.be.false;
@@ -672,7 +673,7 @@ describe('Update orders via on-chain', async function () {
 
         res.body.forEach((order) => {
           if (order.hashCompletion !== txHashNotOrderPaid) {
-            chai.expect(order.status).to.equal('complete');
+            chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETE);
           }
         });
       });
@@ -687,7 +688,7 @@ describe('Update orders via on-chain', async function () {
 
         res.body.forEach((order) => {
           if (order.hashCompletion === txHashNotOrderPaid) {
-            chai.expect(order.status).to.equal('paymentFailure');
+            chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETION_FAILURE);
           }
         });
       });
@@ -718,7 +719,7 @@ describe('Update orders via on-chain', async function () {
         chai.expect(res).to.have.status(200);
 
         const unmodifiedOrder = await collectionOrders.findOne({
-          status: 'success',
+          status: ORDER_STATUS.SUCCESS,
         });
 
         chai.expect(unmodifiedOrder.isComplete).to.be.false;
@@ -777,7 +778,7 @@ describe('Update orders via on-chain', async function () {
 
         res.body.forEach((order) => {
           if (order.hashCompletion !== txHashNotOrderPaid) {
-            chai.expect(order.status).to.equal('complete');
+            chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETE);
           }
         });
       });
@@ -792,7 +793,7 @@ describe('Update orders via on-chain', async function () {
 
         res.body.forEach((order) => {
           if (order.hashCompletion === txHashNotOrderPaid) {
-            chai.expect(order.status).to.equal('paymentFailure');
+            chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETION_FAILURE);
           }
         });
       });

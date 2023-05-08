@@ -11,6 +11,7 @@ import {
   updateOrderValidator,
 } from '../validators/update-orders-onchain.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
+import { ORDER_STATUS } from '../utils/orders-utils.js';
 
 const router = express.Router();
 
@@ -31,14 +32,14 @@ router.put(
         (
           await db
             .collection('orders')
-            .find({ userId: res.locals.userId, status: 'pending' })
+            .find({ userId: res.locals.userId, status: ORDER_STATUS.PENDING })
             .toArray()
         ).map(async (order) => {
           await db
             .collection('orders')
             .updateOne(
               { _id: order._id },
-              { $set: await updateOrderFromDb(req, db, order) }
+              { $set: await updateOrderFromDb(req, order) }
             );
 
           return order;
@@ -63,13 +64,16 @@ router.put(
     res.status(200).send(
       await Promise.all(
         (
-          await db.collection('orders').find({ status: 'pending' }).toArray()
+          await db
+            .collection('orders')
+            .find({ status: ORDER_STATUS.PENDING })
+            .toArray()
         ).map(async (order) => {
           await db
             .collection('orders')
             .updateOne(
               { _id: order._id },
-              { $set: await updateOrderFromDb(req, db, order) }
+              { $set: await updateOrderFromDb(req, order) }
             );
           return order;
         })
@@ -99,14 +103,14 @@ router.put(
               userId: res.locals.userId,
               orderId: { $exists: true, $ne: '' },
               isComplete: false,
-              status: 'completion',
+              status: ORDER_STATUS.COMPLETION,
             })
             .toArray()
         ).map(async (order) => {
           await db.collection('orders').updateOne(
             { _id: order._id },
             {
-              $set: await updateCompletionOrder(req, db, order),
+              $set: await updateCompletionOrder(req, order),
             }
           );
 
@@ -137,14 +141,14 @@ router.put(
             .find({
               orderId: { $exists: true, $ne: '' },
               isComplete: false,
-              status: 'completion',
+              status: ORDER_STATUS.COMPLETION,
             })
             .toArray()
         ).map(async (order) => {
           await db.collection('orders').updateOne(
             { _id: order._id },
             {
-              $set: await updateCompletionOrder(req, db, order),
+              $set: await updateCompletionOrder(req, order),
             }
           );
 
