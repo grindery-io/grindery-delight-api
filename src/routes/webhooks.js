@@ -12,6 +12,8 @@ import { validateResult } from '../utils/validators-utils.js';
 import { Database } from '../db/conn.js';
 import { dispatch } from '../utils/websocket-utils.js';
 import { authenticateApiKey } from '../utils/auth-utils.js';
+import { OFFER_STATUS } from '../utils/offers-utils.js';
+import { ORDER_STATUS } from '../utils/orders-utils.js';
 
 const router = express.Router();
 
@@ -194,6 +196,9 @@ router.put(
     const response = await collection.updateOne(offer, {
       $set: {
         isActive: req.body._isActive,
+        status: req.body._isActive
+          ? OFFER_STATUS.ACTIVATION
+          : OFFER_STATUS.DEACTIVATION,
       },
     });
     if (response.modifiedCount > 0)
@@ -233,7 +238,8 @@ router.put(
     const response = await collection.updateOne(offer, {
       $set: {
         offerId: req.body._idOffer,
-        status: 'success',
+        status: OFFER_STATUS.SUCCESS,
+        isActive: true,
       },
     });
     if (response.modifiedCount > 0)
@@ -273,7 +279,7 @@ router.put(
     const response = await collection.updateOne(order, {
       $set: {
         orderId: req.body._idTrade,
-        status: 'success',
+        status: ORDER_STATUS.SUCCESS,
       },
     });
     if (response.modifiedCount > 0)

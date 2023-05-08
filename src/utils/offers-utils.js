@@ -25,3 +25,12 @@ export async function getOneOfferWithLiquidityWallet(
       }
     : null;
 }
+
+export const OFFER_STATUS = {
+  SUCCESS: 'success', // the offer has been created
+  FAILURE: 'failure', // the offer creation failed
+  ACTIVATION: 'activation', // being activated
+  ACTIVATION_FAILURE: 'activationFailed', // activation failed
+  DEACTIVATION: 'deactivation', // being deactivated
+  DEACTIVATION_FAILUTE: 'deactivationFailure', // deactivation failed
+};
