@@ -473,7 +473,7 @@ describe('Orders route', async function () {
   describe('GET by liquidity provider', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
-        { ...offer, userId: process.env.USER_ID_TEST },
+        { ...offer, isActive: true, userId: process.env.USER_ID_TEST },
         {
           ...offer,
           offerId: 'myDeactivateoffer',
@@ -482,6 +482,7 @@ describe('Orders route', async function () {
         },
         {
           ...offer,
+          isActive: true,
           offerId: 'anotherOfferId',
           userId: process.env.USER_ID_TEST,
         },
@@ -746,23 +747,57 @@ describe('Orders route', async function () {
     });
   });
   describe('PUT order as complete', async function () {
+    beforeEach(async function () {
+      await collectionOrders.insertMany([
+        {
+          ...order,
+          status: ORDER_STATUS.SUCCESS,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...order,
+          status: ORDER_STATUS.SUCCESS,
+          userId: 'anotherUserId',
+          shouldNotBeModified: true,
+        },
+        {
+          ...order,
+          orderId: 'anotherOrderId',
+          status: ORDER_STATUS.SUCCESS,
+          userId: process.env.USER_ID_TEST,
+          shouldNotBeModified: true,
+        },
+        {
+          ...order,
+          status: ORDER_STATUS.FAILURE,
+          userId: process.env.USER_ID_TEST,
+          shouldNotBeModified: true,
+        },
+      ]);
+    });
+
     it('Should return 403 if no token is provided', async function () {
       const res = await chai.request(app).put(pathOrders_Put_Complete).send({
         orderId: 'myOrderId',
+        completionHash: 'myCompletionHash',
       });
       chai.expect(res).to.have.status(403);
     });
+
     it('Should modify one order if the order was previously not completed', async function () {
-      const createResponse = await createBaseOrderOrOffer({
-        path: pathOrders_Post,
-        body: order,
+      const orderBeforeModified = await collectionOrders.findOne({
+        orderId: order.orderId,
+        userId: process.env.USER_ID_TEST,
+        status: ORDER_STATUS.SUCCESS,
       });
+
       const res = await chai
         .request(app)
         .put(pathOrders_Put_Complete)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
           orderId: order.orderId,
+          completionHash: 'myCompletionHash',
         });
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.deep.equal({
@@ -772,49 +807,25 @@ describe('Orders route', async function () {
         upsertedCount: 0,
         matchedCount: 1,
       });
-      const getOrder = await chai
-        .request(app)
-        .get(pathOrders_Get_MongoDBId)
-        .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ id: createResponse.body.insertedId });
-      chai.expect(getOrder.body.isComplete).to.be.true;
-    });
-    it('Should modify no order if the order was previously completed', async function () {
-      await createBaseOrderOrOffer({
-        path: pathOrders_Post,
-        body: order,
+
+      const orderAfterModified = await collectionOrders.findOne({
+        _id: orderBeforeModified._id,
       });
-      const res = await chai
-        .request(app)
-        .put(pathOrders_Put_Complete)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send({
-          orderId: order.orderId,
-        });
-      chai.expect(res).to.have.status(200);
-      const res1 = await chai
-        .request(app)
-        .put(pathOrders_Put_Complete)
-        .set('Authorization', `Bearer ${mockedToken}`)
-        .send({
-          orderId: order.orderId,
-        });
-      chai.expect(res1).to.have.status(200);
-      chai.expect(res1.body).to.deep.equal({
-        acknowledged: true,
-        modifiedCount: 0,
-        upsertedId: null,
-        upsertedCount: 0,
-        matchedCount: 1,
-      });
+
+      chai.expect(orderAfterModified.status).to.equal(ORDER_STATUS.COMPLETION);
+      chai
+        .expect(orderAfterModified.completionHash)
+        .to.equal('myCompletionHash');
     });
+
     it('Should fail if no order exists', async function () {
       const res = await chai
         .request(app)
         .put(pathOrders_Put_Complete)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
-          orderId: order.orderId,
+          orderId: 'nonExistingOrderId',
+          completionHash: 'myCompletionHash',
         });
       chai.expect(res).to.have.status(404);
       chai.expect(res.body).to.deep.equal({ msg: 'No order found' });

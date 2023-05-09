@@ -103,8 +103,13 @@ export const setOrderCompleteValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body('completionHash')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body().custom((value, { req }) => {
-    validateFields(req.body, ['orderId'], 'body');
+    validateFields(req.body, ['orderId', 'completionHash'], 'body');
     return true;
   }),
   query().custom((value, { req }) => {
