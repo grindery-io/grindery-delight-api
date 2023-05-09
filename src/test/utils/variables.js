@@ -252,12 +252,3 @@ export const blockchainBscTestnet = {
   transactionExplorerUrl: 'https://testnet.bscscan.com/tx/{hash}',
   addressExplorerUrl: 'https://testnet.bscscan.com/address/{hash}',
 };
-
-export const updateOrderBody = {
-  rpc: blockchainGoerli.rpc[0],
-  grtPoolAddress: GrtPoolAddressGoerli,
-};
-
-export const updateOrderCompletionBody = {
-  rpc: blockchainBscTestnet.rpc[0],
-};

@@ -40,9 +40,14 @@ export async function updateOfferId(req, db, offer) {
  * the status of the order, which can be either `'complete'` or `'paymentFailure'`. The `isComplete`
  * property is a boolean value that indicates whether the order has been paid or not.
  */
-export async function updateCompletionOrder(req, order) {
+export async function updateCompletionOrder(req, db, order) {
+  const { chainId } = await db
+    .collection('offers')
+    .findOne({ offerId: order.offerId });
+  const chain = await db.collection('blockchains').findOne({ chainId });
+
   order.isComplete = await isPaidOrderFromHash(
-    req.body.rpc,
+    chain.rpc[0],
     order.hashCompletion
   );
   order.status = order.isComplete
@@ -94,19 +99,23 @@ export async function updateActivationOffer(req, db, offer) {
  * the chainId, hash, amountTokenDeposit, addressTokenDeposit, chainIdTokenDeposit, destAddr, offerId,
  * amountTokenOffer, and status.
  */
-export async function updateOrderFromDb(req, order) {
-  const orderId = await getOrderIdFromHash(req.body.rpc, order.hash);
+export async function updateOrderFromDb(req, db, order) {
+  const chain = await db.collection('blockchains').findOne({
+    chainId: order.chainId,
+  });
+
+  const orderId = await getOrderIdFromHash(chain.rpc[0], order.hash);
 
   if (orderId === '') {
     order.status = ORDER_STATUS.FAILURE;
   } else {
     const onChainOrder = await getOrderInformation(
       new ethers.Contract(
-        req.body.grtPoolAddress,
+        chain.usefulAddresses.grtPoolAddress,
         (
           await getAbis()
         ).poolAbi,
-        getProviderFromRpc(req.body.rpc)
+        getProviderFromRpc(chain.rpc[0])
       ),
       orderId
     );
