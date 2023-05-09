@@ -79,6 +79,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
       });
@@ -1268,6 +1269,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...modifiedOffer,
+        isActive: true,
         hash: offer.hash,
         offerId: offer.offerId,
         status: OFFER_STATUS.PENDING,
@@ -1303,6 +1305,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         ...modifiedOffer,
@@ -1337,6 +1340,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         min: modifiedOffer.min,
@@ -1371,6 +1375,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         max: modifiedOffer.max,
@@ -1405,6 +1410,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         tokenId: modifiedOffer.tokenId,
@@ -1439,6 +1445,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         token: modifiedOffer.token,
@@ -1473,6 +1480,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         tokenAddress: modifiedOffer.tokenAddress,
@@ -1507,6 +1515,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         exchangeRate: modifiedOffer.exchangeRate,
@@ -1541,6 +1550,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         exchangeToken: modifiedOffer.exchangeToken,
@@ -1575,6 +1585,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         exchangeChainId: modifiedOffer.exchangeChainId,
@@ -1609,6 +1620,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         estimatedTime: modifiedOffer.estimatedTime,
@@ -1643,6 +1655,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         provider: modifiedOffer.provider,
@@ -1677,6 +1690,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         title: modifiedOffer.title,
@@ -1711,6 +1725,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         image: modifiedOffer.image,
@@ -1745,6 +1760,7 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...offer,
+        isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
         amount: modifiedOffer.amount,
