@@ -10,10 +10,10 @@ import {
 } from '../validators/webhook.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { Database } from '../db/conn.js';
-import { dispatch } from '../utils/websocket-utils.js';
 import { authenticateApiKey } from '../utils/auth-utils.js';
 import { OFFER_STATUS } from '../utils/offers-utils.js';
 import { ORDER_STATUS } from '../utils/orders-utils.js';
+import { sendNotification } from '../utils/notification-utils.js';
 
 const router = express.Router();
 
@@ -43,11 +43,15 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch('maxPrice', {
-        type: 'offer',
-        id: req.body._idOffer,
-        userId: offer.userId,
-      });
+      sendNotification(
+        'maxPrice',
+        {
+          type: 'offer',
+          id: req.body._idOffer,
+          userId: offer.userId,
+        },
+        req
+      );
     return res.status(200).send(response);
   }
 );
@@ -82,7 +86,7 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch('minPrice', {
+      sendNotification('minPrice', {
         type: 'offer',
         id: req.body._idOffer,
         userId: offer.userId,
@@ -121,7 +125,7 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch('token', {
+      sendNotification('token', {
         type: 'offer',
         id: req.body._idOffer,
         userId: offer.userId,
@@ -160,7 +164,7 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch('chain', {
+      sendNotification('chain', {
         type: 'offer',
         id: req.body._idOffer,
         userId: offer.userId,
@@ -200,7 +204,7 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch('activationDeactivation', {
+      sendNotification('activationDeactivation', {
         type: 'offer',
         id: req.body._idOffer,
         userId: offer.userId,
@@ -241,7 +245,7 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch('success', {
+      sendNotification('success', {
         type: 'offer',
         id: req.body._idOffer,
         userId: offer.userId,
@@ -281,7 +285,7 @@ router.put(
       },
     });
     if (response.modifiedCount > 0)
-      dispatch('success', {
+      sendNotification('success', {
         type: 'order',
         id: req.body._idTrade,
         userId: order.userId,
