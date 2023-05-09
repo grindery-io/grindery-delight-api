@@ -19,7 +19,7 @@ import { OFFER_STATUS } from './offers-utils.js';
 export async function updateOfferId(req, db, offer) {
   const chain = await db
     .collection('blockchains')
-    .findOne({ chainId: offer.chainId });
+    .findOne({ chainId: offer.exchangeChainId });
 
   offer.offerId = await getOfferIdFromHash(chain.rpc[0], offer.hash);
   offer.status =
@@ -71,7 +71,7 @@ export async function updateCompletionOrder(req, db, order) {
 export async function updateActivationOffer(req, db, offer) {
   const chain = await db
     .collection('blockchains')
-    .findOne({ chainId: offer.chainId });
+    .findOne({ chainId: offer.exchangeChainId });
 
   const isActivationEvent = await isSetStatusFromHash(
     chain.rpc[0],
