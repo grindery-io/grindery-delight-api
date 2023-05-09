@@ -104,6 +104,7 @@ describe('Offers route', async function () {
       await collectionOffers.insertMany([
         {
           ...offer,
+          isActive: true,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
           status: OFFER_STATUS.SUCCESS,
@@ -111,6 +112,7 @@ describe('Offers route', async function () {
         },
         {
           ...offer,
+          isActive: true,
           date: new Date(),
           userId: 'anotherUserId',
           status: OFFER_STATUS.SUCCESS,
@@ -126,6 +128,7 @@ describe('Offers route', async function () {
         },
         {
           ...offer,
+          isActive: true,
           offerId: '',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -134,6 +137,7 @@ describe('Offers route', async function () {
         },
         {
           ...offer,
+          isActive: true,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
           status: OFFER_STATUS.SUCCESS,
@@ -141,6 +145,7 @@ describe('Offers route', async function () {
         },
         {
           ...offer,
+          isActive: true,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
           status: OFFER_STATUS.PENDING,
@@ -298,6 +303,7 @@ describe('Offers route', async function () {
         offers: [
           {
             ...offer,
+            isActive: true,
             userId: process.env.USER_ID_TEST,
             status: OFFER_STATUS.SUCCESS,
             amount: '8',
@@ -311,6 +317,7 @@ describe('Offers route', async function () {
           },
           {
             ...offer,
+            isActive: true,
             userId: 'anotherUserId',
             status: OFFER_STATUS.SUCCESS,
             amount: '8',
@@ -1261,7 +1268,6 @@ describe('Offers route', async function () {
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
         ...modifiedOffer,
-        isActive: true,
         hash: offer.hash,
         offerId: offer.offerId,
         status: OFFER_STATUS.PENDING,

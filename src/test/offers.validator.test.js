@@ -41,18 +41,16 @@ describe('Offers route - Validators', async function () {
     });
 
     for (const testCase of Object.keys(offer)) {
-      if (testCase !== 'isActive') {
-        testNonString({
-          method: 'post',
-          path: pathOffers_Post,
-          body: {
-            ...offer,
-            [testCase]: 123,
-          },
-          query: {},
-          field: testCase,
-        });
-      }
+      testNonString({
+        method: 'post',
+        path: pathOffers_Post,
+        body: {
+          ...offer,
+          [testCase]: 123,
+        },
+        query: {},
+        field: testCase,
+      });
 
       if (
         testCase !== 'title' &&
@@ -73,17 +71,6 @@ describe('Offers route - Validators', async function () {
         });
       }
     }
-
-    testNonBoolean({
-      method: 'post',
-      path: pathOffers_Post,
-      body: {
-        ...offer,
-        isActive: 123,
-      },
-      query: {},
-      field: 'isActive',
-    });
 
     testUnexpectedField({
       method: 'post',

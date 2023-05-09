@@ -119,7 +119,6 @@ export const offer = {
   estimatedTime: '123',
   provider: '0x795beefD41337BB83903788949c8AC2D559A44a3',
   offerId: '0x02689c291c6d392ab9c02fc2a459a08cc46cc816b77cec928c86109d37ed2843',
-  isActive: true,
   title: '',
   image: '',
   amount: '',
