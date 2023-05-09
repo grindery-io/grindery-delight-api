@@ -16,8 +16,12 @@ import { OFFER_STATUS } from './offers-utils.js';
  * offer ID obtained from the hash, and the `status` property indicates whether the offer ID was
  * successfully obtained (`'success'`) or not (`'failure'`).
  */
-export async function updateOfferId(req, offer) {
-  offer.offerId = await getOfferIdFromHash(req.body.rpc, offer.hash);
+export async function updateOfferId(req, db, offer) {
+  const chain = await db
+    .collection('blockchains')
+    .findOne({ chainId: offer.chainId });
+
+  offer.offerId = await getOfferIdFromHash(chain.rpc[0], offer.hash);
   offer.status =
     offer.offerId !== '' ? OFFER_STATUS.SUCCESS : OFFER_STATUS.FAILURE;
 
@@ -60,8 +64,12 @@ export async function updateCompletionOrder(req, order) {
  * offer is currently active or not.
  */
 export async function updateActivationOffer(req, db, offer) {
+  const chain = await db
+    .collection('blockchains')
+    .findOne({ chainId: offer.chainId });
+
   const isActivationEvent = await isSetStatusFromHash(
-    req.body.rpc,
+    chain.rpc[0],
     offer.activationHash
   );
 
