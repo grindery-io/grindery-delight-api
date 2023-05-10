@@ -107,6 +107,7 @@ describe('Orders route - Validators', async function () {
       path: pathOrders_Put_Complete,
       body: {
         orderId: 123,
+        completionHash: 'myCompletionHash',
       },
       query: {},
       field: 'orderId',
@@ -117,9 +118,32 @@ describe('Orders route - Validators', async function () {
       path: pathOrders_Put_Complete,
       body: {
         orderId: '',
+        completionHash: 'myCompletionHash',
       },
       query: {},
       field: 'orderId',
+    });
+
+    testNonString({
+      method: 'put',
+      path: pathOrders_Put_Complete,
+      body: {
+        orderId: 'myOrderId',
+        completionHash: 123,
+      },
+      query: {},
+      field: 'completionHash',
+    });
+
+    testNonEmpty({
+      method: 'put',
+      path: pathOrders_Put_Complete,
+      body: {
+        orderId: 'myOrderId',
+        completionHash: '',
+      },
+      query: {},
+      field: 'completionHash',
     });
 
     testUnexpectedField({

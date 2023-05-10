@@ -182,6 +182,7 @@ router.put(
     const order = await collection.findOne({
       orderId: req.body.orderId,
       userId: { $regex: res.locals.userId, $options: 'i' },
+      status: ORDER_STATUS.SUCCESS,
     });
 
     if (!order) {
@@ -193,7 +194,8 @@ router.put(
     res.status(200).send(
       await collection.updateOne(order, {
         $set: {
-          isComplete: true,
+          status: ORDER_STATUS.COMPLETION,
+          completionHash: req.body.completionHash,
         },
       })
     );

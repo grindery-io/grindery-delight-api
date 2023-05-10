@@ -47,6 +47,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   newDocument.date = new Date();
   newDocument.userId = res.locals.userId;
   newDocument.status = OFFER_STATUS.PENDING;
+  newDocument.isActive = true;
   res.send(await collection.insertOne(newDocument)).status(201);
 });
 

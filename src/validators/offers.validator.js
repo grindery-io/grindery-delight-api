@@ -38,14 +38,6 @@ export const createOfferValidator = [
     .notEmpty()
     .withMessage('must not be empty'),
   body('offerId').isString().withMessage('must be string value'),
-  body('isActive')
-    .not()
-    .isString()
-    .withMessage('must not be string value')
-    .isBoolean()
-    .withMessage('must be boolean value')
-    .notEmpty()
-    .withMessage('must not be empty'),
   body('estimatedTime')
     .isString()
     .withMessage('must be string value')
@@ -87,7 +79,6 @@ export const createOfferValidator = [
         'estimatedTime',
         'provider',
         'offerId',
-        'isActive',
         'title',
         'image',
         'amount',

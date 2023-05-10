@@ -10,10 +10,8 @@ export const dispatchWebSocket = (method, params) => {
       client.send(
         JSON.stringify({
           jsonrpc: '2.0',
-          data: {
-            method,
-            params,
-          },
+          method,
+          params,
         })
       );
     }
