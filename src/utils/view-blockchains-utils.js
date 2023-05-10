@@ -41,10 +41,9 @@ export async function updateOfferId(db, offer) {
  * property is a boolean value that indicates whether the order has been paid or not.
  */
 export async function updateCompletionOrder(db, order) {
-  const { chainId } = await db
-    .collection('offers')
-    .findOne({ offerId: order.offerId });
-  const chain = await db.collection('blockchains').findOne({ chainId });
+  const chain = await db.collection('blockchains').findOne({
+    chainId: await db.collection('offers').findOne({ offerId: order.offerId }),
+  });
 
   order.isComplete = await isPaidOrderFromHash(
     chain.rpc[0],
