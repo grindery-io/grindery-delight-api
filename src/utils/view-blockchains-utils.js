@@ -16,7 +16,7 @@ import { OFFER_STATUS } from './offers-utils.js';
  * offer ID obtained from the hash, and the `status` property indicates whether the offer ID was
  * successfully obtained (`'success'`) or not (`'failure'`).
  */
-export async function updateOfferId(req, db, offer) {
+export async function updateOfferId(db, offer) {
   const chain = await db
     .collection('blockchains')
     .findOne({ chainId: offer.exchangeChainId });
@@ -40,7 +40,7 @@ export async function updateOfferId(req, db, offer) {
  * the status of the order, which can be either `'complete'` or `'paymentFailure'`. The `isComplete`
  * property is a boolean value that indicates whether the order has been paid or not.
  */
-export async function updateCompletionOrder(req, db, order) {
+export async function updateCompletionOrder(db, order) {
   const { chainId } = await db
     .collection('offers')
     .findOne({ offerId: order.offerId });
@@ -68,7 +68,7 @@ export async function updateCompletionOrder(req, db, order) {
  * "deactivationFailure"). The "isActive" property contains a boolean value indicating whether the
  * offer is currently active or not.
  */
-export async function updateActivationOffer(req, db, offer) {
+export async function updateActivationOffer(db, offer) {
   const chain = await db
     .collection('blockchains')
     .findOne({ chainId: offer.exchangeChainId });
@@ -99,7 +99,7 @@ export async function updateActivationOffer(req, db, offer) {
  * the chainId, hash, amountTokenDeposit, addressTokenDeposit, chainIdTokenDeposit, destAddr, offerId,
  * amountTokenOffer, and status.
  */
-export async function updateOrderFromDb(req, db, order) {
+export async function updateOrderFromDb(db, order) {
   const chain = await db.collection('blockchains').findOne({
     chainId: order.chainId,
   });
@@ -239,26 +239,15 @@ export async function isPaidOrderFromHash(rpc, hash) {
  * offer being active or inactive.
  */
 export async function isSetStatusFromHash(rpc, hash) {
-  const provider = getProviderFromRpc(rpc);
-  const txReceipt = await provider.getTransactionReceipt(hash);
-  const iface = new ethers.utils.Interface((await getAbis()).poolAbi);
-
-  let isActive = undefined;
-
-  const isSetStatus =
-    txReceipt.status !== 0 &&
-    txReceipt.logs.find((log) => {
-      const parsedLog = iface.parseLog(log);
-      if (parsedLog.name === 'LogSetStatusOffer') {
-        isActive = parsedLog.args[1];
-        return true;
-      }
-      return false;
-    }) !== undefined;
+  const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(hash);
+  const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
+  const log = txReceipt.logs.find(
+    (log) => poolIface.parseLog(log).name === 'LogSetStatusOffer'
+  );
 
   return {
-    isSetStatus: isSetStatus,
-    isActive: isActive,
+    isSetStatus: txReceipt.status !== 0 && log !== undefined,
+    isActive: log ? poolIface.parseLog(log).args._isActive : undefined,
   };
 }
 

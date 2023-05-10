@@ -24,7 +24,7 @@ router.put('/update-offer-user', isRequired, async (req, res) => {
           .collection('offers')
           .updateOne(
             { _id: offer._id },
-            { $set: await updateOfferId(req, db, offer) }
+            { $set: await updateOfferId(db, offer) }
           );
 
         return offer;
@@ -48,7 +48,7 @@ router.put('/update-offer-all', isRequired, async (req, res) => {
           .collection('offers')
           .updateOne(
             { _id: offer._id },
-            { $set: await updateOfferId(req, db, offer) }
+            { $set: await updateOfferId(db, offer) }
           );
 
         return offer;
@@ -78,7 +78,7 @@ router.put('/update-offer-activation-user', isRequired, async (req, res) => {
         await db.collection('offers').updateOne(
           { _id: offer._id },
           {
-            $set: await updateActivationOffer(req, db, offer),
+            $set: await updateActivationOffer(db, offer),
           }
         );
 
@@ -108,7 +108,7 @@ router.put('/update-offer-activation-all', isRequired, async (req, res) => {
         await db.collection('offers').updateOne(
           { _id: offer._id },
           {
-            $set: await updateActivationOffer(req, db, offer),
+            $set: await updateActivationOffer(db, offer),
           }
         );
 

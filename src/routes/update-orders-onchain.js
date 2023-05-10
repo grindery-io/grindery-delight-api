@@ -24,7 +24,7 @@ router.put('/update-order-user', isRequired, async (req, res) => {
           .collection('orders')
           .updateOne(
             { _id: order._id },
-            { $set: await updateOrderFromDb(req, db, order) }
+            { $set: await updateOrderFromDb(db, order) }
           );
 
         return order;
@@ -48,7 +48,7 @@ router.put('/update-order-all', isRequired, async (req, res) => {
           .collection('orders')
           .updateOne(
             { _id: order._id },
-            { $set: await updateOrderFromDb(req, db, order) }
+            { $set: await updateOrderFromDb(db, order) }
           );
         return order;
       })
@@ -75,7 +75,7 @@ router.put('/update-order-completion-user', isRequired, async (req, res) => {
         await db.collection('orders').updateOne(
           { _id: order._id },
           {
-            $set: await updateCompletionOrder(req, db, order),
+            $set: await updateCompletionOrder(db, order),
           }
         );
 
@@ -103,7 +103,7 @@ router.put('/update-order-completion-all', isRequired, async (req, res) => {
         await db.collection('orders').updateOne(
           { _id: order._id },
           {
-            $set: await updateCompletionOrder(req, db, order),
+            $set: await updateCompletionOrder(db, order),
           }
         );
 
