@@ -41,9 +41,10 @@ export async function updateOfferId(db, offer) {
  * property is a boolean value that indicates whether the order has been paid or not.
  */
 export async function updateCompletionOrder(db, order) {
-  const chain = await db.collection('blockchains').findOne({
-    chainId: await db.collection('offers').findOne({ offerId: order.offerId }),
-  });
+  const { chainId } = await db
+    .collection('offers')
+    .findOne({ offerId: order.offerId });
+  const chain = await db.collection('blockchains').findOne({ chainId });
 
   order.isComplete = await isPaidOrderFromHash(
     chain.rpc[0],
@@ -214,15 +215,11 @@ export async function isPaidOrderFromHash(rpc, hash) {
     (await getAbis()).liquidityWalletAbi
   );
 
-  if (txReceipt.status === 0) {
-    return false;
-  }
-
-  return (
-    txReceipt.logs.find(
-      (log) => iface.parseLog(log).name === 'LogOfferPaid'
-    ) !== undefined
-  );
+  return txReceipt.status === 0
+    ? false
+    : txReceipt.logs.find(
+        (log) => iface.parseLog(log).name === 'LogOfferPaid'
+      ) !== undefined;
 }
 
 /**
