@@ -274,18 +274,18 @@ export function getProviderFromRpc(rpc) {
  * to `null`. The ABI data is obtained by making HTTP
  */
 export const getAbis = async () => {
-  const promises = [
-    'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/GrtPool.json',
-    'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/ERC20Sample.json',
-    'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/GrtLiquidityWallet.json',
-  ].map(async (url) => {
-    const result = await axios.get(url).catch(() => {
-      return null;
-    });
-    return result?.data || null;
-  });
-
-  const results = await Promise.all(promises);
+  const results = await Promise.all(
+    [
+      'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/GrtPool.json',
+      'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/ERC20Sample.json',
+      'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/GrtLiquidityWallet.json',
+    ].map(async (url) => {
+      const result = await axios.get(url).catch(() => {
+        return null;
+      });
+      return result?.data || null;
+    })
+  );
 
   return {
     poolAbi: results[0],
