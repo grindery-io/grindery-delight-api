@@ -229,8 +229,8 @@ export const blockchainGoerli = {
   label: 'Goerli',
   nativeTokenSymbol: 'ETH',
   rpc: [
-    'https://goerli.blockpi.network/v1/rpc/public',
     'https://rpc.ankr.com/eth_goerli',
+    'https://goerli.blockpi.network/v1/rpc/public',
   ],
   transactionExplorerUrl: 'https://goerli.etherscan.io/tx/{hash}',
   addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',

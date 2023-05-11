@@ -177,9 +177,16 @@ export async function getOrderInformation(contract, orderId) {
  * ID.
  */
 export async function getOrderIdFromHash(rpc, hash) {
-  const provider = getProviderFromRpc(rpc);
-  const txReceipt = await provider.getTransactionReceipt(hash);
-  return txReceipt.status === 0 ? '' : txReceipt.logs[0].topics[2];
+  const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(hash);
+  const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
+
+  const log = txReceipt.logs.find(
+    (log) => poolIface.parseLog(log).name === 'LogTrade'
+  );
+
+  return txReceipt.status === 0 || log === undefined
+    ? ''
+    : poolIface.parseLog(log).args._idTrade;
 }
 
 /**
