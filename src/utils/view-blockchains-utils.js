@@ -179,7 +179,6 @@ export async function getOrderInformation(contract, orderId) {
 export async function getOrderIdFromHash(rpc, hash) {
   const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(hash);
   const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
-
   const log = txReceipt.logs.find(
     (log) => poolIface.parseLog(log).name === 'LogTrade'
   );
@@ -199,9 +198,15 @@ export async function getOrderIdFromHash(rpc, hash) {
  * transaction failed (status = 0), an empty string is returned.
  */
 export async function getOfferIdFromHash(rpc, hash) {
-  const provider = getProviderFromRpc(rpc);
-  const txReceipt = await provider.getTransactionReceipt(hash);
-  return txReceipt.status === 0 ? '' : txReceipt.logs[0].topics[1];
+  const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(hash);
+  const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
+  const log = txReceipt.logs.find(
+    (log) => poolIface.parseLog(log).name === 'LogNewOffer'
+  );
+
+  return txReceipt.status === 0 || log === undefined
+    ? ''
+    : poolIface.parseLog(log).args._idOffer;
 }
 
 /**
