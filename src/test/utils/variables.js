@@ -74,6 +74,12 @@ export const pathTokens_Get_MongoDBId = '/unit-test/tokens/';
 export const pathTokens_Put_MongoDBId = '/unit-test/tokens/';
 export const pathTokens_Delete_MongoDBId = '/unit-test/tokens/';
 
+// Webhooks paths
+export const pathWebhooks_Put_Offer_Status =
+  '/unit-test/webhooks/offer/activation-deactivation';
+export const pathWebhooks_Put_Offer = '/unit-test/webhooks/offer';
+export const pathWebhooks_Put_Order = '/unit-test/webhooks/order';
+
 // Modify orders blockchain paths
 export const pathViewBlockchain_Put_OrdersUser =
   '/unit-test/orders-onchain/update-order-user';
@@ -229,8 +235,8 @@ export const blockchainGoerli = {
   label: 'Goerli',
   nativeTokenSymbol: 'ETH',
   rpc: [
-    'https://goerli.blockpi.network/v1/rpc/public',
     'https://rpc.ankr.com/eth_goerli',
+    'https://goerli.blockpi.network/v1/rpc/public',
   ],
   transactionExplorerUrl: 'https://goerli.etherscan.io/tx/{hash}',
   addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',
@@ -251,4 +257,14 @@ export const blockchainBscTestnet = {
   ],
   transactionExplorerUrl: 'https://testnet.bscscan.com/tx/{hash}',
   addressExplorerUrl: 'https://testnet.bscscan.com/address/{hash}',
+};
+
+export const offer = {
+  coinmarketcapId: '4543',
+  symbol: 'mySymbol',
+  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/tokens/bnb.png',
+  chainId: '544',
+  address: '0x0',
+  isNative: false,
+  isActive: false,
 };
