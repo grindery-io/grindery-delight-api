@@ -11,7 +11,6 @@ export const dispatchFirebase = async (method, params, req) => {
   });
 
   if (notificationToken) {
-    console.log(messageBuilder(method, params));
     try {
       const message = {
         android: {
