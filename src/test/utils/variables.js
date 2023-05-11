@@ -259,12 +259,12 @@ export const blockchainBscTestnet = {
   addressExplorerUrl: 'https://testnet.bscscan.com/address/{hash}',
 };
 
-export const offer = {
-  coinmarketcapId: '4543',
-  symbol: 'mySymbol',
-  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/tokens/bnb.png',
-  chainId: '544',
-  address: '0x0',
-  isNative: false,
-  isActive: false,
-};
+// export const offer = {
+//   coinmarketcapId: '4543',
+//   symbol: 'mySymbol',
+//   icon: 'https://www.grindery.io/hubfs/delight-assets/icons/tokens/bnb.png',
+//   chainId: '544',
+//   address: '0x0',
+//   isNative: false,
+//   isActive: false,
+// };
