@@ -13,11 +13,9 @@ export const dispatchFirebase = async (method, params, req) => {
   if (notificationToken) {
     try {
       const message = {
-        android: {
-          notification: {
-            title: params.type + ' transaction confirmed',
-            body: messageBuilder(method, params),
-          },
+        notification: {
+          title: params.type + ' transaction confirmed',
+          body: messageBuilder(method, params),
         },
         token: notificationToken.token,
       };
