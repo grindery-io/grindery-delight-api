@@ -12,6 +12,7 @@ import webhooks from './routes/webhooks.js';
 import g_sheets from './routes/g-sheets.js';
 import orders_onchain from './routes/update-orders-onchain.js';
 import offers_onchain from './routes/update-offers-onchain.js';
+import push_notifications from './routes/push-notifications.js';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use('/webhooks', webhooks);
 router.use('/gsheets', g_sheets);
 router.use('/orders-onchain', orders_onchain);
 router.use('/offers-onchain', offers_onchain);
+router.use('/push-notifications', push_notifications);
 
 export default router;

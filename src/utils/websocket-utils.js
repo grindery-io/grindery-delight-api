@@ -1,7 +1,7 @@
 import { wss } from '../index.js';
 import WebSocket from 'ws';
 
-export const dispatch = (method, params) => {
+export const dispatchWebSocket = (method, params) => {
   wss.clients.forEach(function each(client) {
     if (
       client.readyState === WebSocket.OPEN &&
