@@ -59,5 +59,6 @@ const messageBuilder = (method, params) => {
   let status = 'placed';
   if (method == 'sucess') status = 'created';
   if (method == 'activationDeactivation') status = 'activated/deactivated';
+  if (method == 'complete') status = 'completed';
   return `Your ${params.type} ${id} has been ${status}. Click to view in the Mercari dApp.`;
 };
