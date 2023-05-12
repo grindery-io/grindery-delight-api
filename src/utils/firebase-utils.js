@@ -15,8 +15,8 @@ export const dispatchFirebase = async (method, params, req) => {
       const message = {
         android: {
           notification: {
-            title: method,
-            body: params.toString(),
+            title: params.type + ' transaction confirmed',
+            body: messageBuilder(method, params),
           },
         },
         token: notificationToken.token,
@@ -53,3 +53,11 @@ const firebaseCredentials = {
 };
 
 const firebase = new fcm(admin.credential.cert(firebaseCredentials));
+
+const messageBuilder = (method, params) => {
+  const id = params.id.slice(0, 6) + '...' + params.id.slice(-4);
+  let status = 'placed';
+  if (method == 'sucess') status = 'created';
+  if (method == 'activationDeactivation') status = 'activated/deactivated';
+  return `Your ${params.type} ${id} has been ${status}. Click to view in the Mercari dApp.`;
+};
