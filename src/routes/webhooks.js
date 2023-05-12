@@ -3,6 +3,7 @@ import {
   updateStatusOfferValidator,
   updateOfferValidator,
   updateOrderValidator,
+  updateOfferOrderPaidValidator,
 } from '../validators/webhook.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { Database } from '../db/conn.js';
@@ -126,6 +127,46 @@ router.put(
     });
     if (response.modifiedCount > 0)
       sendNotification('success', {
+        type: 'order',
+        id: req.body._idTrade,
+        userId: order.userId,
+      });
+    return res.status(200).send(response);
+  }
+);
+
+/* This is a PUT request that updates offer trade when paid. */
+router.put(
+  '/offer/order/paid',
+  updateOfferOrderPaidValidator,
+  authenticateApiKey,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('orders');
+
+    const order = await collection.findOne({
+      hash: req.body._grinderyTransactionHash,
+    });
+
+    if (!order) {
+      res.status(404).send({
+        msg: 'No order found',
+      });
+    }
+
+    const response = await collection.updateOne(order, {
+      $set: {
+        isComplete: true,
+        status: ORDER_STATUS.COMPLETE,
+      },
+    });
+    if (response.modifiedCount > 0)
+      sendNotification('complete', {
         type: 'order',
         id: req.body._idTrade,
         userId: order.userId,
