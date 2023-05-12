@@ -120,24 +120,18 @@ export async function updateOrderFromDb(db, order) {
       orderId
     );
 
-    order.amountTokenDeposit = onChainOrder.depositAmount;
-    order.addressTokenDeposit = onChainOrder.depositToken;
-    order.chainIdTokenDeposit = onChainOrder.depositChainId;
-    order.destAddr = onChainOrder.destAddr;
-    order.offerId = onChainOrder.offerId;
-    order.amountTokenOffer = onChainOrder.amountTokenOffer;
-    order.status = ORDER_STATUS.SUCCESS;
+    Object.assign(order, {
+      amountTokenDeposit: onChainOrder.amountTokenDeposit,
+      addressTokenDeposit: onChainOrder.addressTokenDeposit,
+      chainIdTokenDeposit: onChainOrder.depositChainId,
+      destAddr: onChainOrder.destAddr,
+      offerId: onChainOrder.offerId,
+      amountTokenOffer: onChainOrder.amountTokenOffer,
+      status: ORDER_STATUS.SUCCESS,
+    });
   }
 
-  return {
-    amountTokenDeposit: order.amountTokenDeposit,
-    addressTokenDeposit: order.addressTokenDeposit,
-    chainIdTokenDeposit: order.chainIdTokenDeposit,
-    destAddr: order.destAddr,
-    offerId: order.offerId,
-    amountTokenOffer: order.amountTokenOffer,
-    status: order.status,
-  };
+  return Object.assign({}, order);
 }
 
 /**
@@ -151,10 +145,10 @@ export async function updateOrderFromDb(db, order) {
  */
 export async function getOrderInformation(contract, orderId) {
   return {
-    depositAmount: ethers.utils
+    amountTokenDeposit: ethers.utils
       .formatEther(await contract.getDepositAmount(orderId))
       .toString(),
-    depositToken: await contract.getDepositToken(orderId),
+    addressTokenDeposit: await contract.getDepositToken(orderId),
     depositChainId: (await contract.getDepositChainId(orderId)).toString(),
     destAddr: await contract.getRecipient(orderId),
     offerId: await contract.getIdOffer(orderId),

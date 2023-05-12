@@ -5,12 +5,14 @@ import {
   GrtPoolAddressGoerli,
   blockchainBscTestnet,
   blockchainGoerli,
+  collectionAdmins,
   collectionBlockchains,
   collectionOffers,
   collectionOrders,
   offer,
   pathViewBlockchain_Put_OrdersAll,
   pathViewBlockchain_Put_OrdersCompleteAll,
+  pathViewBlockchain_Put_OrdersCompleteSeller,
   pathViewBlockchain_Put_OrdersCompleteUser,
   pathViewBlockchain_Put_OrdersUser,
 } from './utils/variables.js';
@@ -96,14 +98,16 @@ describe('Update orders via on-chain', async function () {
     it('Should return the proper deposited amount', async function () {
       chai
         .expect(
-          (await getOrderInformation(GrtPoolContract, orderId)).depositAmount
+          (await getOrderInformation(GrtPoolContract, orderId))
+            .amountTokenDeposit
         )
         .to.equal('0.001');
     });
     it('Should return the proper deposited token', async function () {
       chai
         .expect(
-          (await getOrderInformation(GrtPoolContract, orderId)).depositToken
+          (await getOrderInformation(GrtPoolContract, orderId))
+            .addressTokenDeposit
         )
         .to.equal('0x0000000000000000000000000000000000000000');
     });
@@ -212,7 +216,7 @@ describe('Update orders via on-chain', async function () {
         if (order.hash == txHashNewOrder) {
           chai
             .expect(order.amountTokenDeposit)
-            .to.equal(onChainOrderInfo.depositAmount);
+            .to.equal(onChainOrderInfo.amountTokenDeposit);
         }
       });
     });
@@ -227,7 +231,7 @@ describe('Update orders via on-chain', async function () {
         if (order.hash == txHashNewOrder) {
           chai
             .expect(order.addressTokenDeposit)
-            .to.equal(onChainOrderInfo.depositToken);
+            .to.equal(onChainOrderInfo.addressTokenDeposit);
         }
       });
     });
@@ -397,7 +401,7 @@ describe('Update orders via on-chain', async function () {
         if (order.hash == txHashNewOrder) {
           chai
             .expect(order.amountTokenDeposit)
-            .to.equal(onChainOrderInfo.depositAmount);
+            .to.equal(onChainOrderInfo.amountTokenDeposit);
         }
       });
     });
@@ -411,7 +415,7 @@ describe('Update orders via on-chain', async function () {
         if (order.hash == txHashNewOrder) {
           chai
             .expect(order.addressTokenDeposit)
-            .to.equal(onChainOrderInfo.depositToken);
+            .to.equal(onChainOrderInfo.addressTokenDeposit);
         }
       });
     });
@@ -626,7 +630,7 @@ describe('Update orders via on-chain', async function () {
         });
       });
 
-      it('Should update isComplete to true', async function () {
+      it('Should update isComplete to true for successfull transaction hash', async function () {
         const res = await chai
           .request(app)
           .put(pathViewBlockchain_Put_OrdersCompleteUser)
@@ -640,7 +644,7 @@ describe('Update orders via on-chain', async function () {
         });
       });
 
-      it('Should update status to complete', async function () {
+      it('Should update status to complete for successfull transaction hash', async function () {
         const res = await chai
           .request(app)
           .put(pathViewBlockchain_Put_OrdersCompleteUser)
@@ -724,7 +728,7 @@ describe('Update orders via on-chain', async function () {
           .to.be.true;
       });
 
-      it('Should update isComplete to true if LogOfferPaid appears', async function () {
+      it('Should update isComplete to true for successfull transaction hash if LogOfferPaid appears', async function () {
         const res = await chai
           .request(app)
           .put(pathViewBlockchain_Put_OrdersCompleteAll)
@@ -738,7 +742,7 @@ describe('Update orders via on-chain', async function () {
         });
       });
 
-      it('Should update status to complete if LogOfferPaid appears', async function () {
+      it('Should update status to complete for successfull transaction hash if LogOfferPaid appears', async function () {
         const res = await chai
           .request(app)
           .put(pathViewBlockchain_Put_OrdersCompleteAll)
@@ -778,6 +782,199 @@ describe('Update orders via on-chain', async function () {
             chai.expect(order.isComplete).to.be.false;
           }
         });
+      });
+    });
+  });
+
+  describe('Update orders completion via on-chain for seller', async function () {
+    beforeEach(async function () {
+      await collectionOffers.insertMany([
+        {
+          ...offer,
+          chainId: blockchainBscTestnet.chainId,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          offerId: 'anotherOfferId',
+          chainId: blockchainBscTestnet.chainId,
+          userId: 'anotherUserId',
+          shouldNotAppear: 'shouldNotAppear',
+        },
+        {
+          ...offer,
+          chainId: blockchainBscTestnet.chainId,
+          userId: 'anotherUserId',
+          shouldNotAppear: 'shouldNotAppear',
+        },
+      ]);
+      await collectionOrders.insertMany([
+        {
+          ...order,
+          status: ORDER_STATUS.COMPLETION,
+          offerId: offer.offerId,
+          isComplete: false,
+          hashCompletion: txHashOrderPaid,
+        },
+        {
+          ...order,
+          status: ORDER_STATUS.COMPLETION,
+          offerId: 'anotherOfferId',
+          isComplete: false,
+          hashCompletion: txHashOrderPaid,
+        },
+        {
+          ...order,
+          status: ORDER_STATUS.SUCCESS,
+          offerId: offer.offerId,
+          isComplete: false,
+          hashCompletion: txHashOrderPaid,
+        },
+        {
+          ...order,
+          status: ORDER_STATUS.COMPLETION,
+          offerId: offer.offerId,
+          isComplete: false,
+          hashCompletion: txHashOrderPaid,
+        },
+        {
+          ...order,
+          status: ORDER_STATUS.COMPLETION,
+          offerId: offer.offerId,
+          isComplete: false,
+          hashCompletion: txHashNotOrderPaid,
+        },
+        {
+          ...order,
+          status: ORDER_STATUS.COMPLETION,
+          offerId: offer.offerId,
+          isComplete: true,
+          hashCompletion: txHashOrderPaid,
+        },
+        {
+          ...order,
+          status: ORDER_STATUS.COMPLETION,
+          offerId: offer.offerId,
+          isComplete: false,
+          hashCompletion: txHashOrderPaid,
+        },
+      ]);
+    });
+
+    it('Should not modify orders with non completion status', async function () {
+      const unmodifiedOrder = await collectionOrders
+        .find({
+          status: { $exists: true, $ne: ORDER_STATUS.COMPLETION },
+        })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersCompleteSeller)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        chai.expect(
+          unmodifiedOrder.every(
+            (unModifOrder) => unModifOrder._id.toString() !== order._id
+          )
+        ).to.be.true;
+      });
+    });
+
+    it('Should not modify completed orders', async function () {
+      const unmodifiedOrder = await collectionOrders
+        .find({
+          isComplete: true,
+        })
+        .toArray();
+
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersCompleteSeller)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        chai.expect(
+          unmodifiedOrder.every(
+            (unModifOrder) => unModifOrder._id.toString() !== order._id
+          )
+        ).to.be.true;
+      });
+    });
+
+    it('Should only modify orders corresponding to the current liquidity provider', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersCompleteSeller)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      await Promise.all(
+        res.body.map(async (order) => {
+          const offer = await collectionOffers.findOne({
+            offerId: order.offerId,
+          });
+          chai.expect(offer.userId).to.equal(process.env.USER_ID_TEST);
+        })
+      );
+    });
+
+    it('Should update isComplete to true for successfull transaction hash', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersCompleteSeller)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hashCompletion !== txHashNotOrderPaid) {
+          chai.expect(order.isComplete).to.be.true;
+        }
+      });
+    });
+
+    it('Should update status to complete for successfull transaction hash', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersCompleteSeller)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hashCompletion !== txHashNotOrderPaid) {
+          chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETE);
+        }
+      });
+    });
+
+    it('Should update status to paymentFailure if LogOfferPaid doesnt appear', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersCompleteSeller)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hashCompletion === txHashNotOrderPaid) {
+          chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETION_FAILURE);
+        }
+      });
+    });
+
+    it('Should not update isComplete if LogOfferPaid doesnt appear', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersCompleteSeller)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+
+      res.body.forEach((order) => {
+        if (order.hashCompletion === txHashNotOrderPaid) {
+          chai.expect(order.isComplete).to.be.false;
+        }
       });
     });
   });

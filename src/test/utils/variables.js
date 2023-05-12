@@ -89,6 +89,8 @@ export const pathViewBlockchain_Put_OrdersCompleteUser =
   '/unit-test/orders-onchain/update-order-completion-user';
 export const pathViewBlockchain_Put_OrdersCompleteAll =
   '/unit-test/orders-onchain/update-order-completion-all';
+export const pathViewBlockchain_Put_OrdersCompleteSeller =
+  '/unit-test/orders-onchain/update-order-completion-seller';
 
 // Modify offers blockchain paths
 export const pathBlockchain_Put_OffersUser =

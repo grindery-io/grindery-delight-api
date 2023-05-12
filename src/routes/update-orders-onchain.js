@@ -113,4 +113,49 @@ router.put('/update-order-completion-all', isRequired, async (req, res) => {
   );
 });
 
+router.put('/update-order-completion-seller', isRequired, async (req, res) => {
+  const db = await Database.getInstance(req);
+
+  const filterOrders = await db
+    .collection('orders')
+    .aggregate([
+      {
+        $match: {
+          orderId: { $exists: true, $ne: '' },
+          isComplete: false,
+          status: ORDER_STATUS.COMPLETION,
+        },
+      },
+      {
+        $lookup: {
+          from: 'offers',
+          localField: 'offerId',
+          foreignField: 'offerId',
+          as: 'offer',
+        },
+      },
+      {
+        $match: {
+          'offer.userId': res.locals.userId,
+        },
+      },
+    ])
+    .toArray();
+
+  res.status(200).send(
+    await Promise.all(
+      filterOrders.map(async (order) => {
+        await db.collection('orders').updateOne(
+          { _id: order._id },
+          {
+            $set: await updateCompletionOrder(db, order),
+          }
+        );
+
+        return order;
+      })
+    )
+  );
+});
+
 export default router;
