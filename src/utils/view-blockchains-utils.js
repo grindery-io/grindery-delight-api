@@ -101,7 +101,7 @@ export async function updateActivationOffer(db, offer) {
  */
 export async function updateOrderFromDb(db, order) {
   const chain = await db.collection('blockchains').findOne({
-    chainId: order.chainId,
+    chainId: order.chainIdTokenDeposit,
   });
 
   const orderId = await getOrderIdFromHash(chain.rpc[0], order.hash);

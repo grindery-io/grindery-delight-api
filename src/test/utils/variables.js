@@ -254,6 +254,7 @@ export const blockchainBscTestnet = {
   label: 'BSC Testnet',
   nativeTokenSymbol: 'BNB',
   rpc: [
+    'https://rpc.ankr.com/bsc_testnet_chapel',
     'https://bsc-testnet.public.blastapi.io',
     'https://data-seed-prebsc-1-s3.binance.org:8545',
   ],
