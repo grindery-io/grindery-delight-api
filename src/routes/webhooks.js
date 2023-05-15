@@ -168,7 +168,7 @@ router.put(
     if (response.modifiedCount > 0)
       sendNotification('complete', {
         type: 'order',
-        id: req.body._idTrade,
+        id: req.body._offerId,
         userId: order.userId,
       });
     return res.status(200).send(response);

@@ -189,16 +189,16 @@ export const updateOfferOrderPaidValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_idOffer')
+  body('_offerId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_tradeId')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
+  // body('_tradeId')
+  //   .isString()
+  //   .withMessage('must be string value')
+  //   .notEmpty()
+  //   .withMessage('must not be empty'),
   body('_token')
     .isString()
     .withMessage('must be string value')
@@ -225,8 +225,8 @@ export const updateOfferOrderPaidValidator = [
       [
         '_grinderyChainId',
         '_grinderyTransactionHash',
-        '_idOffer',
-        '_tradeId',
+        '_offerId',
+        // '_tradeId',
         '_token',
         '_to',
         '_amount',
