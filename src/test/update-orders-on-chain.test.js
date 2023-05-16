@@ -1,15 +1,16 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
+import sinon from 'sinon';
 import {
   GrtPoolAddressGoerli,
   blockchainBscTestnet,
   blockchainGoerli,
-  collectionAdmins,
   collectionBlockchains,
   collectionOffers,
   collectionOrders,
   offer,
+  orderInformationOnChain,
   pathViewBlockchain_Put_OrdersAll,
   pathViewBlockchain_Put_OrdersCompleteAll,
   pathViewBlockchain_Put_OrdersCompleteSeller,
@@ -18,10 +19,8 @@ import {
 } from './utils/variables.js';
 import {
   getAbis,
-  getOrderIdFromHash,
-  getOrderInformation,
-  isPaidOrderFromHash,
   getProviderFromRpc,
+  utils_orders,
 } from '../utils/view-blockchains-utils.js';
 import { ethers } from 'ethers';
 import { order } from './utils/variables.js';
@@ -30,10 +29,13 @@ import { ORDER_STATUS } from '../utils/orders-utils.js';
 
 chai.use(chaiHttp);
 
-let blockchainDBGoerli = '';
-let blockchainDBBscTesnet = '';
-let GrtPoolContract = '';
-let onChainOrderInfo = '';
+let blockchainDBGoerli,
+  blockchainDBBscTesnet,
+  GrtPoolContract,
+  onChainOrderInfo,
+  getOrderIdFromHashStub,
+  getOrderInformationStub,
+  isPaidOrderFromHashStub;
 
 // Order creation
 const txHashNewOrder =
@@ -73,6 +75,43 @@ beforeEach(async function () {
     abis.poolAbi,
     getProviderFromRpc(blockchainDBGoerli.rpc[0])
   );
+
+  // Mocking
+  getOrderIdFromHashStub = sinon
+    .stub(utils_orders, 'getOrderIdFromHash')
+    .callsFake(async function (_rpc, _hash) {
+      const expectedOrderId = {
+        [txHashNewOrder]: orderId,
+        [txHashFailed]: '',
+      };
+      return expectedOrderId[_hash];
+    });
+
+  getOrderInformationStub = sinon
+    .stub(utils_orders, 'getOrderInformation')
+    .callsFake(async function (_contract, _orderId) {
+      const expectedOrderInfo = {
+        [orderId]: orderInformationOnChain,
+      };
+      return expectedOrderInfo[_orderId];
+    });
+
+  isPaidOrderFromHashStub = sinon
+    .stub(utils_orders, 'isPaidOrderFromHash')
+    .callsFake(async function (_rpc, _hash) {
+      const expectedIsPaidOrder = {
+        [txHashOrderPaid]: true,
+        [txHashNotOrderPaid]: false,
+        [txHashFailedOnBSC]: false,
+      };
+      return expectedIsPaidOrder[_hash];
+    });
+});
+
+afterEach(async function () {
+  getOrderIdFromHashStub.restore();
+  getOrderInformationStub.restore();
+  isPaidOrderFromHashStub.restore();
 });
 
 describe('Update orders via on-chain', async function () {
@@ -80,23 +119,30 @@ describe('Update orders via on-chain', async function () {
     it('getOrderIdFromHash should return the proper orderId', async function () {
       chai
         .expect(
-          await getOrderIdFromHash(blockchainDBGoerli.rpc[0], txHashNewOrder)
+          await utils_orders.getOrderIdFromHash(
+            blockchainDBGoerli.rpc[0],
+            txHashNewOrder
+          )
         )
         .to.equal(orderId);
     });
     it('getOrderIdFromHash should return empty string if transaction failed', async function () {
       chai
         .expect(
-          await getOrderIdFromHash(blockchainDBGoerli.rpc[0], txHashFailed)
+          await utils_orders.getOrderIdFromHash(
+            blockchainDBGoerli.rpc[0],
+            txHashFailed
+          )
         )
         .to.equal('');
     });
   });
+
   describe('Order informations', async function () {
     it('Should return the proper deposited amount', async function () {
       chai
         .expect(
-          (await getOrderInformation(GrtPoolContract, orderId))
+          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
             .amountTokenDeposit
         )
         .to.equal('0.001');
@@ -104,7 +150,7 @@ describe('Update orders via on-chain', async function () {
     it('Should return the proper deposited token', async function () {
       chai
         .expect(
-          (await getOrderInformation(GrtPoolContract, orderId))
+          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
             .addressTokenDeposit
         )
         .to.equal('0x0000000000000000000000000000000000000000');
@@ -112,29 +158,37 @@ describe('Update orders via on-chain', async function () {
     it('Should return the proper deposit chainId', async function () {
       chai
         .expect(
-          (await getOrderInformation(GrtPoolContract, orderId))
+          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
             .chainIdTokenDeposit
         )
         .to.equal('5');
     });
     it('Should return the proper destination address', async function () {
       chai
-        .expect((await getOrderInformation(GrtPoolContract, orderId)).destAddr)
+        .expect(
+          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
+            .destAddr
+        )
         .to.equal('0x0cBB9CCA778De38d48F1795E6B8C7E8C8FFAe59B');
     });
     it('Should return the proper offerId', async function () {
       chai
-        .expect((await getOrderInformation(GrtPoolContract, orderId)).offerId)
+        .expect(
+          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
+            .offerId
+        )
         .to.equal(offerId);
     });
     it('Should return the offer amount', async function () {
       chai
         .expect(
-          (await getOrderInformation(GrtPoolContract, orderId)).amountTokenOffer
+          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
+            .amountTokenOffer
         )
         .to.equal('1.0');
     });
   });
+
   describe('Update database - by userId', async function () {
     beforeEach(async function () {
       await collectionOrders.insertMany([
@@ -174,7 +228,10 @@ describe('Update orders via on-chain', async function () {
           userId: 'anotherUserId',
         },
       ]);
-      onChainOrderInfo = await getOrderInformation(GrtPoolContract, orderId);
+      onChainOrderInfo = await utils_orders.getOrderInformation(
+        GrtPoolContract,
+        orderId
+      );
     });
     it('Should not modify orders with non pending status', async function () {
       const unmodifiedOrder = await collectionOrders.findOne({
@@ -327,6 +384,7 @@ describe('Update orders via on-chain', async function () {
       });
     });
   });
+
   describe('Update database - all orders', async function () {
     beforeEach(async function () {
       await collectionOrders.insertMany([
@@ -367,7 +425,10 @@ describe('Update orders via on-chain', async function () {
           userId: 'anotherUserId',
         },
       ]);
-      onChainOrderInfo = await getOrderInformation(GrtPoolContract, orderId);
+      onChainOrderInfo = await utils_orders.getOrderInformation(
+        GrtPoolContract,
+        orderId
+      );
     });
     it('Should not modify orders with non pending status', async function () {
       const unmodifiedOrder = await collectionOrders
@@ -507,6 +568,7 @@ describe('Update orders via on-chain', async function () {
       });
     });
   });
+
   describe('Update orders completion via on-chain', async function () {
     beforeEach(async function () {
       await collectionOffers.insertOne({
@@ -568,7 +630,7 @@ describe('Update orders via on-chain', async function () {
     describe('Capture LogOfferPaid event', async function () {
       it('Should return true for a transaction with LogOfferPaid', async function () {
         chai.expect(
-          await isPaidOrderFromHash(
+          await utils_orders.isPaidOrderFromHash(
             blockchainDBBscTesnet.rpc[0],
             txHashOrderPaid
           )
@@ -576,7 +638,7 @@ describe('Update orders via on-chain', async function () {
       });
       it('Should return false for a transaction without LogOfferPaid', async function () {
         chai.expect(
-          await isPaidOrderFromHash(
+          await utils_orders.isPaidOrderFromHash(
             blockchainDBBscTesnet.rpc[0],
             txHashNotOrderPaid
           )
@@ -584,7 +646,7 @@ describe('Update orders via on-chain', async function () {
       });
       it('Should return false for a transaction that failed', async function () {
         chai.expect(
-          await isPaidOrderFromHash(
+          await utils_orders.isPaidOrderFromHash(
             blockchainDBBscTesnet.rpc[0],
             txHashFailedOnBSC
           )

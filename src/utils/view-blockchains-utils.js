@@ -46,7 +46,7 @@ export async function updateCompletionOrder(db, order) {
     .findOne({ offerId: order.offerId });
   const chain = await db.collection('blockchains').findOne({ chainId });
 
-  order.isComplete = await isPaidOrderFromHash(
+  order.isComplete = await utils_orders.isPaidOrderFromHash(
     chain.rpc[0],
     order.hashCompletion
   );
@@ -104,13 +104,16 @@ export async function updateOrderFromDb(db, order) {
     chainId: order.chainIdTokenDeposit,
   });
 
-  const orderId = await getOrderIdFromHash(chain.rpc[0], order.hash);
+  const orderId = await utils_orders.getOrderIdFromHash(
+    chain.rpc[0],
+    order.hash
+  );
   order.orderId = orderId;
 
   if (orderId === '') {
     order.status = ORDER_STATUS.FAILURE;
   } else {
-    const onChainOrder = await getOrderInformation(
+    const onChainOrder = await utils_orders.getOrderInformation(
       new ethers.Contract(
         chain.usefulAddresses.grtPoolAddress,
         (
@@ -296,4 +299,10 @@ export const getAbis = async () => {
     liquidityWalletAbi: results[2],
     satelliteAbi: null,
   };
+};
+
+export const utils_orders = {
+  getOrderIdFromHash,
+  getOrderInformation,
+  isPaidOrderFromHash,
 };
