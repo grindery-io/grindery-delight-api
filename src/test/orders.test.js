@@ -540,6 +540,30 @@ describe('Orders route', async function () {
         },
         {
           ...order,
+          orderId: 'myOrderId1',
+          offerId: offer.offerId,
+          userId: process.env.USER_ID_TEST,
+          status: ORDER_STATUS.COMPLETION,
+          date: new Date(),
+        },
+        {
+          ...order,
+          orderId: 'myOrderId1',
+          offerId: offer.offerId,
+          userId: process.env.USER_ID_TEST,
+          status: ORDER_STATUS.COMPLETION_FAILURE,
+          date: new Date(),
+        },
+        {
+          ...order,
+          orderId: 'myOrderId1',
+          offerId: offer.offerId,
+          userId: process.env.USER_ID_TEST,
+          status: ORDER_STATUS.COMPLETE,
+          date: new Date(),
+        },
+        {
+          ...order,
           orderId: '',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
@@ -554,10 +578,18 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should not show orders with non success status', async function () {
+    it('Should not show orders with pending or failure status', async function () {
       const unmodifiedOrder = await collectionOrders
         .find({
-          status: { $exists: true, $ne: ORDER_STATUS.SUCCESS },
+          status: {
+            $exists: true,
+            $nin: [
+              ORDER_STATUS.SUCCESS,
+              ORDER_STATUS.COMPLETION,
+              ORDER_STATUS.COMPLETION_FAILURE,
+              ORDER_STATUS.COMPLETE,
+            ],
+          },
         })
         .toArray();
 
@@ -693,7 +725,7 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ offset: 1 });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.orders.length).to.equal(2);
+      chai.expect(res.body.orders.length).to.equal(5);
       chai
         .expect(res.body.orders[0]._id)
         .to.equal(orderFromInMemoryDB[1]._id.toString());
@@ -706,8 +738,8 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({ offset: 1 });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.orders.length).to.equal(2);
-      chai.expect(res.body.totalCount).to.equal(3);
+      chai.expect(res.body.orders.length).to.equal(5);
+      chai.expect(res.body.totalCount).to.equal(6);
     });
 
     it('Should show only orders with proper fields and offer information', async function () {

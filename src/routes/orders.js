@@ -148,7 +148,14 @@ router.get(
     const query = {
       offerId: { $in: activeOffersForUser.map((offer) => offer.offerId) },
       orderId: { $exists: true, $ne: '' },
-      status: ORDER_STATUS.SUCCESS,
+      status: {
+        $in: [
+          ORDER_STATUS.SUCCESS,
+          ORDER_STATUS.COMPLETION,
+          ORDER_STATUS.COMPLETION_FAILURE,
+          ORDER_STATUS.COMPLETE,
+        ],
+      },
     };
 
     res.status(200).send({
