@@ -116,6 +116,7 @@ export async function updateOrderFromDb(db, order) {
   if (orderId === '') {
     order.status = ORDER_STATUS.FAILURE;
   } else {
+    console.log(chain);
     const onChainOrder = await utils_orders.getOrderInformation(
       new ethers.Contract(
         chain.usefulAddresses.grtPoolAddress,
