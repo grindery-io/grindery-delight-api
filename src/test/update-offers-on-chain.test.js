@@ -43,7 +43,6 @@ const offerId =
 const abis = await getAbis();
 
 beforeEach(async function () {
-  await collectionBlockchains.insertOne({ ...blockchainGoerli });
   blockchainDBGoerli = await collectionBlockchains.findOne({
     chainId: blockchainGoerli.chainId,
   });

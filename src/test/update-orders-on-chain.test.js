@@ -57,16 +57,10 @@ const txHashFailedOnBSC =
   '0xf2da1f454e228f1a95398d0b1d38131cc79893a5f49b2dc94825df2cd8011bf2';
 
 beforeEach(async function () {
-  await collectionBlockchains.insertOne({
-    ...blockchainGoerli,
-    usefulAddresses: { grtPoolAddress: GrtPoolAddressGoerli },
-    testCI: 'testCI',
-  });
   blockchainDBGoerli = await collectionBlockchains.findOne({
     chainId: blockchainGoerli.chainId,
   });
 
-  await collectionBlockchains.insertOne(blockchainBscTestnet);
   blockchainDBBscTesnet = await collectionBlockchains.findOne({
     chainId: blockchainBscTestnet.chainId,
   });
