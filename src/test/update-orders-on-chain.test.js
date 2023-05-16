@@ -60,6 +60,7 @@ beforeEach(async function () {
   await collectionBlockchains.insertOne({
     ...blockchainGoerli,
     usefulAddresses: { grtPoolAddress: GrtPoolAddressGoerli },
+    testCI: 'testCI',
   });
   blockchainDBGoerli = await collectionBlockchains.findOne({
     chainId: blockchainGoerli.chainId,
