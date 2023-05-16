@@ -40,7 +40,7 @@ router.put('/update-order-user', isRequired, async (req, res) => {
           }
         })
       )
-    ).filter((value) => value !== undefined)
+    ).filter((order) => order !== undefined)
   );
 });
 
@@ -74,7 +74,7 @@ router.put('/update-order-all', isRequired, async (req, res) => {
           }
         })
       )
-    ).filter((value) => value !== undefined)
+    ).filter((order) => order !== undefined)
   );
 });
 
@@ -114,7 +114,7 @@ router.put('/update-order-completion-user', isRequired, async (req, res) => {
           }
         })
       )
-    ).filter((value) => value !== undefined)
+    ).filter((order) => order !== undefined)
   );
 });
 
@@ -153,7 +153,7 @@ router.put('/update-order-completion-all', isRequired, async (req, res) => {
           }
         })
       )
-    ).filter((value) => value !== undefined)
+    ).filter((order) => order !== undefined)
   );
 });
 
@@ -209,7 +209,7 @@ router.put('/update-order-completion-seller', isRequired, async (req, res) => {
           }
         })
       )
-    ).filter((value) => value !== undefined)
+    ).filter((order) => order !== undefined)
   );
 });
 
