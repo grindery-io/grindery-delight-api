@@ -32,9 +32,7 @@ chai.use(chaiHttp);
 let blockchainDBGoerli,
   blockchainDBBscTesnet,
   GrtPoolContract,
-  onChainOrderInfo,
   getOrderIdFromHashStub,
-  getOrderInformationStub,
   isPaidOrderFromHashStub;
 
 // Order creation
@@ -78,12 +76,6 @@ beforeEach(async function () {
       return _hash === txHashNewOrder ? orderId : '';
     });
 
-  getOrderInformationStub = sinon
-    .stub(utils_orders, 'getOrderInformation')
-    .callsFake(async function (_contract, _orderId) {
-      return orderInformationOnChain;
-    });
-
   isPaidOrderFromHashStub = sinon
     .stub(utils_orders, 'isPaidOrderFromHash')
     .callsFake(async function (_rpc, _hash) {
@@ -98,7 +90,6 @@ beforeEach(async function () {
 
 afterEach(async function () {
   getOrderIdFromHashStub.restore();
-  getOrderInformationStub.restore();
   isPaidOrderFromHashStub.restore();
 });
 
@@ -123,57 +114,6 @@ describe('Update orders via on-chain', async function () {
           )
         )
         .to.equal('');
-    });
-  });
-
-  describe('Order informations', async function () {
-    it('Should return the proper deposited amount', async function () {
-      chai
-        .expect(
-          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
-            .amountTokenDeposit
-        )
-        .to.equal('0.001');
-    });
-    it('Should return the proper deposited token', async function () {
-      chai
-        .expect(
-          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
-            .addressTokenDeposit
-        )
-        .to.equal('0x0000000000000000000000000000000000000000');
-    });
-    it('Should return the proper deposit chainId', async function () {
-      chai
-        .expect(
-          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
-            .chainIdTokenDeposit
-        )
-        .to.equal('5');
-    });
-    it('Should return the proper destination address', async function () {
-      chai
-        .expect(
-          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
-            .destAddr
-        )
-        .to.equal('0x0cBB9CCA778De38d48F1795E6B8C7E8C8FFAe59B');
-    });
-    it('Should return the proper offerId', async function () {
-      chai
-        .expect(
-          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
-            .offerId
-        )
-        .to.equal(offerId);
-    });
-    it('Should return the offer amount', async function () {
-      chai
-        .expect(
-          (await utils_orders.getOrderInformation(GrtPoolContract, orderId))
-            .amountTokenOffer
-        )
-        .to.equal('1.0');
     });
   });
 
@@ -216,10 +156,6 @@ describe('Update orders via on-chain', async function () {
           userId: 'anotherUserId',
         },
       ]);
-      onChainOrderInfo = await utils_orders.getOrderInformation(
-        GrtPoolContract,
-        orderId
-      );
     });
     it('Should not modify orders with non pending status', async function () {
       const unmodifiedOrder = await collectionOrders.findOne({
@@ -261,86 +197,7 @@ describe('Update orders via on-chain', async function () {
         }
       });
     });
-    it('Should modify order - amountTokenDeposit', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersUser)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai
-            .expect(order.amountTokenDeposit)
-            .to.equal(onChainOrderInfo.amountTokenDeposit);
-        }
-      });
-    });
-    it('Should modify order - addressTokenDeposit', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersUser)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai
-            .expect(order.addressTokenDeposit)
-            .to.equal(onChainOrderInfo.addressTokenDeposit);
-        }
-      });
-    });
-    it('Should modify order - chainIdTokenDeposit', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersUser)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai
-            .expect(order.chainIdTokenDeposit)
-            .to.equal(onChainOrderInfo.chainIdTokenDeposit);
-        }
-      });
-    });
-    it('Should modify order - destAddr', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersUser)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai.expect(order.destAddr).to.equal(onChainOrderInfo.destAddr);
-        }
-      });
-    });
-    it('Should modify order - offerId', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersUser)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai.expect(order.offerId).to.equal(onChainOrderInfo.offerId);
-        }
-      });
-    });
-    it('Should modify order - amountTokenOffer', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersUser)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai
-            .expect(order.amountTokenOffer)
-            .to.equal(onChainOrderInfo.amountTokenOffer);
-        }
-      });
-    });
+
     it('Should modify order - status', async function () {
       const res = await chai
         .request(app)
@@ -413,10 +270,6 @@ describe('Update orders via on-chain', async function () {
           userId: 'anotherUserId',
         },
       ]);
-      onChainOrderInfo = await utils_orders.getOrderInformation(
-        GrtPoolContract,
-        orderId
-      );
     });
     it('Should not modify orders with non pending status', async function () {
       const unmodifiedOrder = await collectionOrders
@@ -445,7 +298,8 @@ describe('Update orders via on-chain', async function () {
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.length).to.equal(4);
     });
-    it('Should modify order - amountTokenDeposit', async function () {
+
+    it('Should modify order - orderId', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersAll)
@@ -454,77 +308,14 @@ describe('Update orders via on-chain', async function () {
       res.body.forEach((order) => {
         if (order.hash == txHashNewOrder) {
           chai
-            .expect(order.amountTokenDeposit)
-            .to.equal(onChainOrderInfo.amountTokenDeposit);
+            .expect(order.orderId)
+            .to.equal(
+              '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec'
+            );
         }
       });
     });
-    it('Should modify order - addressTokenDeposit', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersAll)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai
-            .expect(order.addressTokenDeposit)
-            .to.equal(onChainOrderInfo.addressTokenDeposit);
-        }
-      });
-    });
-    it('Should modify order - chainIdTokenDeposit', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersAll)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai
-            .expect(order.chainIdTokenDeposit)
-            .to.equal(onChainOrderInfo.chainIdTokenDeposit);
-        }
-      });
-    });
-    it('Should modify order - destAddr', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersAll)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai.expect(order.destAddr).to.equal(onChainOrderInfo.destAddr);
-        }
-      });
-    });
-    it('Should modify order - offerId', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersAll)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai.expect(order.offerId).to.equal(onChainOrderInfo.offerId);
-        }
-      });
-    });
-    it('Should modify order - amountTokenOffer', async function () {
-      const res = await chai
-        .request(app)
-        .put(pathViewBlockchain_Put_OrdersAll)
-        .set('Authorization', `Bearer ${mockedToken}`);
-      chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai
-            .expect(order.amountTokenOffer)
-            .to.equal(onChainOrderInfo.amountTokenOffer);
-        }
-      });
-    });
+
     it('Should modify order - status', async function () {
       const res = await chai
         .request(app)

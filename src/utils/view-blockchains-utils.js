@@ -107,38 +107,14 @@ export async function updateOrderFromDb(db, order) {
     chainId: order.chainIdTokenDeposit,
   });
 
-  const orderId = await utils_orders.getOrderIdFromHash(
+  order.orderId = await utils_orders.getOrderIdFromHash(
     chain.rpc[0],
     order.hash
   );
-  order.orderId = orderId;
+  order.status =
+    order.orderId === '' ? ORDER_STATUS.FAILURE : ORDER_STATUS.SUCCESS;
 
-  if (orderId === '') {
-    order.status = ORDER_STATUS.FAILURE;
-  } else {
-    const onChainOrder = await utils_orders.getOrderInformation(
-      new ethers.Contract(
-        chain.usefulAddresses.grtPoolAddress,
-        (
-          await getAbis()
-        ).poolAbi,
-        getProviderFromRpc(chain.rpc[0])
-      ),
-      orderId
-    );
-
-    Object.assign(order, {
-      amountTokenDeposit: onChainOrder.amountTokenDeposit,
-      addressTokenDeposit: onChainOrder.addressTokenDeposit,
-      chainIdTokenDeposit: onChainOrder.chainIdTokenDeposit,
-      destAddr: onChainOrder.destAddr,
-      offerId: onChainOrder.offerId,
-      amountTokenOffer: onChainOrder.amountTokenOffer,
-      status: ORDER_STATUS.SUCCESS,
-    });
-  }
-
-  return Object.assign({}, order);
+  return { orderId: order.orderId, status: order.status };
 }
 
 /**
