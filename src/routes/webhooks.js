@@ -150,7 +150,7 @@ router.put(
     const collection = db.collection('orders');
 
     const order = await collection.findOne({
-      hash: req.body._grinderyTransactionHash,
+      completionHash: req.body._grinderyTransactionHash,
     });
 
     if (!order) {
