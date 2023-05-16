@@ -15,9 +15,7 @@ import {
 } from './utils/variables.js';
 import {
   getAbis,
-  getOfferIdFromHash,
   getProviderFromRpc,
-  isSetStatusFromHash,
   utils_offers,
 } from '../utils/view-blockchains-utils.js';
 import { ethers } from 'ethers';
@@ -413,7 +411,7 @@ describe('Update offers via on-chain', async function () {
     });
 
     describe('Capture LogSetStatusOffer event', async function () {
-      it('Should return isSetStatus: true, isActive: true for a transaction with LogSetStatusOffer', async function () {
+      it('Should return {isSetStatus: true, isActive: true} for a transaction with LogSetStatusOffer', async function () {
         chai
           .expect(
             await utils_offers.isSetStatusFromHash(
@@ -424,7 +422,7 @@ describe('Update offers via on-chain', async function () {
           .to.deep.equal({ isSetStatus: true, isActive: true });
       });
 
-      it('Should return isSetStatus: true, isActive: false for a transaction with LogSetStatusOffer', async function () {
+      it('Should return {isSetStatus: true, isActive: false} for a transaction with LogSetStatusOffer', async function () {
         chai
           .expect(
             await utils_offers.isSetStatusFromHash(
@@ -435,7 +433,7 @@ describe('Update offers via on-chain', async function () {
           .to.deep.equal({ isSetStatus: true, isActive: false });
       });
 
-      it('Should return isSetStatus: false, isActive: undefined for a transaction without LogSetStatusOffer', async function () {
+      it('Should return {isSetStatus: false, isActive: undefined} for a transaction without LogSetStatusOffer', async function () {
         chai
           .expect(
             await utils_offers.isSetStatusFromHash(
@@ -446,7 +444,7 @@ describe('Update offers via on-chain', async function () {
           .to.deep.equal({ isSetStatus: false, isActive: undefined });
       });
 
-      it('Should return isSetStatus: false, isActive: undefined for a transaction that failed', async function () {
+      it('Should return {isSetStatus: false, isActive: undefined} for a transaction that failed', async function () {
         chai
           .expect(
             await utils_offers.isSetStatusFromHash(

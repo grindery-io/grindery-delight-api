@@ -80,20 +80,13 @@ beforeEach(async function () {
   getOrderIdFromHashStub = sinon
     .stub(utils_orders, 'getOrderIdFromHash')
     .callsFake(async function (_rpc, _hash) {
-      const expectedOrderId = {
-        [txHashNewOrder]: orderId,
-        [txHashFailed]: '',
-      };
-      return expectedOrderId[_hash];
+      return _hash === txHashNewOrder ? orderId : '';
     });
 
   getOrderInformationStub = sinon
     .stub(utils_orders, 'getOrderInformation')
     .callsFake(async function (_contract, _orderId) {
-      const expectedOrderInfo = {
-        [orderId]: orderInformationOnChain,
-      };
-      return expectedOrderInfo[_orderId];
+      return orderInformationOnChain;
     });
 
   isPaidOrderFromHashStub = sinon
