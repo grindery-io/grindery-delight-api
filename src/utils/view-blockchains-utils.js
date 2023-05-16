@@ -105,6 +105,7 @@ export async function updateOrderFromDb(db, order) {
   });
 
   const orderId = await getOrderIdFromHash(chain.rpc[0], order.hash);
+  order.orderId = orderId;
 
   if (orderId === '') {
     order.status = ORDER_STATUS.FAILURE;
@@ -123,7 +124,7 @@ export async function updateOrderFromDb(db, order) {
     Object.assign(order, {
       amountTokenDeposit: onChainOrder.amountTokenDeposit,
       addressTokenDeposit: onChainOrder.addressTokenDeposit,
-      chainIdTokenDeposit: onChainOrder.depositChainId,
+      chainIdTokenDeposit: onChainOrder.chainIdTokenDeposit,
       destAddr: onChainOrder.destAddr,
       offerId: onChainOrder.offerId,
       amountTokenOffer: onChainOrder.amountTokenOffer,
@@ -149,7 +150,7 @@ export async function getOrderInformation(contract, orderId) {
       .formatEther(await contract.getDepositAmount(orderId))
       .toString(),
     addressTokenDeposit: await contract.getDepositToken(orderId),
-    depositChainId: (await contract.getDepositChainId(orderId)).toString(),
+    chainIdTokenDeposit: (await contract.getDepositChainId(orderId)).toString(),
     destAddr: await contract.getRecipient(orderId),
     offerId: await contract.getIdOffer(orderId),
     amountTokenOffer: ethers.utils

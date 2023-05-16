@@ -114,7 +114,8 @@ describe('Update orders via on-chain', async function () {
     it('Should return the proper deposit chainId', async function () {
       chai
         .expect(
-          (await getOrderInformation(GrtPoolContract, orderId)).depositChainId
+          (await getOrderInformation(GrtPoolContract, orderId))
+            .chainIdTokenDeposit
         )
         .to.equal('5');
     });
@@ -206,6 +207,23 @@ describe('Update orders via on-chain', async function () {
       });
     });
 
+    it('Should modify order - orderId', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathViewBlockchain_Put_OrdersUser)
+        .set('Authorization', `Bearer ${mockedToken}`);
+      chai.expect(res).to.have.status(200);
+      res.body.forEach((order) => {
+        if (order.hash == txHashNewOrder) {
+          chai
+            .expect(order.orderId)
+            .to.equal(
+              '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec'
+            );
+        }
+      });
+    });
+
     it('Should modify order - amountTokenDeposit', async function () {
       const res = await chai
         .request(app)
@@ -246,7 +264,7 @@ describe('Update orders via on-chain', async function () {
         if (order.hash == txHashNewOrder) {
           chai
             .expect(order.chainIdTokenDeposit)
-            .to.equal(onChainOrderInfo.depositChainId);
+            .to.equal(onChainOrderInfo.chainIdTokenDeposit);
         }
       });
     });
@@ -369,17 +387,25 @@ describe('Update orders via on-chain', async function () {
     });
 
     it('Should not modify orders with non pending status', async function () {
+      const unmodifiedOrder = await collectionOrders
+        .find({
+          status: { $exists: true, $ne: ORDER_STATUS.PENDING },
+        })
+        .toArray();
+
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersAll)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
-      const unmodifiedOrder = await collectionOrders.findOne({
-        status: ORDER_STATUS.SUCCESS,
+      res.body.forEach((order) => {
+        chai.expect(
+          unmodifiedOrder.every(
+            (unModifOrder) => unModifOrder._id.toString() !== order._id
+          )
+        ).to.be.true;
       });
-
-      chai.expect(unmodifiedOrder.orderId).to.equal(order.orderId);
     });
 
     it('Should modify all orders', async function () {
@@ -429,7 +455,7 @@ describe('Update orders via on-chain', async function () {
         if (order.hash == txHashNewOrder) {
           chai
             .expect(order.chainIdTokenDeposit)
-            .to.equal(onChainOrderInfo.depositChainId);
+            .to.equal(onChainOrderInfo.chainIdTokenDeposit);
         }
       });
     });
