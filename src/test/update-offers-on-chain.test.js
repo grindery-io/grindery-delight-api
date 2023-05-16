@@ -1,6 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index.js';
+import sinon from 'sinon';
 import {
   GrtPoolAddressGoerli,
   blockchainGoerli,
@@ -17,6 +18,7 @@ import {
   getOfferIdFromHash,
   getProviderFromRpc,
   isSetStatusFromHash,
+  utils_offers,
 } from '../utils/view-blockchains-utils.js';
 import { ethers } from 'ethers';
 import { mockedToken } from './utils/utils.js';
@@ -24,8 +26,10 @@ import { OFFER_STATUS } from '../utils/offers-utils.js';
 
 chai.use(chaiHttp);
 
-let blockchainDBGoerli = '';
-let GrtPoolContract = '';
+let blockchainDBGoerli,
+  GrtPoolContract,
+  getOfferIdFromHashStub,
+  isSetStatusFromHashStub;
 
 // Offer creation
 const txHashNewOffer =
@@ -51,6 +55,33 @@ beforeEach(async function () {
     abis.poolAbi,
     getProviderFromRpc(blockchainDBGoerli.rpc[0])
   );
+
+  // Mocking
+  getOfferIdFromHashStub = sinon
+    .stub(utils_offers, 'getOfferIdFromHash')
+    .callsFake(async function (_rpc, _hash) {
+      return _hash === txHashNewOffer ? offerId : '';
+    });
+
+  isSetStatusFromHashStub = sinon
+    .stub(utils_offers, 'isSetStatusFromHash')
+    .callsFake(async function (_rpc, _hash) {
+      return _hash === txHashSetStatusActivation ||
+        _hash === txHashSetStatusDeactivation
+        ? {
+            isSetStatus: true,
+            isActive: _hash === txHashSetStatusActivation ? true : false,
+          }
+        : {
+            isSetStatus: false,
+            isActive: undefined,
+          };
+    });
+});
+
+afterEach(async function () {
+  getOfferIdFromHashStub.restore();
+  isSetStatusFromHashStub.restore();
 });
 
 describe('Update offers via on-chain', async function () {
@@ -58,7 +89,10 @@ describe('Update offers via on-chain', async function () {
     it('getOfferIdFromHash should return the proper offerId', async function () {
       chai
         .expect(
-          await getOfferIdFromHash(blockchainDBGoerli.rpc[0], txHashNewOffer)
+          await utils_offers.getOfferIdFromHash(
+            blockchainDBGoerli.rpc[0],
+            txHashNewOffer
+          )
         )
         .to.equal(offerId);
     });
@@ -66,7 +100,10 @@ describe('Update offers via on-chain', async function () {
     it('getOfferIdFromHash should return empty string if transaction failed', async function () {
       chai
         .expect(
-          await getOfferIdFromHash(blockchainDBGoerli.rpc[0], txHashFailed)
+          await utils_offers.getOfferIdFromHash(
+            blockchainDBGoerli.rpc[0],
+            txHashFailed
+          )
         )
         .to.equal('');
     });
@@ -376,10 +413,10 @@ describe('Update offers via on-chain', async function () {
     });
 
     describe('Capture LogSetStatusOffer event', async function () {
-      it('Should return true for a transaction with LogSetStatusOffer', async function () {
+      it('Should return isSetStatus: true, isActive: true for a transaction with LogSetStatusOffer', async function () {
         chai
           .expect(
-            await isSetStatusFromHash(
+            await utils_offers.isSetStatusFromHash(
               blockchainDBGoerli.rpc[0],
               txHashSetStatusActivation
             )
@@ -387,19 +424,35 @@ describe('Update offers via on-chain', async function () {
           .to.deep.equal({ isSetStatus: true, isActive: true });
       });
 
-      it('Should return false for a transaction without LogSetStatusOffer', async function () {
-        await isSetStatusFromHash(blockchainDBGoerli.rpc[0], txHashNewOffer);
+      it('Should return isSetStatus: true, isActive: false for a transaction with LogSetStatusOffer', async function () {
         chai
           .expect(
-            await isSetStatusFromHash(blockchainDBGoerli.rpc[0], txHashNewOffer)
+            await utils_offers.isSetStatusFromHash(
+              blockchainDBGoerli.rpc[0],
+              txHashSetStatusDeactivation
+            )
+          )
+          .to.deep.equal({ isSetStatus: true, isActive: false });
+      });
+
+      it('Should return isSetStatus: false, isActive: undefined for a transaction without LogSetStatusOffer', async function () {
+        chai
+          .expect(
+            await utils_offers.isSetStatusFromHash(
+              blockchainDBGoerli.rpc[0],
+              txHashNewOffer
+            )
           )
           .to.deep.equal({ isSetStatus: false, isActive: undefined });
       });
 
-      it('Should return false for a transaction that failed', async function () {
+      it('Should return isSetStatus: false, isActive: undefined for a transaction that failed', async function () {
         chai
           .expect(
-            await isSetStatusFromHash(blockchainDBGoerli.rpc[0], txHashFailed)
+            await utils_offers.isSetStatusFromHash(
+              blockchainDBGoerli.rpc[0],
+              txHashFailed
+            )
           )
           .to.deep.equal({ isSetStatus: false, isActive: undefined });
       });

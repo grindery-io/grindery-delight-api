@@ -21,7 +21,10 @@ export async function updateOfferId(db, offer) {
     .collection('blockchains')
     .findOne({ chainId: offer.exchangeChainId });
 
-  offer.offerId = await getOfferIdFromHash(chain.rpc[0], offer.hash);
+  offer.offerId = await utils_offers.getOfferIdFromHash(
+    chain.rpc[0],
+    offer.hash
+  );
   offer.status =
     offer.offerId !== '' ? OFFER_STATUS.SUCCESS : OFFER_STATUS.FAILURE;
 
@@ -73,7 +76,7 @@ export async function updateActivationOffer(db, offer) {
     .collection('blockchains')
     .findOne({ chainId: offer.exchangeChainId });
 
-  const isActivationEvent = await isSetStatusFromHash(
+  const isActivationEvent = await utils_offers.isSetStatusFromHash(
     chain.rpc[0],
     offer.activationHash
   );
@@ -306,3 +309,5 @@ export const utils_orders = {
   getOrderInformation,
   isPaidOrderFromHash,
 };
+
+export const utils_offers = { getOfferIdFromHash, isSetStatusFromHash };
