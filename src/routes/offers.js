@@ -62,21 +62,53 @@ router.get('/', getOffersPaginationValidator, async (req, res) => {
     offerId: { $exists: true, $ne: '' },
   };
 
-  res
-    .send({
-      offers: await getOffersWithLiquidityWallets(
-        db,
-        await db
-          .collection('offers')
-          .find(query)
-          .sort({ date: -1 })
-          .skip(+req.query.offset || 0)
-          .limit(+req.query.limit || 0)
-          .toArray()
-      ),
-      totalCount: await db.collection('offers').countDocuments(query),
-    })
-    .status(200);
+  const pipeline = [
+    {
+      $match: query,
+    },
+    {
+      $lookup: {
+        from: 'liquidity-wallets',
+        let: {
+          chainId: '$chainId',
+          provider: '$provider',
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$chainId', '$$chainId'] },
+                  { $eq: ['$walletAddress', '$$provider'] },
+                ],
+              },
+            },
+          },
+        ],
+        as: 'liquidityWallet',
+      },
+    },
+    {
+      $addFields: {
+        liquidityWallet: {
+          $ifNull: [{ $first: '$liquidityWallet' }, null],
+        },
+      },
+    },
+    {
+      $sort: { date: -1 },
+    },
+    { $skip: +req.query.offset || 0 },
+  ];
+
+  if (req.query.limit) {
+    pipeline.push({ $limit: +req.query.limit });
+  }
+
+  res.status(200).send({
+    offers: await db.collection('offers').aggregate(pipeline).toArray(),
+    totalCount: await db.collection('offers').countDocuments(query),
+  });
 });
 
 /* This is a GET request that returns all activated offers
@@ -132,21 +164,53 @@ router.get(
     const db = await Database.getInstance(req);
     const query = { userId: { $regex: res.locals.userId, $options: 'i' } };
 
-    res
-      .send({
-        offers: await getOffersWithLiquidityWallets(
-          db,
-          await db
-            .collection('offers')
-            .find(query)
-            .sort({ date: -1 })
-            .skip(+req.query.offset || 0)
-            .limit(+req.query.limit || 0)
-            .toArray()
-        ),
-        totalCount: await db.collection('offers').countDocuments(query),
-      })
-      .status(200);
+    const pipeline = [
+      {
+        $match: query,
+      },
+      {
+        $lookup: {
+          from: 'liquidity-wallets',
+          let: {
+            chainId: '$chainId',
+            provider: '$provider',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$chainId', '$$chainId'] },
+                    { $eq: ['$walletAddress', '$$provider'] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'liquidityWallet',
+        },
+      },
+      {
+        $addFields: {
+          liquidityWallet: {
+            $ifNull: [{ $first: '$liquidityWallet' }, null],
+          },
+        },
+      },
+      {
+        $sort: { date: -1 },
+      },
+      { $skip: +req.query.offset || 0 },
+    ];
+
+    if (req.query.limit) {
+      pipeline.push({ $limit: +req.query.limit });
+    }
+
+    res.status(200).send({
+      offers: await db.collection('offers').aggregate(pipeline).toArray(),
+      totalCount: await db.collection('offers').countDocuments(query),
+    });
   }
 );
 
@@ -164,12 +228,43 @@ router.get(
     const db = await Database.getInstance(req);
 
     res.status(200).send(
-      await getOneOfferWithLiquidityWallet(
-        db.collection('liquidity-wallets'),
-        await db.collection('offers').findOne({
-          offerId: req.query.offerId,
-        })
-      )
+      await db
+        .collection('offers')
+        .aggregate([
+          {
+            $match: { offerId: req.query.offerId },
+          },
+          {
+            $lookup: {
+              from: 'liquidity-wallets',
+              let: {
+                chainId: '$chainId',
+                provider: '$provider',
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ['$chainId', '$$chainId'] },
+                        { $eq: ['$walletAddress', '$$provider'] },
+                      ],
+                    },
+                  },
+                },
+              ],
+              as: 'liquidityWallet',
+            },
+          },
+          {
+            $addFields: {
+              liquidityWallet: {
+                $ifNull: [{ $first: '$liquidityWallet' }, null],
+              },
+            },
+          },
+        ])
+        .next()
     );
   }
 );
@@ -184,13 +279,46 @@ router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
 
   res.status(200).send(
-    await getOneOfferWithLiquidityWallet(
-      db.collection('liquidity-wallets'),
-      await db.collection('offers').findOne({
-        _id: new ObjectId(req.query.id),
-        userId: { $regex: res.locals.userId, $options: 'i' },
-      })
-    )
+    await db
+      .collection('offers')
+      .aggregate([
+        {
+          $match: {
+            _id: new ObjectId(req.query.id),
+            userId: { $regex: res.locals.userId, $options: 'i' },
+          },
+        },
+        {
+          $lookup: {
+            from: 'liquidity-wallets',
+            let: {
+              chainId: '$chainId',
+              provider: '$provider',
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$chainId', '$$chainId'] },
+                      { $eq: ['$walletAddress', '$$provider'] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: 'liquidityWallet',
+          },
+        },
+        {
+          $addFields: {
+            liquidityWallet: {
+              $ifNull: [{ $first: '$liquidityWallet' }, null],
+            },
+          },
+        },
+      ])
+      .next()
   );
 });
 
