@@ -118,30 +118,6 @@ export async function updateOrderFromDb(db, order) {
 }
 
 /**
- * The function retrieves information about a specific order from a smart contract.
- * @param contract - The contract parameter is likely an instance of a smart contract on the Ethereum
- * blockchain. It is used to interact with the functions and data stored on the contract.
- * @param orderId - The `orderId` parameter is an identifier for a specific order in the smart
- * contract. The function `getOrderInformation` takes this parameter and retrieves various pieces of
- * information related to that order from the smart contract.
- * @returns The function `getOrderInformation` is returning an object with the following properties:
- */
-export async function getOrderInformation(contract, orderId) {
-  return {
-    amountTokenDeposit: ethers.utils
-      .formatEther(await contract.getDepositAmount(orderId))
-      .toString(),
-    addressTokenDeposit: await contract.getDepositToken(orderId),
-    chainIdTokenDeposit: (await contract.getDepositChainId(orderId)).toString(),
-    destAddr: await contract.getRecipient(orderId),
-    offerId: await contract.getIdOffer(orderId),
-    amountTokenOffer: ethers.utils
-      .formatEther(await contract.getAmountOffer(orderId))
-      .toString(),
-  };
-}
-
-/**
  * This function retrieves the order ID from a transaction hash using a specified RPC provider.
  * @param rpc - The rpc parameter is likely a URL or endpoint for a remote procedure call (RPC) server.
  * This server is used to interact with a blockchain network, such as Ethereum, and execute
@@ -282,7 +258,6 @@ export const getAbis = async () => {
 
 export const utils_orders = {
   getOrderIdFromHash,
-  getOrderInformation,
   isPaidOrderFromHash,
 };
 
