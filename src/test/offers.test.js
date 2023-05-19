@@ -1094,7 +1094,7 @@ describe('Offers route', async function () {
         .delete(pathOffers_Delete_MongoDBId + 'myOfferId')
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(404);
-      chai.expect(res.body).to.deep.equal({ msg: 'No offer found.' });
+      chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
     });
   });
 
@@ -1136,7 +1136,7 @@ describe('Offers route', async function () {
           hash: 'myHashForActivation',
         });
       chai.expect(res).to.have.status(404);
-      chai.expect(res.body).to.deep.equal({ msg: 'No offer found.' });
+      chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
     });
 
     it('Should update offer only for current userId and proper offerId', async function () {
@@ -1224,7 +1224,7 @@ describe('Offers route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ chainId: '232323' });
       chai.expect(modifyOffer).to.have.status(404);
-      chai.expect(modifyOffer.body).to.deep.equal({ msg: 'No offer found.' });
+      chai.expect(modifyOffer.body).to.deep.equal({ msg: 'No offer found' });
     });
 
     it('Should modify only one offer', async function () {

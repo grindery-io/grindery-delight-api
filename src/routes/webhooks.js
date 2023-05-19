@@ -74,7 +74,7 @@ router.put(
 
     if (!offer) {
       res.status(404).send({
-        msg: 'No offer found.',
+        msg: 'No offer found',
       });
     }
 
