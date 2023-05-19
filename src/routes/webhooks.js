@@ -44,12 +44,13 @@ router.put(
         status: OFFER_STATUS.SUCCESS,
       },
     });
-    if (response.modifiedCount > 0)
+    if (response.modifiedCount > 0) {
       sendNotification('activationDeactivation', {
         type: 'offer',
         id: req.body._idOffer,
         userId: offer.userId,
       });
+    }
     return res.status(200).send(response);
   }
 );
@@ -85,12 +86,13 @@ router.put(
         isActive: true,
       },
     });
-    if (response.modifiedCount > 0)
+    if (response.modifiedCount > 0) {
       sendNotification('success', {
         type: 'offer',
         id: req.body._idOffer,
         userId: offer.userId,
       });
+    }
     return res.status(200).send(response);
   }
 );
@@ -125,12 +127,13 @@ router.put(
         status: ORDER_STATUS.SUCCESS,
       },
     });
-    if (response.modifiedCount > 0)
+    if (response.modifiedCount > 0) {
       sendNotification('success', {
         type: 'order',
         id: req.body._idTrade,
         userId: order.userId,
       });
+    }
     return res.status(200).send(response);
   }
 );
@@ -165,12 +168,13 @@ router.put(
         status: ORDER_STATUS.COMPLETE,
       },
     });
-    if (response.modifiedCount > 0)
+    if (response.modifiedCount > 0) {
       sendNotification('complete', {
         type: 'order',
         id: req.body._offerId,
         userId: order.userId,
       });
+    }
     return res.status(200).send(response);
   }
 );
