@@ -12,11 +12,7 @@ import {
 } from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
-import {
-  ORDER_STATUS,
-  getOneOrderWithOffer,
-  getOrdersWithOffers,
-} from '../utils/orders-utils.js';
+import { ORDER_STATUS } from '../utils/orders-utils.js';
 
 const router = express.Router();
 
@@ -57,25 +53,42 @@ router.get(
     const db = await Database.getInstance(req);
     const query = { userId: { $regex: res.locals.userId, $options: 'i' } };
 
-    res
-      .send({
-        orders: await getOrdersWithOffers(
-          db,
-          await db
-            .collection('orders')
-            .find(query)
-            .sort({ date: -1 })
-            .skip(+req.query.offset || 0)
-            .limit(+req.query.limit || 0)
-            .toArray()
-        ),
-        totalCount: await db.collection('orders').countDocuments(query),
-      })
-      .status(200);
+    const pipeline = [
+      {
+        $match: query,
+      },
+      {
+        $lookup: {
+          from: 'offers',
+          localField: 'offerId',
+          foreignField: 'offerId',
+          as: 'offer',
+        },
+      },
+      {
+        $addFields: {
+          offer: {
+            $ifNull: [{ $first: '$offer' }, null],
+          },
+        },
+      },
+      {
+        $sort: { date: -1 },
+      },
+      { $skip: +req.query.offset || 0 },
+    ];
+
+    if (req.query.limit) {
+      pipeline.push({ $limit: +req.query.limit });
+    }
+
+    res.status(200).send({
+      orders: await db.collection('orders').aggregate(pipeline).toArray(),
+      totalCount: await db.collection('orders').countDocuments(query),
+    });
   }
 );
 
-/* This is a GET request that returns a order for a specific user by the order id. */
 router.get(
   '/orderId',
   getOrderByOrderIdValidator,
@@ -88,17 +101,34 @@ router.get(
 
     const db = await Database.getInstance(req);
 
-    res
-      .send(
-        await getOneOrderWithOffer(
-          db.collection('offers'),
-          await db.collection('orders').findOne({
-            userId: { $regex: res.locals.userId, $options: 'i' },
-            orderId: req.query.orderId,
-          })
-        )
-      )
-      .status(200);
+    res.status(200).send(
+      await db
+        .collection('orders')
+        .aggregate([
+          {
+            $match: {
+              userId: { $regex: res.locals.userId, $options: 'i' },
+              orderId: req.query.orderId,
+            },
+          },
+          {
+            $lookup: {
+              from: 'offers',
+              localField: 'offerId',
+              foreignField: 'offerId',
+              as: 'offer',
+            },
+          },
+          {
+            $addFields: {
+              offer: {
+                $ifNull: [{ $first: '$offer' }, null],
+              },
+            },
+          },
+        ])
+        .next()
+    );
   }
 );
 
@@ -111,17 +141,34 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
 
   const db = await Database.getInstance(req);
 
-  res
-    .send(
-      await getOneOrderWithOffer(
-        db.collection('offers'),
-        await db.collection('orders').findOne({
-          userId: { $regex: res.locals.userId, $options: 'i' },
-          _id: new ObjectId(req.query.id),
-        })
-      )
-    )
-    .status(200);
+  res.status(200).send(
+    await db
+      .collection('orders')
+      .aggregate([
+        {
+          $match: {
+            userId: { $regex: res.locals.userId, $options: 'i' },
+            _id: new ObjectId(req.query.id),
+          },
+        },
+        {
+          $lookup: {
+            from: 'offers',
+            localField: 'offerId',
+            foreignField: 'offerId',
+            as: 'offer',
+          },
+        },
+        {
+          $addFields: {
+            offer: {
+              $ifNull: [{ $first: '$offer' }, null],
+            },
+          },
+        },
+      ])
+      .next()
+  );
 });
 
 /* This is a GET request that returns all orders associated with active offers for a specific user who
@@ -158,17 +205,37 @@ router.get(
       },
     };
 
+    const pipeline = [
+      {
+        $match: query,
+      },
+      {
+        $lookup: {
+          from: 'offers',
+          localField: 'offerId',
+          foreignField: 'offerId',
+          as: 'offer',
+        },
+      },
+      {
+        $addFields: {
+          offer: {
+            $ifNull: [{ $first: '$offer' }, null],
+          },
+        },
+      },
+      {
+        $sort: { date: -1 },
+      },
+      { $skip: +req.query.offset || 0 },
+    ];
+
+    if (req.query.limit) {
+      pipeline.push({ $limit: +req.query.limit });
+    }
+
     res.status(200).send({
-      orders: await getOrdersWithOffers(
-        db,
-        await db
-          .collection('orders')
-          .find(query)
-          .sort({ date: -1 })
-          .skip(+req.query.offset || 0)
-          .limit(+req.query.limit || 0)
-          .toArray()
-      ),
+      orders: await db.collection('orders').aggregate(pipeline).toArray(),
       totalCount: await db.collection('orders').countDocuments(query),
     });
   }
