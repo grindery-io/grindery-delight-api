@@ -14,10 +14,7 @@ import { validationResult, body } from 'express-validator';
  */
 export const validateResult = (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return errors.array();
-  }
-  return [];
+  return errors.isEmpty() ? [] : errors.array();
 };
 
 /**
@@ -30,10 +27,10 @@ export const validateResult = (req, res) => {
  * is used in the error message to indicate where the invalid fields were found.
  */
 export const validateFields = (req, allowedFields, location) => {
-  const receivedFields = Object.keys(req);
-  const unknownFields = receivedFields.filter(
+  const unknownFields = Object.keys(req).filter(
     (field) => !allowedFields.includes(field)
   );
+
   if (unknownFields.length) {
     throw new Error(
       `The following fields are not allowed in ${location}: ${unknownFields.join(
