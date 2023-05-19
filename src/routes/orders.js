@@ -12,7 +12,11 @@ import {
 } from '../validators/orders.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
-import { ORDER_STATUS } from '../utils/orders-utils.js';
+import {
+  ORDER_STATUS,
+  getPipelineOfferInOrder,
+  getPipelineOfferInOrders,
+} from '../utils/orders-utils.js';
 
 const router = express.Router();
 
@@ -53,37 +57,11 @@ router.get(
     const db = await Database.getInstance(req);
     const query = { userId: { $regex: res.locals.userId, $options: 'i' } };
 
-    const pipeline = [
-      {
-        $match: query,
-      },
-      {
-        $lookup: {
-          from: 'offers',
-          localField: 'offerId',
-          foreignField: 'offerId',
-          as: 'offer',
-        },
-      },
-      {
-        $addFields: {
-          offer: {
-            $ifNull: [{ $first: '$offer' }, null],
-          },
-        },
-      },
-      {
-        $sort: { date: -1 },
-      },
-      { $skip: +req.query.offset || 0 },
-    ];
-
-    if (req.query.limit) {
-      pipeline.push({ $limit: +req.query.limit });
-    }
-
     res.status(200).send({
-      orders: await db.collection('orders').aggregate(pipeline).toArray(),
+      orders: await db
+        .collection('orders')
+        .aggregate(getPipelineOfferInOrders(req, query))
+        .toArray(),
       totalCount: await db.collection('orders').countDocuments(query),
     });
   }
@@ -104,29 +82,12 @@ router.get(
     res.status(200).send(
       await db
         .collection('orders')
-        .aggregate([
-          {
-            $match: {
-              userId: { $regex: res.locals.userId, $options: 'i' },
-              orderId: req.query.orderId,
-            },
-          },
-          {
-            $lookup: {
-              from: 'offers',
-              localField: 'offerId',
-              foreignField: 'offerId',
-              as: 'offer',
-            },
-          },
-          {
-            $addFields: {
-              offer: {
-                $ifNull: [{ $first: '$offer' }, null],
-              },
-            },
-          },
-        ])
+        .aggregate(
+          getPipelineOfferInOrder({
+            userId: { $regex: res.locals.userId, $options: 'i' },
+            orderId: req.query.orderId,
+          })
+        )
         .next()
     );
   }
@@ -144,29 +105,12 @@ router.get('/id', getOrderByIdValidator, isRequired, async (req, res) => {
   res.status(200).send(
     await db
       .collection('orders')
-      .aggregate([
-        {
-          $match: {
-            userId: { $regex: res.locals.userId, $options: 'i' },
-            _id: new ObjectId(req.query.id),
-          },
-        },
-        {
-          $lookup: {
-            from: 'offers',
-            localField: 'offerId',
-            foreignField: 'offerId',
-            as: 'offer',
-          },
-        },
-        {
-          $addFields: {
-            offer: {
-              $ifNull: [{ $first: '$offer' }, null],
-            },
-          },
-        },
-      ])
+      .aggregate(
+        getPipelineOfferInOrder({
+          userId: { $regex: res.locals.userId, $options: 'i' },
+          _id: new ObjectId(req.query.id),
+        })
+      )
       .next()
   );
 });
@@ -205,37 +149,11 @@ router.get(
       },
     };
 
-    const pipeline = [
-      {
-        $match: query,
-      },
-      {
-        $lookup: {
-          from: 'offers',
-          localField: 'offerId',
-          foreignField: 'offerId',
-          as: 'offer',
-        },
-      },
-      {
-        $addFields: {
-          offer: {
-            $ifNull: [{ $first: '$offer' }, null],
-          },
-        },
-      },
-      {
-        $sort: { date: -1 },
-      },
-      { $skip: +req.query.offset || 0 },
-    ];
-
-    if (req.query.limit) {
-      pipeline.push({ $limit: +req.query.limit });
-    }
-
     res.status(200).send({
-      orders: await db.collection('orders').aggregate(pipeline).toArray(),
+      orders: await db
+        .collection('orders')
+        .aggregate(getPipelineOfferInOrders(req, query))
+        .toArray(),
       totalCount: await db.collection('orders').countDocuments(query),
     });
   }
