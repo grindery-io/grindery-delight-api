@@ -34,7 +34,7 @@ router.put(
 
     if (!offer) {
       res.status(404).send({
-        msg: 'Not found.',
+        msg: 'Not offer found.',
       });
     }
 
@@ -74,7 +74,7 @@ router.put(
 
     if (!offer) {
       res.status(404).send({
-        msg: 'No offer found',
+        msg: 'No offer found.',
       });
     }
 

@@ -173,8 +173,7 @@ export async function getOfferIdFromHash(rpc, hash) {
  * order, and `false` if it is not a paid order or if the transaction failed (status is 0).
  */
 export async function isPaidOrderFromHash(rpc, hash) {
-  const provider = getProviderFromRpc(rpc);
-  const txReceipt = await provider.getTransactionReceipt(hash);
+  const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(hash);
 
   const iface = new ethers.utils.Interface(
     (await getAbis()).liquidityWalletAbi

@@ -215,7 +215,7 @@ router.delete(
       res.status(200).send(await collection.deleteOne(offer));
     } else {
       res.status(404).send({
-        msg: 'No offer found',
+        msg: 'No offer found.',
       });
     }
   }
@@ -242,7 +242,7 @@ router.put(
 
     if (!offer) {
       res.status(404).send({
-        msg: 'No offer found',
+        msg: 'No offer found.',
       });
     }
 
@@ -276,7 +276,7 @@ router.put('/:offerId', updateOfferValidator, isRequired, async (req, res) => {
 
   if (!offer) {
     res.status(404).send({
-      msg: 'No offer found',
+      msg: 'No offer found.',
     });
   }
 
