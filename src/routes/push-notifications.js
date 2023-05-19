@@ -54,13 +54,13 @@ router.delete(
       userId: res.locals.userId,
     });
 
-    if (token) {
-      res.status(200).send(await collection.deleteOne(token));
-    } else {
+    if (!token) {
       res.status(404).send({
         msg: 'No notification token found',
       });
     }
+
+    res.status(200).send(await collection.deleteOne(token));
   }
 );
 
