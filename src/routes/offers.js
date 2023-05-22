@@ -53,24 +53,82 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   res.send(await collection.insertOne(newDocument)).status(201);
 });
 
+// const query = {
+//   isActive: true,
+//   amount: { $exists: true, $ne: '' },
+//   status: OFFER_STATUS.SUCCESS,
+//   offerId: { $exists: true, $ne: '' },
+// };
+
 /* This is a GET request that returns all offers. */
 router.get('/', getOffersPaginationValidator, async (req, res) => {
   const db = await Database.getInstance(req);
 
   const query = {
     isActive: true,
-    amount: { $exists: true, $ne: '' },
     status: OFFER_STATUS.SUCCESS,
-    offerId: { $exists: true, $ne: '' },
+    ...(req.query.offerId
+      ? { offerId: req.query.offerId }
+      : { offerId: { $exists: true, $ne: '' } }),
+    ...(req.query.token ? { token: req.query.token } : {}),
+    ...(req.query.exchangeToken
+      ? { exchangeToken: req.query.exchangeToken }
+      : {}),
+    ...(req.query.exchangeChainId
+      ? { exchangeChainId: req.query.exchangeChainId }
+      : {}),
+    amount: { $exists: true, $ne: '' },
+    ...(req.query.amountMin && req.query.amountMax
+      ? {
+          $expr: {
+            $and: [
+              {
+                $gte: [
+                  { $convert: { input: '$amount', to: 'decimal' } },
+                  parseFloat(req.query.amountMin),
+                ],
+              },
+              {
+                $lte: [
+                  { $convert: { input: '$amount', to: 'decimal' } },
+                  parseFloat(req.query.amountMax),
+                ],
+              },
+            ],
+          },
+        }
+      : req.query.amountMin
+      ? {
+          $expr: {
+            $gte: [
+              { $convert: { input: '$amount', to: 'decimal' } },
+              parseFloat(req.query.amountMin),
+            ],
+          },
+        }
+      : req.query.amountMax
+      ? {
+          $expr: {
+            $lte: [
+              { $convert: { input: '$amount', to: 'decimal' } },
+              parseFloat(req.query.amountMax),
+            ],
+          },
+        }
+      : {}),
   };
 
-  res.status(200).send({
-    offers: await db
-      .collection('offers')
-      .aggregate(getPipelineLiquidityWalletInOffers(req, query))
-      .toArray(),
-    totalCount: await db.collection('offers').countDocuments(query),
-  });
+  try {
+    res.status(200).send({
+      offers: await db
+        .collection('offers')
+        .aggregate(getPipelineLiquidityWalletInOffers(req, query))
+        .toArray(),
+      totalCount: await db.collection('offers').countDocuments(query),
+    });
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 /* This is a GET request that returns all activated offers

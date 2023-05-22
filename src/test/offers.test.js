@@ -42,63 +42,63 @@ async function createBaseOffer(offer) {
 }
 
 describe('Offers route', async function () {
-  // describe('POST new offer', async function () {
-  //   it('Should return 403 if no token is provided', async function () {
-  //     const createResponse = await chai
-  //       .request(app)
-  //       .post(pathOffers_Post)
-  //       .send(offer);
-  //     chai.expect(createResponse).to.have.status(403);
-  //   });
+  describe('POST new offer', async function () {
+    it('Should return 403 if no token is provided', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post(pathOffers_Post)
+        .send(offer);
+      chai.expect(createResponse).to.have.status(403);
+    });
 
-  //   it('Should POST a new offer if all fields are completed and no existing offer', async function () {
-  //     await createBaseOffer(offer);
-  //   });
+    it('Should POST a new offer if all fields are completed and no existing offer', async function () {
+      await createBaseOffer(offer);
+    });
 
-  //   it('Should POST multiple new offers with empty offerId', async function () {
-  //     await createBaseOffer({ ...offer, offerId: '' });
-  //     await createBaseOffer({ ...offer, offerId: '' });
-  //   });
+    it('Should POST multiple new offers with empty offerId', async function () {
+      await createBaseOffer({ ...offer, offerId: '' });
+      await createBaseOffer({ ...offer, offerId: '' });
+    });
 
-  //   it('Should POST a new offer if all fields are completed and no existing offer (with correct fields)', async function () {
-  //     await createBaseOffer(offer);
+    it('Should POST a new offer if all fields are completed and no existing offer (with correct fields)', async function () {
+      await createBaseOffer(offer);
 
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .query({ offerId: offer.offerId })
-  //       .set('Authorization', `Bearer ${mockedToken}`);
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .query({ offerId: offer.offerId })
+        .set('Authorization', `Bearer ${mockedToken}`);
 
-  //     // Assertions
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.be.an('object');
+      // Assertions
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.be.an('object');
 
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.userId;
-  //     delete getOffer.body.date;
+      delete getOffer.body._id;
+      delete getOffer.body.userId;
+      delete getOffer.body.date;
 
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //     });
-  //   });
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+      });
+    });
 
-  //   it('Should fail if same offerId exists', async function () {
-  //     await createBaseOffer(offer);
+    it('Should fail if same offerId exists', async function () {
+      await createBaseOffer(offer);
 
-  //     const createDuplicateResponse = await chai
-  //       .request(app)
-  //       .post(pathOffers_Post)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(offer);
-  //     chai.expect(createDuplicateResponse).to.have.status(404);
-  //     chai
-  //       .expect(createDuplicateResponse.body.msg)
-  //       .to.be.equal('This offer already exists.');
-  //   });
-  // });
+      const createDuplicateResponse = await chai
+        .request(app)
+        .post(pathOffers_Post)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(offer);
+      chai.expect(createDuplicateResponse).to.have.status(404);
+      chai
+        .expect(createDuplicateResponse.body.msg)
+        .to.be.equal('This offer already exists.');
+    });
+  });
 
   describe('GET all offers', async function () {
     beforeEach(async function () {
@@ -110,6 +110,58 @@ describe('Offers route', async function () {
           userId: process.env.USER_ID_TEST,
           status: OFFER_STATUS.SUCCESS,
           amount: '8',
+        },
+        {
+          ...offer,
+          offerId: 'anotherOfferId',
+          isActive: true,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: OFFER_STATUS.SUCCESS,
+          amount: '8',
+        },
+        {
+          ...offer,
+          token: 'anotherToken',
+          isActive: true,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: OFFER_STATUS.SUCCESS,
+          amount: '8',
+        },
+        {
+          ...offer,
+          exchangeToken: 'anotherExchangeToken',
+          isActive: true,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: OFFER_STATUS.SUCCESS,
+          amount: '8',
+        },
+        {
+          ...offer,
+          exchangeChainId: 'anotherExchangeChainId',
+          isActive: true,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: OFFER_STATUS.SUCCESS,
+          amount: '8',
+        },
+        {
+          ...offer,
+          isActive: true,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: OFFER_STATUS.SUCCESS,
+          amount: '4',
+        },
+        {
+          ...offer,
+          isActive: true,
+          date: new Date(),
+          userId: process.env.USER_ID_TEST,
+          status: OFFER_STATUS.SUCCESS,
+          amount: '10',
         },
         {
           ...offer,
@@ -213,13 +265,105 @@ describe('Offers route', async function () {
       });
     });
 
+    it('Should return offers with the proper offerId if specified in query', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ offerId: offer.offerId });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((e) => {
+        chai.expect(e.offerId).to.equal(offer.offerId);
+      });
+    });
+
+    it('Should return offers with the proper token if specified in query', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ token: offer.token });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((e) => {
+        chai.expect(e.token).to.equal(offer.token);
+      });
+    });
+
+    it('Should return offers with the proper exchangeToken if specified in query', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ exchangeToken: offer.exchangeToken });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((e) => {
+        chai.expect(e.exchangeToken).to.equal(offer.exchangeToken);
+      });
+    });
+
+    it('Should return offers with the proper exchangeChainId if specified in query', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ exchangeChainId: offer.exchangeChainId });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((e) => {
+        chai.expect(e.exchangeChainId).to.equal(offer.exchangeChainId);
+      });
+    });
+
+    it('Should return offers with the proper minAmount if specified in query', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ amountMin: '5' });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((e) => {
+        chai.expect(parseInt(e.amount)).to.be.at.least(5);
+      });
+    });
+
+    it('Should return offers with the proper maxAmount if specified in query', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ amountMax: '9' });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((e) => {
+        chai.expect(parseInt(e.amount)).to.be.at.most(9);
+      });
+    });
+
+    it('Should return offers with the proper minAmount and maxAmount if both specified in query', async function () {
+      const res = await chai
+        .request(app)
+        .get(pathOffers_Get_All)
+        .set({ Authorization: `Bearer ${mockedToken}` })
+        .query({ amountMin: '5', amountMax: '9' });
+      chai.expect(res).to.have.status(200);
+
+      res.body.offers.forEach((e) => {
+        chai.expect(parseInt(e.amount)).to.be.at.least(5);
+        chai.expect(parseInt(e.amount)).to.be.at.most(9);
+      });
+    });
+
     it('Should return the correct total count', async function () {
       const res = await chai
         .request(app)
         .get(pathOffers_Get_All)
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.totalCount).to.be.equal(2);
+      chai.expect(res.body.totalCount).to.be.equal(8);
     });
 
     it('Should set a proper limit', async function () {
@@ -250,7 +394,7 @@ describe('Offers route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({ offset: 1 });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.offers.length).to.be.equal(1);
+      chai.expect(res.body.offers.length).to.be.equal(7);
       chai
         .expect(res.body.offers[0]._id)
         .to.equal(offerFromInMemoryDB[1]._id.toString());
@@ -279,60 +423,6 @@ describe('Offers route', async function () {
           .expect(res.body.offers[i].date)
           .to.equal(offerFromInMemoryDB[i].date.toISOString());
       }
-    });
-
-    it('Should return an array with the correct MongoDB elements', async function () {
-      const offerFromInMemoryDB = await collectionOffers
-        .find({
-          isActive: true,
-          amount: { $exists: true, $ne: '' },
-          status: OFFER_STATUS.SUCCESS,
-          offerId: { $exists: true, $ne: '' },
-        })
-        .sort({ date: -1 })
-        .toArray();
-      const liquidityWalletFromInMemoryDB =
-        await collectionLiquidityWallet.findOne({});
-
-      const res = await chai
-        .request(app)
-        .get(pathOffers_Get_All)
-        .set({ Authorization: `Bearer ${mockedToken}` });
-
-      chai.expect(res).to.have.status(200);
-      chai.expect(res.body).to.deep.equal({
-        offers: [
-          {
-            ...offer,
-            isActive: true,
-            userId: process.env.USER_ID_TEST,
-            status: OFFER_STATUS.SUCCESS,
-            amount: '8',
-            _id: offerFromInMemoryDB[0]._id.toString(),
-            date: offerFromInMemoryDB[0].date.toISOString(),
-            liquidityWallet: {
-              chainId: offer.chainId,
-              walletAddress: offer.provider,
-              _id: liquidityWalletFromInMemoryDB._id.toString(),
-            },
-          },
-          {
-            ...offer,
-            isActive: true,
-            userId: 'anotherUserId',
-            status: OFFER_STATUS.SUCCESS,
-            amount: '8',
-            _id: offerFromInMemoryDB[1]._id.toString(),
-            date: offerFromInMemoryDB[1].date.toISOString(),
-            liquidityWallet: {
-              chainId: offer.chainId,
-              walletAddress: offer.provider,
-              _id: liquidityWalletFromInMemoryDB._id.toString(),
-            },
-          },
-        ],
-        totalCount: 2,
-      });
     });
   });
 
@@ -1039,732 +1129,732 @@ describe('Offers route', async function () {
     });
   });
 
-  // describe('DELETE offer by offerId', async function () {
-  //   it('Should return 403 if no token is provided', async function () {
-  //     const res = await chai
-  //       .request(app)
-  //       .delete(pathOffers_Delete_MongoDBId + 'myOfferId');
-  //     chai.expect(res).to.have.status(403);
-  //   });
-
-  //   it('Should delete one offer', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const deleteResponse = await chai
-  //       .request(app)
-  //       .delete(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`);
-
-  //     chai.expect(deleteResponse).to.have.status(200);
-  //     chai.expect(deleteResponse.body.acknowledged).to.be.true;
-  //     chai.expect(deleteResponse.body.deletedCount).to.equal(1);
-  //   });
-
-  //   it('Should delete the appropriate offer', async function () {
-  //     const createResponse = await chai
-  //       .request(app)
-  //       .post(pathOffers_Post)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(offer);
-  //     chai.expect(createResponse).to.have.status(200);
-
-  //     chai.expect(
-  //       await collectionOffers.findOne({
-  //         _id: new ObjectId(createResponse.body.insertedId),
-  //       })
-  //     ).to.not.be.empty;
-
-  //     const deleteResponse = await chai
-  //       .request(app)
-  //       .delete(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`);
-
-  //     chai.expect(deleteResponse).to.have.status(200);
-
-  //     chai.expect(
-  //       await collectionOffers.findOne({
-  //         _id: new ObjectId(createResponse.body.insertedId),
-  //       })
-  //     ).to.be.null;
-  //   });
-
-  //   it('Should return 404 with message if no offer found', async function () {
-  //     const res = await chai
-  //       .request(app)
-  //       .delete(pathOffers_Delete_MongoDBId + 'myOfferId')
-  //       .set({ Authorization: `Bearer ${mockedToken}` });
-  //     chai.expect(res).to.have.status(404);
-  //     chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
-  //   });
-  // });
-
-  // describe('PUT offer by offerId', async function () {
-  //   beforeEach(async function () {
-  //     await collectionOffers.insertMany([
-  //       {
-  //         ...offer,
-  //         userId: process.env.USER_ID_TEST,
-  //       },
-  //       {
-  //         ...offer,
-  //         offerId: 'anotherOfferId',
-  //         userId: process.env.USER_ID_TEST,
-  //       },
-  //       {
-  //         ...offer,
-  //         userId: 'anotherUserId',
-  //       },
-  //     ]);
-  //   });
-
-  //   it('Should return 403 if no token is provided', async function () {
-  //     const res = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put_Activation)
-  //       .send({ chainId: '232323' });
-  //     chai.expect(res).to.have.status(403);
-  //   });
-
-  //   it('Should return 404 if no offer found', async function () {
-  //     const res = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put_Activation)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send({
-  //         offerId: 'notAnOfferId',
-  //         activating: true,
-  //         hash: 'myHashForActivation',
-  //       });
-  //     chai.expect(res).to.have.status(404);
-  //     chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
-  //   });
-
-  //   it('Should update offer only for current userId and proper offerId', async function () {
-  //     const res = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put_Activation)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send({
-  //         offerId: offer.offerId,
-  //         activating: true,
-  //         hash: 'myHashForActivation',
-  //       });
-  //     chai.expect(res).to.have.status(200);
-  //     chai.expect(res.body.matchedCount).to.equal(1);
-  //   });
-
-  //   it('Should push activation hash', async function () {
-  //     const res = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put_Activation)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send({
-  //         offerId: offer.offerId,
-  //         activating: true,
-  //         hash: 'myHashForActivation',
-  //       });
-  //     chai.expect(res).to.have.status(200);
-
-  //     const modifOffer = await collectionOffers.findOne({
-  //       offerId: offer.offerId,
-  //     });
-  //     chai.expect(modifOffer.activationHash).to.equal('myHashForActivation');
-  //   });
-
-  //   it('Should set status activating if activating is true', async function () {
-  //     const res = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put_Activation)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send({
-  //         offerId: offer.offerId,
-  //         activating: true,
-  //         hash: 'myHashForActivation',
-  //       });
-  //     chai.expect(res).to.have.status(200);
-
-  //     const modifOffer = await collectionOffers.findOne({
-  //       offerId: offer.offerId,
-  //     });
-  //     chai.expect(modifOffer.status).to.equal(OFFER_STATUS.ACTIVATION);
-  //   });
-
-  //   it('Should set status deactivating if activating is false', async function () {
-  //     const res = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put_Activation)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send({
-  //         offerId: offer.offerId,
-  //         activating: false,
-  //         hash: 'myHashForActivation',
-  //       });
-  //     chai.expect(res).to.have.status(200);
-
-  //     const modifOffer = await collectionOffers.findOne({
-  //       offerId: offer.offerId,
-  //     });
-  //     chai.expect(modifOffer.status).to.equal(OFFER_STATUS.DEACTIVATION);
-  //   });
-  // });
-
-  // describe('PUT offer by offerId', async function () {
-  //   it('Should return 403 if no token is provided', async function () {
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .send({ chainId: '232323' });
-  //     chai.expect(modifyOffer).to.have.status(403);
-  //   });
-
-  //   it('Should return 404 if offer doesnt exist', async function () {
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Delete_MongoDBId + 'myOfferId')
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send({ chainId: '232323' });
-  //     chai.expect(modifyOffer).to.have.status(404);
-  //     chai.expect(modifyOffer.body).to.deep.equal({ msg: 'No offer found' });
-  //   });
-
-  //   it('Should modify only one offer', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send({ chainId: '232323' });
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-  //     chai.expect(modifyOffer.body).to.deep.equal({
-  //       acknowledged: true,
-  //       modifiedCount: 1,
-  //       upsertedId: null,
-  //       upsertedCount: 0,
-  //       matchedCount: 1,
-  //     });
-  //   });
-
-  //   it('Should modify all offer fields', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...modifiedOffer,
-  //       isActive: true,
-  //       hash: offer.hash,
-  //       offerId: offer.offerId,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //     });
-  //   });
-
-  //   it('Should modify only the chainId field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       chainId: '76',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       ...modifiedOffer,
-  //     });
-  //   });
-
-  //   it('Should modify only min field of an offer', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       min: '10',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       min: modifiedOffer.min,
-  //     });
-  //   });
-
-  //   it('Should modify only max field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       max: '500',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       max: modifiedOffer.max,
-  //     });
-  //   });
-
-  //   it('Should modify only tokenId field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       tokenId: 'new-token-id',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       tokenId: modifiedOffer.tokenId,
-  //     });
-  //   });
-
-  //   it('Should modify only the token field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       token: 'modified-token',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       token: modifiedOffer.token,
-  //     });
-  //   });
-
-  //   it('Should modify only tokenAddress field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       tokenAddress: '0x1234567890123456789012345678901234567890',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       tokenAddress: modifiedOffer.tokenAddress,
-  //     });
-  //   });
-
-  //   it('Should modify the exchangeRate field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       exchangeRate: '3',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       exchangeRate: modifiedOffer.exchangeRate,
-  //     });
-  //   });
-
-  //   it('Should modify the exchangeToken field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       exchangeToken: 'modified-exchange-token',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       exchangeToken: modifiedOffer.exchangeToken,
-  //     });
-  //   });
-
-  //   it('Should modify the exchangeChainId field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       exchangeChainId: 'modified-exchange-chain-id',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       exchangeChainId: modifiedOffer.exchangeChainId,
-  //     });
-  //   });
-
-  //   it('Should modify only estimatedTime field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       estimatedTime: 'modified-estimated-time',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       estimatedTime: modifiedOffer.estimatedTime,
-  //     });
-  //   });
-
-  //   it('Should modify only provider field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       provider: 'new-provider',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       provider: modifiedOffer.provider,
-  //     });
-  //   });
-
-  //   it('Should modify the title field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       title: 'Modified Offer Title',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       title: modifiedOffer.title,
-  //     });
-  //   });
-
-  //   it('Should modify only the image field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       image: 'modified-image',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       image: modifiedOffer.image,
-  //     });
-  //   });
-
-  //   it('Should modify the amount field', async function () {
-  //     await createBaseOffer(offer);
-
-  //     const modifiedOffer = {
-  //       amount: '2',
-  //     };
-
-  //     const modifyOffer = await chai
-  //       .request(app)
-  //       .put(pathOffers_Put + offer.offerId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .send(modifiedOffer);
-
-  //     chai.expect(modifyOffer).to.have.status(200);
-
-  //     const getOffer = await chai
-  //       .request(app)
-  //       .get(pathOffers_Get_OfferId)
-  //       .set('Authorization', `Bearer ${mockedToken}`)
-  //       .query({ offerId: offer.offerId });
-
-  //     delete getOffer.body._id;
-  //     delete getOffer.body.date;
-  //     delete getOffer.body.userId;
-
-  //     chai.expect(getOffer).to.have.status(200);
-  //     chai.expect(getOffer.body).to.deep.equal({
-  //       ...offer,
-  //       isActive: true,
-  //       status: OFFER_STATUS.PENDING,
-  //       liquidityWallet: null,
-  //       amount: modifiedOffer.amount,
-  //     });
-  //   });
-  // });
+  describe('DELETE offer by offerId', async function () {
+    it('Should return 403 if no token is provided', async function () {
+      const res = await chai
+        .request(app)
+        .delete(pathOffers_Delete_MongoDBId + 'myOfferId');
+      chai.expect(res).to.have.status(403);
+    });
+
+    it('Should delete one offer', async function () {
+      await createBaseOffer(offer);
+
+      const deleteResponse = await chai
+        .request(app)
+        .delete(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`);
+
+      chai.expect(deleteResponse).to.have.status(200);
+      chai.expect(deleteResponse.body.acknowledged).to.be.true;
+      chai.expect(deleteResponse.body.deletedCount).to.equal(1);
+    });
+
+    it('Should delete the appropriate offer', async function () {
+      const createResponse = await chai
+        .request(app)
+        .post(pathOffers_Post)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(offer);
+      chai.expect(createResponse).to.have.status(200);
+
+      chai.expect(
+        await collectionOffers.findOne({
+          _id: new ObjectId(createResponse.body.insertedId),
+        })
+      ).to.not.be.empty;
+
+      const deleteResponse = await chai
+        .request(app)
+        .delete(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`);
+
+      chai.expect(deleteResponse).to.have.status(200);
+
+      chai.expect(
+        await collectionOffers.findOne({
+          _id: new ObjectId(createResponse.body.insertedId),
+        })
+      ).to.be.null;
+    });
+
+    it('Should return 404 with message if no offer found', async function () {
+      const res = await chai
+        .request(app)
+        .delete(pathOffers_Delete_MongoDBId + 'myOfferId')
+        .set({ Authorization: `Bearer ${mockedToken}` });
+      chai.expect(res).to.have.status(404);
+      chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
+    });
+  });
+
+  describe('PUT offer by offerId', async function () {
+    beforeEach(async function () {
+      await collectionOffers.insertMany([
+        {
+          ...offer,
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          offerId: 'anotherOfferId',
+          userId: process.env.USER_ID_TEST,
+        },
+        {
+          ...offer,
+          userId: 'anotherUserId',
+        },
+      ]);
+    });
+
+    it('Should return 403 if no token is provided', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .send({ chainId: '232323' });
+      chai.expect(res).to.have.status(403);
+    });
+
+    it('Should return 404 if no offer found', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: 'notAnOfferId',
+          activating: true,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(404);
+      chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
+    });
+
+    it('Should update offer only for current userId and proper offerId', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: offer.offerId,
+          activating: true,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(200);
+      chai.expect(res.body.matchedCount).to.equal(1);
+    });
+
+    it('Should push activation hash', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: offer.offerId,
+          activating: true,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(200);
+
+      const modifOffer = await collectionOffers.findOne({
+        offerId: offer.offerId,
+      });
+      chai.expect(modifOffer.activationHash).to.equal('myHashForActivation');
+    });
+
+    it('Should set status activating if activating is true', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: offer.offerId,
+          activating: true,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(200);
+
+      const modifOffer = await collectionOffers.findOne({
+        offerId: offer.offerId,
+      });
+      chai.expect(modifOffer.status).to.equal(OFFER_STATUS.ACTIVATION);
+    });
+
+    it('Should set status deactivating if activating is false', async function () {
+      const res = await chai
+        .request(app)
+        .put(pathOffers_Put_Activation)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({
+          offerId: offer.offerId,
+          activating: false,
+          hash: 'myHashForActivation',
+        });
+      chai.expect(res).to.have.status(200);
+
+      const modifOffer = await collectionOffers.findOne({
+        offerId: offer.offerId,
+      });
+      chai.expect(modifOffer.status).to.equal(OFFER_STATUS.DEACTIVATION);
+    });
+  });
+
+  describe('PUT offer by offerId', async function () {
+    it('Should return 403 if no token is provided', async function () {
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .send({ chainId: '232323' });
+      chai.expect(modifyOffer).to.have.status(403);
+    });
+
+    it('Should return 404 if offer doesnt exist', async function () {
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Delete_MongoDBId + 'myOfferId')
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({ chainId: '232323' });
+      chai.expect(modifyOffer).to.have.status(404);
+      chai.expect(modifyOffer.body).to.deep.equal({ msg: 'No offer found' });
+    });
+
+    it('Should modify only one offer', async function () {
+      await createBaseOffer(offer);
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send({ chainId: '232323' });
+
+      chai.expect(modifyOffer).to.have.status(200);
+      chai.expect(modifyOffer.body).to.deep.equal({
+        acknowledged: true,
+        modifiedCount: 1,
+        upsertedId: null,
+        upsertedCount: 0,
+        matchedCount: 1,
+      });
+    });
+
+    it('Should modify all offer fields', async function () {
+      await createBaseOffer(offer);
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...modifiedOffer,
+        isActive: true,
+        hash: offer.hash,
+        offerId: offer.offerId,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+      });
+    });
+
+    it('Should modify only the chainId field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        chainId: '76',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        ...modifiedOffer,
+      });
+    });
+
+    it('Should modify only min field of an offer', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        min: '10',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        min: modifiedOffer.min,
+      });
+    });
+
+    it('Should modify only max field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        max: '500',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        max: modifiedOffer.max,
+      });
+    });
+
+    it('Should modify only tokenId field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        tokenId: 'new-token-id',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        tokenId: modifiedOffer.tokenId,
+      });
+    });
+
+    it('Should modify only the token field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        token: 'modified-token',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        token: modifiedOffer.token,
+      });
+    });
+
+    it('Should modify only tokenAddress field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        tokenAddress: '0x1234567890123456789012345678901234567890',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        tokenAddress: modifiedOffer.tokenAddress,
+      });
+    });
+
+    it('Should modify the exchangeRate field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        exchangeRate: '3',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        exchangeRate: modifiedOffer.exchangeRate,
+      });
+    });
+
+    it('Should modify the exchangeToken field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        exchangeToken: 'modified-exchange-token',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        exchangeToken: modifiedOffer.exchangeToken,
+      });
+    });
+
+    it('Should modify the exchangeChainId field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        exchangeChainId: 'modified-exchange-chain-id',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        exchangeChainId: modifiedOffer.exchangeChainId,
+      });
+    });
+
+    it('Should modify only estimatedTime field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        estimatedTime: 'modified-estimated-time',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        estimatedTime: modifiedOffer.estimatedTime,
+      });
+    });
+
+    it('Should modify only provider field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        provider: 'new-provider',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        provider: modifiedOffer.provider,
+      });
+    });
+
+    it('Should modify the title field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        title: 'Modified Offer Title',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        title: modifiedOffer.title,
+      });
+    });
+
+    it('Should modify only the image field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        image: 'modified-image',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        image: modifiedOffer.image,
+      });
+    });
+
+    it('Should modify the amount field', async function () {
+      await createBaseOffer(offer);
+
+      const modifiedOffer = {
+        amount: '2',
+      };
+
+      const modifyOffer = await chai
+        .request(app)
+        .put(pathOffers_Put + offer.offerId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .send(modifiedOffer);
+
+      chai.expect(modifyOffer).to.have.status(200);
+
+      const getOffer = await chai
+        .request(app)
+        .get(pathOffers_Get_OfferId)
+        .set('Authorization', `Bearer ${mockedToken}`)
+        .query({ offerId: offer.offerId });
+
+      delete getOffer.body._id;
+      delete getOffer.body.date;
+      delete getOffer.body.userId;
+
+      chai.expect(getOffer).to.have.status(200);
+      chai.expect(getOffer.body).to.deep.equal({
+        ...offer,
+        isActive: true,
+        status: OFFER_STATUS.PENDING,
+        liquidityWallet: null,
+        amount: modifiedOffer.amount,
+      });
+    });
+  });
 });

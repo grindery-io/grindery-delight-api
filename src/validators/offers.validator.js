@@ -149,6 +149,42 @@ export const getOffersValidator = [
 export const getOffersPaginationValidator = [
   query('limit').optional().isInt().withMessage('must be int value'),
   query('offset').optional().isInt().withMessage('must be int value'),
+  query('offerId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  query('token')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  query('exchangeToken')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  query('exchangeChainId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  query('amountMin')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  query('amountMax')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
 ];
 
 export const deleteOfferValidator = [
