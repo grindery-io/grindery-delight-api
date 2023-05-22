@@ -1,5 +1,5 @@
 import express from 'express';
-import isRequired from '../utils/auth-utils.js';
+import isRequired, { authenticateApiKey } from '../utils/auth-utils.js';
 import { Database } from '../db/conn.js';
 import {
   updateActivationOffer,
@@ -44,7 +44,7 @@ router.put('/update-offer-user', isRequired, async (req, res) => {
   );
 });
 
-router.put('/update-offer-all', isRequired, async (req, res) => {
+router.put('/update-offer-all', authenticateApiKey, async (req, res) => {
   const db = await Database.getInstance(req);
 
   res.status(200).send(
@@ -121,45 +121,49 @@ router.put('/update-offer-activation-user', isRequired, async (req, res) => {
   );
 });
 
-router.put('/update-offer-activation-all', isRequired, async (req, res) => {
-  const db = await Database.getInstance(req);
+router.put(
+  '/update-offer-activation-all',
+  authenticateApiKey,
+  async (req, res) => {
+    const db = await Database.getInstance(req);
 
-  res.status(200).send(
-    (
-      await Promise.all(
-        (
-          await db
-            .collection('offers')
-            .find({
-              offerId: { $exists: true, $ne: '' },
-              $or: [
-                { isActive: false, status: OFFER_STATUS.ACTIVATION },
-                { isActive: true, status: OFFER_STATUS.DEACTIVATION },
-              ],
-            })
-            .toArray()
-        ).map(async (offer) => {
-          try {
-            await db.collection('offers').updateOne(
-              { _id: offer._id },
-              {
-                $set: await updateActivationOffer(db, offer),
-              }
-            );
+    res.status(200).send(
+      (
+        await Promise.all(
+          (
+            await db
+              .collection('offers')
+              .find({
+                offerId: { $exists: true, $ne: '' },
+                $or: [
+                  { isActive: false, status: OFFER_STATUS.ACTIVATION },
+                  { isActive: true, status: OFFER_STATUS.DEACTIVATION },
+                ],
+              })
+              .toArray()
+          ).map(async (offer) => {
+            try {
+              await db.collection('offers').updateOne(
+                { _id: offer._id },
+                {
+                  $set: await updateActivationOffer(db, offer),
+                }
+              );
 
-            return offer;
-          } catch (e) {
-            console.log(
-              '[update-offer-activation-all] - Offers MongoDB Id:',
-              offer._id.toString(),
-              '- error:',
-              e
-            );
-          }
-        })
-      )
-    ).filter((offer) => offer !== undefined)
-  );
-});
+              return offer;
+            } catch (e) {
+              console.log(
+                '[update-offer-activation-all] - Offers MongoDB Id:',
+                offer._id.toString(),
+                '- error:',
+                e
+              );
+            }
+          })
+        )
+      ).filter((offer) => offer !== undefined)
+    );
+  }
+);
 
 export default router;
