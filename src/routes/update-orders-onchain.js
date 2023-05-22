@@ -1,5 +1,5 @@
 import express from 'express';
-import isRequired from '../utils/auth-utils.js';
+import isRequired, { authenticateApiKey } from '../utils/auth-utils.js';
 import { Database } from '../db/conn.js';
 import {
   updateCompletionOrder,
@@ -44,7 +44,7 @@ router.put('/update-order-user', isRequired, async (req, res) => {
   );
 });
 
-router.put('/update-order-all', isRequired, async (req, res) => {
+router.put('/update-order-all', authenticateApiKey, async (req, res) => {
   const db = await Database.getInstance(req);
 
   res.status(200).send(
@@ -118,44 +118,48 @@ router.put('/update-order-completion-user', isRequired, async (req, res) => {
   );
 });
 
-router.put('/update-order-completion-all', isRequired, async (req, res) => {
-  const db = await Database.getInstance(req);
+router.put(
+  '/update-order-completion-all',
+  authenticateApiKey,
+  async (req, res) => {
+    const db = await Database.getInstance(req);
 
-  res.status(200).send(
-    (
-      await Promise.all(
-        (
-          await db
-            .collection('orders')
-            .find({
-              orderId: { $exists: true, $ne: '' },
-              isComplete: false,
-              status: ORDER_STATUS.COMPLETION,
-            })
-            .toArray()
-        ).map(async (order) => {
-          try {
-            await db.collection('orders').updateOne(
-              { _id: order._id },
-              {
-                $set: await updateCompletionOrder(db, order),
-              }
-            );
+    res.status(200).send(
+      (
+        await Promise.all(
+          (
+            await db
+              .collection('orders')
+              .find({
+                orderId: { $exists: true, $ne: '' },
+                isComplete: false,
+                status: ORDER_STATUS.COMPLETION,
+              })
+              .toArray()
+          ).map(async (order) => {
+            try {
+              await db.collection('orders').updateOne(
+                { _id: order._id },
+                {
+                  $set: await updateCompletionOrder(db, order),
+                }
+              );
 
-            return order;
-          } catch (e) {
-            console.log(
-              '[update-order-completion-all] - Orders MongoDB Id:',
-              order._id.toString(),
-              '- error:',
-              e
-            );
-          }
-        })
-      )
-    ).filter((order) => order !== undefined)
-  );
-});
+              return order;
+            } catch (e) {
+              console.log(
+                '[update-order-completion-all] - Orders MongoDB Id:',
+                order._id.toString(),
+                '- error:',
+                e
+              );
+            }
+          })
+        )
+      ).filter((order) => order !== undefined)
+    );
+  }
+);
 
 router.put('/update-order-completion-seller', isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
