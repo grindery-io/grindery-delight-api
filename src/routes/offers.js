@@ -17,6 +17,8 @@ import {
   OFFER_STATUS,
   getOffersWithLiquidityWallets,
   getOneOfferWithLiquidityWallet,
+  getPipelineLiquidityWalletInOffer,
+  getPipelineLiquidityWalletInOffers,
 } from '../utils/offers-utils.js';
 
 const router = express.Router();
@@ -62,51 +64,11 @@ router.get('/', getOffersPaginationValidator, async (req, res) => {
     offerId: { $exists: true, $ne: '' },
   };
 
-  const pipeline = [
-    {
-      $match: query,
-    },
-    {
-      $lookup: {
-        from: 'liquidity-wallets',
-        let: {
-          chainId: '$chainId',
-          provider: '$provider',
-        },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ['$chainId', '$$chainId'] },
-                  { $eq: ['$walletAddress', '$$provider'] },
-                ],
-              },
-            },
-          },
-        ],
-        as: 'liquidityWallet',
-      },
-    },
-    {
-      $addFields: {
-        liquidityWallet: {
-          $ifNull: [{ $first: '$liquidityWallet' }, null],
-        },
-      },
-    },
-    {
-      $sort: { date: -1 },
-    },
-    { $skip: +req.query.offset || 0 },
-  ];
-
-  if (req.query.limit) {
-    pipeline.push({ $limit: +req.query.limit });
-  }
-
   res.status(200).send({
-    offers: await db.collection('offers').aggregate(pipeline).toArray(),
+    offers: await db
+      .collection('offers')
+      .aggregate(getPipelineLiquidityWalletInOffers(req, query))
+      .toArray(),
     totalCount: await db.collection('offers').countDocuments(query),
   });
 });
@@ -164,51 +126,11 @@ router.get(
     const db = await Database.getInstance(req);
     const query = { userId: { $regex: res.locals.userId, $options: 'i' } };
 
-    const pipeline = [
-      {
-        $match: query,
-      },
-      {
-        $lookup: {
-          from: 'liquidity-wallets',
-          let: {
-            chainId: '$chainId',
-            provider: '$provider',
-          },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$chainId', '$$chainId'] },
-                    { $eq: ['$walletAddress', '$$provider'] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: 'liquidityWallet',
-        },
-      },
-      {
-        $addFields: {
-          liquidityWallet: {
-            $ifNull: [{ $first: '$liquidityWallet' }, null],
-          },
-        },
-      },
-      {
-        $sort: { date: -1 },
-      },
-      { $skip: +req.query.offset || 0 },
-    ];
-
-    if (req.query.limit) {
-      pipeline.push({ $limit: +req.query.limit });
-    }
-
     res.status(200).send({
-      offers: await db.collection('offers').aggregate(pipeline).toArray(),
+      offers: await db
+        .collection('offers')
+        .aggregate(getPipelineLiquidityWalletInOffers(req, query))
+        .toArray(),
       totalCount: await db.collection('offers').countDocuments(query),
     });
   }
@@ -230,40 +152,9 @@ router.get(
     res.status(200).send(
       await db
         .collection('offers')
-        .aggregate([
-          {
-            $match: { offerId: req.query.offerId },
-          },
-          {
-            $lookup: {
-              from: 'liquidity-wallets',
-              let: {
-                chainId: '$chainId',
-                provider: '$provider',
-              },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        { $eq: ['$chainId', '$$chainId'] },
-                        { $eq: ['$walletAddress', '$$provider'] },
-                      ],
-                    },
-                  },
-                },
-              ],
-              as: 'liquidityWallet',
-            },
-          },
-          {
-            $addFields: {
-              liquidityWallet: {
-                $ifNull: [{ $first: '$liquidityWallet' }, null],
-              },
-            },
-          },
-        ])
+        .aggregate(
+          getPipelineLiquidityWalletInOffer({ offerId: req.query.offerId })
+        )
         .next()
     );
   }
@@ -281,43 +172,12 @@ router.get('/id', getOfferByIdValidator, isRequired, async (req, res) => {
   res.status(200).send(
     await db
       .collection('offers')
-      .aggregate([
-        {
-          $match: {
-            _id: new ObjectId(req.query.id),
-            userId: { $regex: res.locals.userId, $options: 'i' },
-          },
-        },
-        {
-          $lookup: {
-            from: 'liquidity-wallets',
-            let: {
-              chainId: '$chainId',
-              provider: '$provider',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ['$chainId', '$$chainId'] },
-                      { $eq: ['$walletAddress', '$$provider'] },
-                    ],
-                  },
-                },
-              },
-            ],
-            as: 'liquidityWallet',
-          },
-        },
-        {
-          $addFields: {
-            liquidityWallet: {
-              $ifNull: [{ $first: '$liquidityWallet' }, null],
-            },
-          },
-        },
-      ])
+      .aggregate(
+        getPipelineLiquidityWalletInOffer({
+          _id: new ObjectId(req.query.id),
+          userId: { $regex: res.locals.userId, $options: 'i' },
+        })
+      )
       .next()
   );
 });
