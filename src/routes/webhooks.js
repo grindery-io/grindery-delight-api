@@ -87,7 +87,7 @@ router.put(
       },
     });
     if (response.modifiedCount > 0) {
-      sendNotification('success', {
+      sendNotification('creation', {
         type: 'offer',
         id: req.body._idOffer,
         userId: offer.userId,
@@ -128,7 +128,7 @@ router.put(
       },
     });
     if (response.modifiedCount > 0) {
-      sendNotification('success', {
+      sendNotification('creation', {
         type: 'order',
         id: req.body._idTrade,
         userId: order.userId,
@@ -169,7 +169,7 @@ router.put(
       },
     });
     if (response.modifiedCount > 0) {
-      sendNotification('complete', {
+      sendNotification('completion', {
         type: 'order',
         id: req.body._offerId,
         userId: order.userId,
