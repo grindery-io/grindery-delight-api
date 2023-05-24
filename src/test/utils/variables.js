@@ -261,12 +261,3 @@ export const blockchainBscTestnet = {
   transactionExplorerUrl: 'https://testnet.bscscan.com/tx/{hash}',
   addressExplorerUrl: 'https://testnet.bscscan.com/address/{hash}',
 };
-
-export const orderInformationOnChain = {
-  amountTokenDeposit: '0.001',
-  addressTokenDeposit: '0x0000000000000000000000000000000000000000',
-  chainIdTokenDeposit: '5',
-  destAddr: '0x0cBB9CCA778De38d48F1795E6B8C7E8C8FFAe59B',
-  offerId: '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec',
-  amountTokenOffer: '1.0',
-};

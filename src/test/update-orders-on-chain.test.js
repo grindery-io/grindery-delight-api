@@ -10,7 +10,6 @@ import {
   collectionOffers,
   collectionOrders,
   offer,
-  orderInformationOnChain,
   pathViewBlockchain_Put_OrdersAll,
   pathViewBlockchain_Put_OrdersCompleteAll,
   pathViewBlockchain_Put_OrdersCompleteSeller,
