@@ -360,7 +360,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -368,7 +368,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.SUCCESS,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -376,7 +376,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -384,7 +384,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashNotOrderPaid,
+          completionHash: txHashNotOrderPaid,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -393,7 +393,7 @@ describe('Update orders via on-chain', async function () {
           offerId: offer.offerId,
           isComplete: true,
           shouldNotAppear: 'shouldNotAppear',
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -401,7 +401,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
           userId: 'anotherUserId',
         },
       ]);
@@ -471,7 +471,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((order) => {
-          if (order.hashCompletion !== txHashNotOrderPaid) {
+          if (order.completionHash !== txHashNotOrderPaid) {
             chai.expect(order.isComplete).to.be.true;
           }
         });
@@ -483,7 +483,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((order) => {
-          if (order.hashCompletion !== txHashNotOrderPaid) {
+          if (order.completionHash !== txHashNotOrderPaid) {
             chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETE);
           }
         });
@@ -495,7 +495,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((order) => {
-          if (order.hashCompletion === txHashNotOrderPaid) {
+          if (order.completionHash === txHashNotOrderPaid) {
             chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETION_FAILURE);
           }
         });
@@ -507,13 +507,24 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((order) => {
-          if (order.hashCompletion === txHashNotOrderPaid) {
+          if (order.completionHash === txHashNotOrderPaid) {
             chai.expect(order.isComplete).to.be.false;
           }
         });
       });
     });
     describe('Update completion in database - all', async function () {
+      it('Should not update orders already completed', async function () {
+        const res = await chai
+          .request(app)
+          .put(pathViewBlockchain_Put_OrdersCompleteAll)
+          .set('Authorization', `Bearer ${mockedToken}`);
+        chai.expect(res).to.have.status(200);
+        res.body.forEach((order) => {
+          chai.expect(order.shouldNotAppear).to.be.undefined;
+        });
+      });
+
       it('Should update only orders with completion status', async function () {
         const res = await chai
           .request(app)
@@ -554,7 +565,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((order) => {
-          if (order.hashCompletion !== txHashNotOrderPaid) {
+          if (order.completionHash !== txHashNotOrderPaid) {
             chai.expect(order.isComplete).to.be.true;
           }
         });
@@ -566,7 +577,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((order) => {
-          if (order.hashCompletion !== txHashNotOrderPaid) {
+          if (order.completionHash !== txHashNotOrderPaid) {
             chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETE);
           }
         });
@@ -578,7 +589,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((order) => {
-          if (order.hashCompletion === txHashNotOrderPaid) {
+          if (order.completionHash === txHashNotOrderPaid) {
             chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETION_FAILURE);
           }
         });
@@ -590,13 +601,14 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((order) => {
-          if (order.hashCompletion === txHashNotOrderPaid) {
+          if (order.completionHash === txHashNotOrderPaid) {
             chai.expect(order.isComplete).to.be.false;
           }
         });
       });
     });
   });
+
   describe('Update orders completion via on-chain for seller', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
@@ -625,49 +637,49 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
         },
         {
           ...order,
           status: ORDER_STATUS.COMPLETION,
           offerId: 'anotherOfferId',
           isComplete: false,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
         },
         {
           ...order,
           status: ORDER_STATUS.SUCCESS,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
         },
         {
           ...order,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
         },
         {
           ...order,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashNotOrderPaid,
+          completionHash: txHashNotOrderPaid,
         },
         {
           ...order,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: true,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
         },
         {
           ...order,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
-          hashCompletion: txHashOrderPaid,
+          completionHash: txHashOrderPaid,
         },
       ]);
     });
@@ -731,7 +743,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((order) => {
-        if (order.hashCompletion !== txHashNotOrderPaid) {
+        if (order.completionHash !== txHashNotOrderPaid) {
           chai.expect(order.isComplete).to.be.true;
         }
       });
@@ -743,7 +755,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((order) => {
-        if (order.hashCompletion !== txHashNotOrderPaid) {
+        if (order.completionHash !== txHashNotOrderPaid) {
           chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETE);
         }
       });
@@ -755,7 +767,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((order) => {
-        if (order.hashCompletion === txHashNotOrderPaid) {
+        if (order.completionHash === txHashNotOrderPaid) {
           chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETION_FAILURE);
         }
       });
@@ -767,7 +779,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((order) => {
-        if (order.hashCompletion === txHashNotOrderPaid) {
+        if (order.completionHash === txHashNotOrderPaid) {
           chai.expect(order.isComplete).to.be.false;
         }
       });

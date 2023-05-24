@@ -37,7 +37,7 @@ export async function updateOfferId(db, offer) {
  * @param db - The `db` parameter is likely a database object that is used to interact with a database,
  * possibly a MongoDB database based on the use of `db.collection` in the code.
  * @param order - The `order` parameter is an object that represents an order and contains various
- * properties such as `offerId`, `hashCompletion`, `isComplete`, and `status`. The function updates the
+ * properties such as `offerId`, `completionHash`, `isComplete`, and `status`. The function updates the
  * `isComplete` and `status` properties of the `order` object based on whether the payment for the
  * @returns an object with two properties: `status` and `isComplete`. The `status` property indicates
  * the status of the order, which can be either `'complete'` or `'paymentFailure'`. The `isComplete`
@@ -51,7 +51,7 @@ export async function updateCompletionOrder(db, order) {
 
   order.isComplete = await utils_orders.isPaidOrderFromHash(
     chain.rpc[0],
-    order.hashCompletion
+    order.completionHash
   );
   order.status = order.isComplete
     ? ORDER_STATUS.COMPLETE
