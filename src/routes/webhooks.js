@@ -171,7 +171,7 @@ router.put(
     if (response.modifiedCount > 0) {
       sendNotification('completion', {
         type: 'order',
-        id: req.body._offerId,
+        id: order.orderId,
         userId: order.userId,
       });
     }
