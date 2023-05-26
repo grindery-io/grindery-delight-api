@@ -173,6 +173,12 @@ export const getOffersPaginationValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
+  query('chainId')
+    .optional()
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   query('amountMin')
     .optional()
     .isString()

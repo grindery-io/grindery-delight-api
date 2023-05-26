@@ -77,6 +77,7 @@ router.get('/', getOffersPaginationValidator, async (req, res) => {
     ...(req.query.exchangeChainId
       ? { exchangeChainId: req.query.exchangeChainId }
       : {}),
+    ...(req.query.chainId ? { chainId: req.query.chainId } : {}),
     amount: { $exists: true, $ne: '' },
     ...(req.query.amountMin && req.query.amountMax
       ? {
