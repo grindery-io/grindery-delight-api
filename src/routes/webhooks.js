@@ -168,11 +168,29 @@ router.put(
         status: ORDER_STATUS.COMPLETE,
       },
     });
+
+    const collectionOffer = db.collection('offers');
+
+    const offer = await collectionOffer.findOne({
+      offerId: order.offerId,
+    });
+
+    if (!offer) {
+      res.status(404).send({
+        msg: 'No order found',
+      });
+    }
+
     if (response.modifiedCount > 0) {
       sendNotification('completion', {
         type: 'order',
         id: order.orderId,
         userId: order.userId,
+      });
+      sendNotification('completion', {
+        type: 'order',
+        id: order.orderId,
+        userId: offer.userId,
       });
     }
     return res.status(200).send(response);
