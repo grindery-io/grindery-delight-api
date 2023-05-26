@@ -21,10 +21,7 @@ export async function updateOfferId(db, offer) {
     .collection('blockchains')
     .findOne({ chainId: offer.exchangeChainId });
 
-  offer.offerId = await utils_offers.getOfferIdFromHash(
-    chain.rpc[0],
-    offer.hash
-  );
+  offer.offerId = await utils_offers.getOfferIdFromHash(chain.rpc, offer.hash);
   offer.status =
     offer.offerId !== '' ? OFFER_STATUS.SUCCESS : OFFER_STATUS.FAILURE;
 
@@ -50,7 +47,7 @@ export async function updateCompletionOrder(db, order) {
   const chain = await db.collection('blockchains').findOne({ chainId });
 
   order.isComplete = await utils_orders.isPaidOrderFromHash(
-    chain.rpc[0],
+    chain.rpc,
     order.completionHash
   );
   order.status = order.isComplete
@@ -77,7 +74,7 @@ export async function updateActivationOffer(db, offer) {
     .findOne({ chainId: offer.exchangeChainId });
 
   const isActivationEvent = await utils_offers.isSetStatusFromHash(
-    chain.rpc[0],
+    chain.rpc,
     offer.activationHash
   );
 
@@ -107,10 +104,7 @@ export async function updateOrderFromDb(db, order) {
     chainId: order.chainIdTokenDeposit,
   });
 
-  order.orderId = await utils_orders.getOrderIdFromHash(
-    chain.rpc[0],
-    order.hash
-  );
+  order.orderId = await utils_orders.getOrderIdFromHash(chain.rpc, order.hash);
   order.status =
     order.orderId === '' ? ORDER_STATUS.FAILURE : ORDER_STATUS.SUCCESS;
 
@@ -129,16 +123,28 @@ export async function updateOrderFromDb(db, order) {
  * status is not 0, otherwise it returns an empty string. The third topic is assumed to be the order
  * ID.
  */
-export async function getOrderIdFromHash(rpc, hash) {
-  const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(hash);
-  const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
-  const log = txReceipt.logs.find(
-    (log) => poolIface.parseLog(log).name === 'LogTrade'
-  );
+export async function getOrderIdFromHash(rpcs, hash) {
+  for (const rpc of rpcs) {
+    try {
+      const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(
+        hash
+      );
+      if (txReceipt !== null) {
+        const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
+        const log = txReceipt.logs.find(
+          (log) => poolIface.parseLog(log).name === 'LogTrade'
+        );
 
-  return txReceipt.status === 0 || log === undefined
-    ? ''
-    : poolIface.parseLog(log).args._idTrade;
+        return txReceipt.status === 0 || log === undefined
+          ? ''
+          : poolIface.parseLog(log).args._idTrade;
+      }
+    } catch (e) {
+      console.log('RPC connection error - ', e);
+    }
+  }
+
+  return '';
 }
 
 /**
@@ -150,16 +156,28 @@ export async function getOrderIdFromHash(rpc, hash) {
  * @returns the offer ID extracted from the logs of a transaction with the given hash. If the
  * transaction failed (status = 0), an empty string is returned.
  */
-export async function getOfferIdFromHash(rpc, hash) {
-  const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(hash);
-  const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
-  const log = txReceipt.logs.find(
-    (log) => poolIface.parseLog(log).name === 'LogNewOffer'
-  );
+export async function getOfferIdFromHash(rpcs, hash) {
+  for (const rpc of rpcs) {
+    try {
+      const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(
+        hash
+      );
+      if (txReceipt !== null) {
+        const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
+        const log = txReceipt.logs.find(
+          (log) => poolIface.parseLog(log).name === 'LogNewOffer'
+        );
 
-  return txReceipt.status === 0 || log === undefined
-    ? ''
-    : poolIface.parseLog(log).args._idOffer;
+        return txReceipt.status === 0 || log === undefined
+          ? ''
+          : poolIface.parseLog(log).args._idOffer;
+      }
+    } catch (e) {
+      console.log('RPC connection error - ', e);
+    }
+  }
+
+  return '';
 }
 
 /**
@@ -172,18 +190,29 @@ export async function getOfferIdFromHash(rpc, hash) {
  * @returns a boolean value. It will return `true` if the transaction with the given hash is a paid
  * order, and `false` if it is not a paid order or if the transaction failed (status is 0).
  */
-export async function isPaidOrderFromHash(rpc, hash) {
-  const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(hash);
+export async function isPaidOrderFromHash(rpcs, hash) {
+  for (const rpc of rpcs) {
+    try {
+      const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(
+        hash
+      );
+      if (txReceipt !== null) {
+        const iface = new ethers.utils.Interface(
+          (await getAbis()).liquidityWalletAbi
+        );
 
-  const iface = new ethers.utils.Interface(
-    (await getAbis()).liquidityWalletAbi
-  );
+        return txReceipt.status === 0
+          ? false
+          : txReceipt.logs.find(
+              (log) => iface.parseLog(log).name === 'LogOfferPaid'
+            ) !== undefined;
+      }
+    } catch (e) {
+      console.log('RPC connection error - ', e);
+    }
+  }
 
-  return txReceipt.status === 0
-    ? false
-    : txReceipt.logs.find(
-        (log) => iface.parseLog(log).name === 'LogOfferPaid'
-      ) !== undefined;
+  return '';
 }
 
 /**
@@ -198,17 +227,30 @@ export async function isPaidOrderFromHash(rpc, hash) {
  * change. The "isActive" property is a boolean indicating whether the status change resulted in the
  * offer being active or inactive.
  */
-export async function isSetStatusFromHash(rpc, hash) {
-  const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(hash);
-  const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
-  const log = txReceipt.logs.find(
-    (log) => poolIface.parseLog(log).name === 'LogSetStatusOffer'
-  );
+export async function isSetStatusFromHash(rpcs, hash) {
+  for (const rpc of rpcs) {
+    try {
+      const txReceipt = await getProviderFromRpc(rpc).getTransactionReceipt(
+        hash
+      );
+      if (txReceipt !== null) {
+        const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
 
-  return {
-    isSetStatus: txReceipt.status !== 0 && log !== undefined,
-    isActive: log ? poolIface.parseLog(log).args._isActive : undefined,
-  };
+        const log = txReceipt.logs.find(
+          (log) => poolIface.parseLog(log).name === 'LogSetStatusOffer'
+        );
+
+        return {
+          isSetStatus: txReceipt.status !== 0 && log !== undefined,
+          isActive: log ? poolIface.parseLog(log).args._isActive : undefined,
+        };
+      }
+    } catch (e) {
+      console.log('RPC connection error - ', e);
+    }
+  }
+
+  return '';
 }
 
 /**
