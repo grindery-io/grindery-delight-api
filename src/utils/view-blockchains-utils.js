@@ -212,7 +212,7 @@ export async function isPaidOrderFromHash(rpcs, hash) {
     }
   }
 
-  return '';
+  return undefined;
 }
 
 /**
@@ -250,7 +250,7 @@ export async function isSetStatusFromHash(rpcs, hash) {
     }
   }
 
-  return '';
+  return undefined;
 }
 
 /**
