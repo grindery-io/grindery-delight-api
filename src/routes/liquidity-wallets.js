@@ -37,6 +37,7 @@ router.post(
       newDocument.userId = res.locals.userId;
       newDocument.date = new Date();
       newDocument.tokens = new Map();
+      newDocument.reputation = '10';
       res.status(201).send(await collection.insertOne(newDocument));
     } else {
       res.status(404).send({
