@@ -245,3 +245,33 @@ export const updateOfferOrderPaidValidator = [
     return true;
   }),
 ];
+
+export const updateOfferOrderCompletionValidator = [
+  body('_completionHash')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('_tradeId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body('apiKey')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
+  body().custom((value, { req }) => {
+    validateFields(req.body, ['_completionHash', '_tradeId', 'apiKey'], 'body');
+    return true;
+  }),
+  query().custom((value, { req }) => {
+    validateFields(req.query, [], 'query');
+    return true;
+  }),
+  param().custom((value, { req }) => {
+    validateFields(req.params, [], 'params');
+    return true;
+  }),
+];
