@@ -4,6 +4,7 @@ import {
   updateOfferValidator,
   updateOrderValidator,
   updateOfferOrderPaidValidator,
+  updateOfferOrderCompletionValidator,
 } from '../validators/webhook.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { Database } from '../db/conn.js';
@@ -178,6 +179,66 @@ router.put(
     if (!offer) {
       res.status(404).send({
         msg: 'No order found',
+      });
+    }
+
+    if (response.modifiedCount > 0) {
+      sendNotification('completion', {
+        type: 'order',
+        id: order.orderId,
+        userId: order.userId,
+      });
+      sendNotification('completion', {
+        type: 'order',
+        id: order.orderId,
+        userId: offer.userId,
+      });
+    }
+    return res.status(200).send(response);
+  }
+);
+
+/* This is a PUT request that updates offer trade. */
+router.put(
+  '/offer/order/completion',
+  updateOfferOrderCompletionValidator,
+  authenticateApiKey,
+  async (req, res) => {
+    const validator = validateResult(req, res);
+    if (validator.length) {
+      return res.status(400).send(validator);
+    }
+
+    const db = await Database.getInstance(req);
+    const collection = db.collection('orders');
+
+    const order = await collection.findOne({
+      orderId: req.body._tradeId,
+      status: ORDER_STATUS.SUCCESS,
+    });
+
+    if (!order) {
+      return res.status(404).send({
+        msg: 'No order found',
+      });
+    }
+
+    const response = await collection.updateOne(order, {
+      $set: {
+        status: ORDER_STATUS.COMPLETION,
+        completionHash: req.body._completionHash,
+      },
+    });
+
+    const collectionOffer = db.collection('offers');
+
+    const offer = await collectionOffer.findOne({
+      offerId: order.offerId,
+    });
+
+    if (!offer) {
+      return res.status(404).send({
+        msg: 'No offer found',
       });
     }
 
