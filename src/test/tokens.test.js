@@ -10,18 +10,18 @@ import {
   pathTokens_Get_MongoDBId,
   pathTokens_Post,
   pathTokens_Put_MongoDBId,
-  token,
+  mockToken,
   validMongoDBId,
 } from './utils/variables.js';
 
 chai.use(chaiHttp);
 
 /**
- * The function modifies a token field and tests the modification using Chai and MongoDB.
+ * The function modifies a mockToken field and tests the modification using Chai and MongoDB.
  */
 function modifyTokenField({ field, value }) {
   it(`PUT /tokens/tokenId - ${field} - Should modify ${field}`, async function () {
-    const customToken = { ...token, isNative: false, isActive: false };
+    const customToken = { ...mockToken, isNative: false, isActive: false };
     const createResponse = await chai
       .request(app)
       .post(pathTokens_Post)
@@ -54,19 +54,19 @@ function modifyTokenField({ field, value }) {
 }
 
 /**
- * This function creates a base token in a database and returns the response.
- * @param token - The `token` parameter is an object that will be sent as the request body in the POST
- * request to the `pathTokens_Post` endpoint. It is used to create a new token in the database.
+ * This function creates a base mockToken in a database and returns the response.
+ * @param mockToken - The `mockToken` parameter is an object that will be sent as the request body in the POST
+ * request to the `pathTokens_Post` endpoint. It is used to create a new mockToken in the database.
  * @returns the response object from the POST request made to the `pathTokens_Post` endpoint with the
- * provided `token` data. The function is also performing some assertions on the response object using the Chai
+ * provided `mockToken` data. The function is also performing some assertions on the response object using the Chai
  * library.
  */
-async function createBaseToken(token) {
+async function createBaseToken(mockToken) {
   const res = await chai
     .request(app)
     .post(pathTokens_Post)
     .set('Authorization', `Bearer ${mockedToken}`)
-    .send(token);
+    .send(mockToken);
   chai.expect(res).to.have.status(201);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
   chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
@@ -74,37 +74,37 @@ async function createBaseToken(token) {
 }
 
 describe('Tokens route', async function () {
-  describe('POST new token', async function () {
-    it('Should return 403 if no token is provided', async function () {
+  describe('POST new mockToken', async function () {
+    it('Should return 403 if no mockToken is provided', async function () {
       const createResponse = await chai
         .request(app)
         .post(pathTokens_Post)
-        .send(token);
+        .send(mockToken);
       chai.expect(createResponse).to.have.status(403);
     });
 
-    it('Should create new token', async function () {
-      await createBaseToken(token);
+    it('Should create new mockToken', async function () {
+      await createBaseToken(mockToken);
     });
 
-    it('Should create new token with the appropriate elements', async function () {
-      const createResponse = await createBaseToken(token);
+    it('Should create new mockToken with the appropriate elements', async function () {
+      const createResponse = await createBaseToken(mockToken);
 
       const tokenDB = await collectionTokens.findOne({
         _id: new ObjectId(createResponse.body.insertedId),
       });
       delete tokenDB._id;
-      chai.expect(tokenDB).to.deep.equal(token);
+      chai.expect(tokenDB).to.deep.equal(mockToken);
     });
 
-    it('Should fail if token already exists', async function () {
-      const createResponse = await createBaseToken(token);
+    it('Should fail if mockToken already exists', async function () {
+      const createResponse = await createBaseToken(mockToken);
 
       const createResponse1 = await chai
         .request(app)
         .post(pathTokens_Post)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(token);
+        .send(mockToken);
       chai.expect(createResponse1).to.have.status(404);
       chai
         .expect(createResponse1.body)
@@ -113,15 +113,15 @@ describe('Tokens route', async function () {
   });
 
   describe('GET active tokens', async function () {
-    it('Should not fail if no token is provided', async function () {
+    it('Should not fail if no mockToken is provided', async function () {
       const res = await chai.request(app).get(pathTokens_Get_Active);
       chai.expect(res).to.have.status(200);
     });
 
     it('Should return all active tokens', async function () {
-      await createBaseToken(token);
+      await createBaseToken(mockToken);
       await createBaseToken({
-        ...token,
+        ...mockToken,
         chainId: 'newChainId',
         address: 'newAddress',
       });
@@ -146,15 +146,15 @@ describe('Tokens route', async function () {
   });
 
   describe('GET by MongoDBId', async function () {
-    it('Should return 403 if no token is provided', async function () {
+    it('Should return 403 if no mockToken is provided', async function () {
       const createResponse = await chai
         .request(app)
         .get(pathTokens_Get_MongoDBId + validMongoDBId);
       chai.expect(createResponse).to.have.status(403);
     });
 
-    it('Should get the adequate token', async function () {
-      const createResponse = await createBaseToken(token);
+    it('Should get the adequate mockToken', async function () {
+      const createResponse = await createBaseToken(mockToken);
 
       const res = await chai
         .request(app)
@@ -165,10 +165,10 @@ describe('Tokens route', async function () {
         .expect(res.body._id.toString())
         .to.equal(createResponse.body.insertedId);
       delete res.body._id;
-      chai.expect(res.body).to.deep.equal(token);
+      chai.expect(res.body).to.deep.equal(mockToken);
     });
 
-    it('Should return an empty object if no token available', async function () {
+    it('Should return an empty object if no mockToken available', async function () {
       const res = await chai
         .request(app)
         .get(pathTokens_Get_MongoDBId + validMongoDBId)
@@ -179,7 +179,7 @@ describe('Tokens route', async function () {
   });
 
   describe('PUT by MongoDBId', async function () {
-    it('Should return 403 if no token is provided', async function () {
+    it('Should return 403 if no mockToken is provided', async function () {
       const createResponse = await chai
         .request(app)
         .put(pathTokens_Put_MongoDBId + validMongoDBId);
@@ -221,7 +221,7 @@ describe('Tokens route', async function () {
       value: true,
     });
 
-    it('Should fail if no token found', async function () {
+    it('Should fail if no mockToken found', async function () {
       const res = await chai
         .request(app)
         .put(pathTokens_Put_MongoDBId + validMongoDBId)
@@ -232,15 +232,15 @@ describe('Tokens route', async function () {
   });
 
   describe('DELETE by MongoDBId', async function () {
-    it('Should return 403 if no token is provided', async function () {
+    it('Should return 403 if no mockToken is provided', async function () {
       const createResponse = await chai
         .request(app)
         .delete(pathTokens_Delete_MongoDBId + validMongoDBId);
       chai.expect(createResponse).to.have.status(403);
     });
 
-    it('Should delete one token', async function () {
-      const createResponse = await createBaseToken(token);
+    it('Should delete one mockToken', async function () {
+      const createResponse = await createBaseToken(mockToken);
 
       const deleteResponse = await chai
         .request(app)
@@ -252,7 +252,7 @@ describe('Tokens route', async function () {
         .to.deep.equal({ acknowledged: true, deletedCount: 1 });
     });
 
-    it('Should fail if no token exists', async function () {
+    it('Should fail if no mockToken exists', async function () {
       const deleteResponse = await chai
         .request(app)
         .delete(pathTokens_Delete_MongoDBId + validMongoDBId)

@@ -196,7 +196,7 @@ export const mockUsefulAddress = {
   address: 'myAddress1',
 };
 
-export const token = {
+export const mockToken = {
   coinmarketcapId: '4543',
   symbol: 'mySymbol',
   icon: 'https://www.grindery.io/hubfs/delight-assets/icons/tokens/bnb.png',

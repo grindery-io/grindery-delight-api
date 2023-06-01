@@ -10,7 +10,7 @@ import {
 import {
   pathTokens_Post,
   pathTokens_Put_MongoDBId,
-  token,
+  mockToken,
   notAMongoDBId,
   randomMongoDBId,
 } from './utils/variables.js';
@@ -18,14 +18,14 @@ import {
 chai.use(chaiHttp);
 
 describe('Tokens route - Validators', async function () {
-  describe('POST new token', async function () {
-    for (const testCase of Object.keys(token)) {
+  describe('POST new mockToken', async function () {
+    for (const testCase of Object.keys(mockToken)) {
       if (testCase !== 'isNative' && testCase !== 'isActive') {
         testNonString({
           method: 'post',
           path: pathTokens_Post,
           body: {
-            ...token,
+            ...mockToken,
             [testCase]: 123,
           },
           query: {},
@@ -37,7 +37,7 @@ describe('Tokens route - Validators', async function () {
         method: 'post',
         path: pathTokens_Post,
         body: {
-          ...token,
+          ...mockToken,
           [testCase]: '',
         },
         query: {},
@@ -57,7 +57,7 @@ describe('Tokens route - Validators', async function () {
   });
 
   describe('PUT by MongoDBId', async function () {
-    for (const testCase of Object.keys(token)) {
+    for (const testCase of Object.keys(mockToken)) {
       if (testCase === 'isActive' || testCase === 'isNative') {
         testNonBoolean({
           method: 'put',
@@ -84,7 +84,7 @@ describe('Tokens route - Validators', async function () {
         method: 'put',
         path: pathTokens_Put_MongoDBId + randomMongoDBId,
         body: {
-          ...token,
+          ...mockToken,
           [testCase]: '',
         },
         query: {},
