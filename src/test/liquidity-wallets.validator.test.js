@@ -10,7 +10,7 @@ import {
   pathLiquidityWallets_Post_NewLiquidityWallet,
   liquidityWallet,
   mockModifySingleLiquidityWallet,
-  updateTokenLiquidityWallet,
+  mockUpdateTokenLiquidityWallet,
   pathLiquidityWallets_Get_MongoDBId,
   notAMongoDBId,
   pathLiquidityWallets_Get_Single,
@@ -159,7 +159,7 @@ describe('Liquidity wallets route - Validators', async function () {
         method: 'put',
         path: pathLiquidityWallets_Put,
         body: {
-          ...updateTokenLiquidityWallet,
+          ...mockUpdateTokenLiquidityWallet,
           [testCase]: 123,
         },
         query: {},
@@ -169,7 +169,7 @@ describe('Liquidity wallets route - Validators', async function () {
         method: 'put',
         path: pathLiquidityWallets_Put,
         body: {
-          ...updateTokenLiquidityWallet,
+          ...mockUpdateTokenLiquidityWallet,
           [testCase]: '',
         },
         query: {},
@@ -181,7 +181,7 @@ describe('Liquidity wallets route - Validators', async function () {
       method: 'put',
       path: pathLiquidityWallets_Put,
       body: {
-        ...updateTokenLiquidityWallet,
+        ...mockUpdateTokenLiquidityWallet,
         unexpectedField: 'unexpectedValue',
       },
       query: {},
@@ -192,7 +192,7 @@ describe('Liquidity wallets route - Validators', async function () {
     testUnexpectedField({
       method: 'put',
       path: pathLiquidityWallets_Put,
-      body: updateTokenLiquidityWallet,
+      body: mockUpdateTokenLiquidityWallet,
       query: { unexpectedField: 'unexpectedValue' },
       field: 'unexpectedField',
       location: 'query',
