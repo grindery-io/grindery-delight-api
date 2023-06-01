@@ -8,7 +8,7 @@ import {
 } from './utils/utils.js';
 import {
   pathLiquidityWallets_Post_NewLiquidityWallet,
-  liquidityWallet,
+  mockLiquidityWallet,
   mockModifySingleLiquidityWallet,
   mockUpdateTokenLiquidityWallet,
   pathLiquidityWallets_Get_MongoDBId,
@@ -29,7 +29,7 @@ describe('Liquidity wallets route - Validators', async function () {
         method: 'post',
         path: pathLiquidityWallets_Post_NewLiquidityWallet,
         body: {
-          ...liquidityWallet,
+          ...mockLiquidityWallet,
           [testCase]: 123,
         },
         query: {},
@@ -39,7 +39,7 @@ describe('Liquidity wallets route - Validators', async function () {
         method: 'post',
         path: pathLiquidityWallets_Post_NewLiquidityWallet,
         body: {
-          ...liquidityWallet,
+          ...mockLiquidityWallet,
           [testCase]: '',
         },
         query: {},
@@ -51,7 +51,7 @@ describe('Liquidity wallets route - Validators', async function () {
       method: 'post',
       path: pathLiquidityWallets_Post_NewLiquidityWallet,
       body: {
-        ...liquidityWallet,
+        ...mockLiquidityWallet,
         unexpectedField: 'unexpectedValue',
       },
       query: {},
@@ -62,7 +62,7 @@ describe('Liquidity wallets route - Validators', async function () {
     testUnexpectedField({
       method: 'post',
       path: pathLiquidityWallets_Post_NewLiquidityWallet,
-      body: liquidityWallet,
+      body: mockLiquidityWallet,
       query: { unexpectedField: 'unexpectedValue' },
       field: 'unexpectedField',
       location: 'query',
@@ -132,7 +132,7 @@ describe('Liquidity wallets route - Validators', async function () {
         path: pathLiquidityWallets_Delete,
         body: {},
         query: {
-          ...liquidityWallet,
+          ...mockLiquidityWallet,
           [testCase]: ['45', '45'],
         },
         field: testCase,
@@ -143,7 +143,7 @@ describe('Liquidity wallets route - Validators', async function () {
         path: pathLiquidityWallets_Delete,
         body: {},
         query: {
-          ...liquidityWallet,
+          ...mockLiquidityWallet,
           [testCase]: '',
         },
         field: testCase,

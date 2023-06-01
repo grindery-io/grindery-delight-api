@@ -206,7 +206,7 @@ export const mockToken = {
   isActive: false,
 };
 
-export const liquidityWallet = {
+export const mockLiquidityWallet = {
   walletAddress: 'myWalletAddress',
   chainId: 'myChainId',
 };
