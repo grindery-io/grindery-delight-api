@@ -131,7 +131,7 @@ export const updateOrderValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_idTrade')
+  body('_tradeId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -159,7 +159,7 @@ export const updateOrderValidator = [
         '_grinderyTransactionHash',
         '_amount',
         '_offerId',
-        '_idTrade',
+        '_tradeId',
         '_offerer',
         '_token',
         'apiKey',

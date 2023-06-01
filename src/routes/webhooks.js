@@ -124,14 +124,14 @@ router.put(
 
     const response = await collection.updateOne(order, {
       $set: {
-        orderId: req.body._idTrade,
+        orderId: req.body._tradeId,
         status: ORDER_STATUS.SUCCESS,
       },
     });
     if (response.modifiedCount > 0) {
       sendNotification('creation', {
         type: 'order',
-        id: req.body._idTrade,
+        id: req.body._tradeId,
         userId: order.userId,
       });
     }
