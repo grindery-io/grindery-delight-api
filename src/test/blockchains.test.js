@@ -7,7 +7,7 @@ import {
   collectionBlockchains,
   pathBlockchains_Post_NewBlockchain,
   mockBlockchain,
-  usefulAddress,
+  mockUsefulAddress,
   pathBlockchains_Get_MongoDBId,
   pathBlockchains_Put_MongoDBId,
   pathBlockchains_Get_Active,
@@ -292,7 +292,7 @@ describe('Blockchains route', async function () {
         .request(app)
         .put(pathBlockchains_Put_UsefulAddress_MongoDBId + validMongoDBId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(usefulAddress);
+        .send(mockUsefulAddress);
       chai.expect(response).to.have.status(404);
       chai.expect(response.body).to.deep.equal({
         msg: 'No blockchain found',
@@ -308,7 +308,7 @@ describe('Blockchains route', async function () {
             createResponse.body.insertedId
         )
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(usefulAddress);
+        .send(mockUsefulAddress);
       chai.expect(newUsefulAddress).to.have.status(200);
       chai.expect(newUsefulAddress.body).to.deep.equal({
         acknowledged: true,
@@ -325,7 +325,7 @@ describe('Blockchains route', async function () {
       delete res.body._id;
       chai.expect(res.body.usefulAddresses).to.deep.equal({
         ...mockBlockchain.usefulAddresses,
-        [usefulAddress.contract]: usefulAddress.address,
+        [mockUsefulAddress.contract]: mockUsefulAddress.address,
       });
     });
 
@@ -383,7 +383,7 @@ describe('Blockchains route', async function () {
             createResponse.body.insertedId
         )
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send({ contract: usefulAddress.contract });
+        .send({ contract: mockUsefulAddress.contract });
       chai.expect(deleteResponse).to.have.status(404);
       chai.expect(deleteResponse.body).to.deep.equal({
         msg: 'No blockchain found or contract doesnt exist',

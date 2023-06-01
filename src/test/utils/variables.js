@@ -191,7 +191,7 @@ export const mockBlockchain = {
   },
 };
 
-export const usefulAddress = {
+export const mockUsefulAddress = {
   contract: 'myContract1',
   address: 'myAddress1',
 };

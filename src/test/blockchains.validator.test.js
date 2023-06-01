@@ -14,7 +14,7 @@ import {
 import {
   pathBlockchains_Post_NewBlockchain,
   mockBlockchain,
-  usefulAddress,
+  mockUsefulAddress,
   pathBlockchains_Get_MongoDBId,
   notAMongoDBId,
   pathBlockchains_Put_MongoDBId,
@@ -336,7 +336,7 @@ describe('Blockchains route - Validators', async function () {
         method: 'put',
         path: pathBlockchains_Put_UsefulAddress_MongoDBId + randomMongoDBId,
         body: {
-          ...usefulAddress,
+          ...mockUsefulAddress,
           [testCase]: 123,
         },
         query: {},
@@ -346,7 +346,7 @@ describe('Blockchains route - Validators', async function () {
         method: 'put',
         path: pathBlockchains_Put_UsefulAddress_MongoDBId + randomMongoDBId,
         body: {
-          ...usefulAddress,
+          ...mockUsefulAddress,
           [testCase]: '',
         },
         query: {},
