@@ -12,7 +12,7 @@ export const updateStatusOfferValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_idOffer')
+  body('_offerId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -36,7 +36,7 @@ export const updateStatusOfferValidator = [
       [
         '_grinderyChainId',
         '_grinderyTransactionHash',
-        '_idOffer',
+        '_offerId',
         '_isActive',
         'apiKey',
       ],
@@ -55,7 +55,7 @@ export const updateStatusOfferValidator = [
 ];
 
 export const updateOfferValidator = [
-  body('_idOffer')
+  body('_offerId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -89,7 +89,7 @@ export const updateOfferValidator = [
     validateFields(
       req.body,
       [
-        '_idOffer',
+        '_offerId',
         '_token',
         '_chainId',
         '_grinderyChainId',
@@ -126,7 +126,7 @@ export const updateOrderValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
-  body('_idOffer')
+  body('_offerId')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -158,7 +158,7 @@ export const updateOrderValidator = [
         '_grinderyChainId',
         '_grinderyTransactionHash',
         '_amount',
-        '_idOffer',
+        '_offerId',
         '_idTrade',
         '_offerer',
         '_token',

@@ -30,7 +30,7 @@ router.put(
     const collection = db.collection('offers');
 
     const offer = await collection.findOne({
-      offerId: req.body._idOffer,
+      offerId: req.body._offerId,
     });
 
     if (!offer) {
@@ -48,7 +48,7 @@ router.put(
     if (response.modifiedCount > 0) {
       sendNotification('activationDeactivation', {
         type: 'offer',
-        id: req.body._idOffer,
+        id: req.body._offerId,
         userId: offer.userId,
       });
     }
@@ -82,7 +82,7 @@ router.put(
 
     const response = await collection.updateOne(offer, {
       $set: {
-        offerId: req.body._idOffer,
+        offerId: req.body._offerId,
         status: OFFER_STATUS.SUCCESS,
         isActive: true,
       },
@@ -90,7 +90,7 @@ router.put(
     if (response.modifiedCount > 0) {
       sendNotification('creation', {
         type: 'offer',
-        id: req.body._idOffer,
+        id: req.body._offerId,
         userId: offer.userId,
       });
     }
