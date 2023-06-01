@@ -9,7 +9,7 @@ import {
 import {
   pathLiquidityWallets_Post_NewLiquidityWallet,
   liquidityWallet,
-  modifySingleLiquidityWallet,
+  mockModifySingleLiquidityWallet,
   updateTokenLiquidityWallet,
   pathLiquidityWallets_Get_MongoDBId,
   notAMongoDBId,
@@ -95,7 +95,7 @@ describe('Liquidity wallets route - Validators', async function () {
         path: pathLiquidityWallets_Get_Single,
         body: {},
         query: {
-          ...modifySingleLiquidityWallet,
+          ...mockModifySingleLiquidityWallet,
           [testCase]: ['45', '45'],
         },
         field: testCase,
@@ -106,7 +106,7 @@ describe('Liquidity wallets route - Validators', async function () {
         path: pathLiquidityWallets_Get_Single,
         body: {},
         query: {
-          ...modifySingleLiquidityWallet,
+          ...mockModifySingleLiquidityWallet,
           [testCase]: '',
         },
         field: testCase,

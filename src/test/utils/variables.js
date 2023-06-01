@@ -211,7 +211,7 @@ export const liquidityWallet = {
   chainId: 'myChainId',
 };
 
-export const modifySingleLiquidityWallet = {
+export const mockModifySingleLiquidityWallet = {
   chainId: 'myNewChainId',
   userId: 'myNewUserId',
 };
