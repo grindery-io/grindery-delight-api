@@ -240,7 +240,7 @@ export const mockBlockchainGoerli = {
   addressExplorerUrl: 'https://goerli.etherscan.io/address/{hash}',
 };
 
-export const blockchainBscTestnet = {
+export const mockBlockchainBscTestnet = {
   caipId: 'eip155:97',
   chainId: '97',
   icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-97.svg',

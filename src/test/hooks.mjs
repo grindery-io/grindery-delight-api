@@ -1,6 +1,6 @@
 import { Database } from '../db/conn.js';
 import {
-  blockchainBscTestnet,
+  mockBlockchainBscTestnet,
   mockBlockchainGoerli,
   collectionAdmins,
   collectionBlockchains,
@@ -16,7 +16,7 @@ export const mochaHooks = {
       ...mockBlockchainGoerli,
     });
 
-    await collectionBlockchains.insertOne(blockchainBscTestnet);
+    await collectionBlockchains.insertOne(mockBlockchainBscTestnet);
   },
   afterEach: async function () {
     const db = await Database.getInstance({});

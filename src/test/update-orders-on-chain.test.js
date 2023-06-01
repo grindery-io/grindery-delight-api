@@ -3,7 +3,7 @@ import chaiHttp from 'chai-http';
 import app from '../index.js';
 import sinon from 'sinon';
 import {
-  blockchainBscTestnet,
+  mockBlockchainBscTestnet,
   mockBlockchainGoerli,
   collectionBlockchains,
   collectionOffers,
@@ -49,7 +49,7 @@ beforeEach(async function () {
   });
 
   blockchainDBBscTesnet = await collectionBlockchains.findOne({
-    chainId: blockchainBscTestnet.chainId,
+    chainId: mockBlockchainBscTestnet.chainId,
   });
 
   // Mocking
@@ -340,7 +340,7 @@ describe('Update orders via on-chain', async function () {
     beforeEach(async function () {
       await collectionOffers.insertOne({
         ...mockOffer,
-        chainId: blockchainBscTestnet.chainId,
+        chainId: mockBlockchainBscTestnet.chainId,
       });
       await collectionOrders.insertMany([
         {
@@ -617,19 +617,19 @@ describe('Update orders via on-chain', async function () {
       await collectionOffers.insertMany([
         {
           ...mockOffer,
-          chainId: blockchainBscTestnet.chainId,
+          chainId: mockBlockchainBscTestnet.chainId,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           offerId: 'anotherOfferId',
-          chainId: blockchainBscTestnet.chainId,
+          chainId: mockBlockchainBscTestnet.chainId,
           userId: 'anotherUserId',
           shouldNotAppear: 'shouldNotAppear',
         },
         {
           ...mockOffer,
-          chainId: blockchainBscTestnet.chainId,
+          chainId: mockBlockchainBscTestnet.chainId,
           userId: 'anotherUserId',
           shouldNotAppear: 'shouldNotAppear',
         },
