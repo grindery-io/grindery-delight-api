@@ -30,20 +30,14 @@ let blockchainDBGoerli,
   isPaidOrderFromHashStub;
 
 // Order creation
-const txHashNewOrder =
-  '0xfb386e3118f30aeabef6bdd379d4c16fada7acc4fd2579413721768231b90d6c';
-const txHashFailed =
-  '0x2290b921525f7e42dfc318e5c69527eae1ac1baa435222e3c773be84101b610d';
-const orderId =
-  '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec';
+const mockTxHashNewOrder = 'successNewOrderHash';
+const mockTxHashFailed = 'failureNewOrderHash';
+const mockOrderId = 'onChainOrderId';
 
 // Order payment
-const txHashOrderPaid =
-  '0xa1415d8bd24714ef91d7dd6d8290e6d1f822b8b20897f7642858a10dbc056ffc';
-const txHashNotOrderPaid =
-  '0xea914a21c9949f9185afa79865ddb651186223bffc552719e0ddb14ad24207ab';
-const txHashFailedOnBSC =
-  '0xf2da1f454e228f1a95398d0b1d38131cc79893a5f49b2dc94825df2cd8011bf2';
+const mockTxHashOrderPaid = 'successOrderPaid';
+const mockTxHashNotOrderPayment = 'nonOrderPaymentTransaction';
+const mockTxHashPaymentFailure = 'failureOrderPaid';
 
 beforeEach(async function () {
   blockchainDBGoerli = await collectionBlockchains.findOne({
@@ -58,16 +52,16 @@ beforeEach(async function () {
   getOrderIdFromHashStub = sinon
     .stub(utils_orders, 'getOrderIdFromHash')
     .callsFake(async function (_rpc, _hash) {
-      return _hash === txHashNewOrder ? orderId : '';
+      return _hash === mockTxHashNewOrder ? mockOrderId : '';
     });
 
   isPaidOrderFromHashStub = sinon
     .stub(utils_orders, 'isPaidOrderFromHash')
     .callsFake(async function (_rpc, _hash) {
       const expectedIsPaidOrder = {
-        [txHashOrderPaid]: true,
-        [txHashNotOrderPaid]: false,
-        [txHashFailedOnBSC]: false,
+        [mockTxHashOrderPaid]: true,
+        [mockTxHashNotOrderPayment]: false,
+        [mockTxHashPaymentFailure]: false,
       };
       return expectedIsPaidOrder[_hash];
     });
@@ -79,23 +73,23 @@ afterEach(async function () {
 });
 
 describe('Update orders via on-chain', async function () {
-  describe('Get orderId', async function () {
-    it('getOrderIdFromHash should return the proper orderId', async function () {
+  describe('Get mockOrderId', async function () {
+    it('getOrderIdFromHash should return the proper mockOrderId', async function () {
       chai
         .expect(
           await utils_orders.getOrderIdFromHash(
             blockchainDBGoerli.rpc[0],
-            txHashNewOrder
+            mockTxHashNewOrder
           )
         )
-        .to.equal(orderId);
+        .to.equal(mockOrderId);
     });
     it('getOrderIdFromHash should return empty string if transaction failed', async function () {
       chai
         .expect(
           await utils_orders.getOrderIdFromHash(
             blockchainDBGoerli.rpc[0],
-            txHashFailed
+            mockTxHashFailed
           )
         )
         .to.equal('');
@@ -109,35 +103,35 @@ describe('Update orders via on-chain', async function () {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          hash: txHashNewOrder,
+          hash: mockTxHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          hash: txHashNewOrder,
+          hash: mockTxHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          hash: txHashNewOrder,
+          hash: mockTxHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          hash: txHashFailed,
+          hash: mockTxHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          orderId,
+          mockOrderId,
           userId: 'anotherUserId',
         },
       ]);
@@ -154,7 +148,7 @@ describe('Update orders via on-chain', async function () {
       const unmodifiedOrderAfter = await collectionOrders.findOne({
         _id: unmodifiedOrder._id,
       });
-      chai.expect(unmodifiedOrderAfter.orderId).to.not.equal(orderId);
+      chai.expect(unmodifiedOrderAfter.orderId).to.not.equal(mockOrderId);
     });
     it('Should only modify orders for the current userId', async function () {
       const res = await chai
@@ -166,19 +160,15 @@ describe('Update orders via on-chain', async function () {
         chai.expect(mockOrder.userId).to.equal(process.env.USER_ID_TEST);
       });
     });
-    it('Should modify mockOrder - orderId', async function () {
+    it('Should modify mockOrder - mockOrderId', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash === txHashNewOrder) {
-          chai
-            .expect(mockOrder.orderId)
-            .to.equal(
-              '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec'
-            );
+        if (mockOrder.hash === mockTxHashNewOrder) {
+          chai.expect(mockOrder.orderId).to.equal(mockOrderId);
         }
       });
     });
@@ -190,7 +180,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash === txHashNewOrder) {
+        if (mockOrder.hash === mockTxHashNewOrder) {
           chai.expect(mockOrder.status).to.equal(ORDER_STATUS.SUCCESS);
         }
       });
@@ -202,11 +192,11 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash === txHashFailed) {
+        if (mockOrder.hash === mockTxHashFailed) {
           chai.expect(mockOrder).to.deep.equal({
             ...mockOrder,
             chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-            hash: txHashFailed,
+            hash: mockTxHashFailed,
             userId: process.env.USER_ID_TEST,
             status: ORDER_STATUS.FAILURE,
           });
@@ -222,36 +212,36 @@ describe('Update orders via on-chain', async function () {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          hash: txHashNewOrder,
+          hash: mockTxHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          hash: txHashNewOrder,
+          hash: mockTxHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          hash: txHashNewOrder,
+          hash: mockTxHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          hash: txHashFailed,
+          hash: mockTxHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          hash: txHashNewOrder,
-          orderId,
+          hash: mockTxHashNewOrder,
+          mockOrderId,
           userId: 'anotherUserId',
         },
       ]);
@@ -286,7 +276,7 @@ describe('Update orders via on-chain', async function () {
       chai.expect(res.body.length).to.equal(4);
     });
 
-    it('Should modify mockOrder - orderId', async function () {
+    it('Should modify mockOrder - mockOrderId', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersAll)
@@ -294,12 +284,8 @@ describe('Update orders via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash === txHashNewOrder) {
-          chai
-            .expect(mockOrder.orderId)
-            .to.equal(
-              '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec'
-            );
+        if (mockOrder.hash === mockTxHashNewOrder) {
+          chai.expect(mockOrder.orderId).to.equal(mockOrderId);
         }
       });
     });
@@ -312,7 +298,7 @@ describe('Update orders via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash === txHashNewOrder) {
+        if (mockOrder.hash === mockTxHashNewOrder) {
           chai.expect(mockOrder.status).to.equal(ORDER_STATUS.SUCCESS);
         }
       });
@@ -325,11 +311,11 @@ describe('Update orders via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash === txHashFailed) {
+        if (mockOrder.hash === mockTxHashFailed) {
           chai.expect(mockOrder).to.deep.equal({
             ...mockOrder,
             chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-            hash: txHashFailed,
+            hash: mockTxHashFailed,
             userId: process.env.USER_ID_TEST,
             status: ORDER_STATUS.FAILURE,
           });
@@ -350,7 +336,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -358,7 +344,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.SUCCESS,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -366,7 +352,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -374,7 +360,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashNotOrderPaid,
+          completionHash: mockTxHashNotOrderPayment,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -383,7 +369,7 @@ describe('Update orders via on-chain', async function () {
           offerId: mockOffer.offerId,
           isComplete: true,
           shouldNotAppear: 'shouldNotAppear',
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -391,7 +377,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
           userId: 'anotherUserId',
         },
       ]);
@@ -401,7 +387,7 @@ describe('Update orders via on-chain', async function () {
         chai.expect(
           await utils_orders.isPaidOrderFromHash(
             blockchainDBBscTesnet.rpc[0],
-            txHashOrderPaid
+            mockTxHashOrderPaid
           )
         ).to.be.true;
       });
@@ -409,7 +395,7 @@ describe('Update orders via on-chain', async function () {
         chai.expect(
           await utils_orders.isPaidOrderFromHash(
             blockchainDBBscTesnet.rpc[0],
-            txHashNotOrderPaid
+            mockTxHashNotOrderPayment
           )
         ).to.be.false;
       });
@@ -417,7 +403,7 @@ describe('Update orders via on-chain', async function () {
         chai.expect(
           await utils_orders.isPaidOrderFromHash(
             blockchainDBBscTesnet.rpc[0],
-            txHashFailedOnBSC
+            mockTxHashPaymentFailure
           )
         ).to.be.false;
       });
@@ -461,7 +447,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((mockOrder) => {
-          if (mockOrder.completionHash !== txHashNotOrderPaid) {
+          if (mockOrder.completionHash !== mockTxHashNotOrderPayment) {
             chai.expect(mockOrder.isComplete).to.be.true;
           }
         });
@@ -473,7 +459,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((mockOrder) => {
-          if (mockOrder.completionHash !== txHashNotOrderPaid) {
+          if (mockOrder.completionHash !== mockTxHashNotOrderPayment) {
             chai.expect(mockOrder.status).to.equal(ORDER_STATUS.COMPLETE);
           }
         });
@@ -485,7 +471,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((mockOrder) => {
-          if (mockOrder.completionHash === txHashNotOrderPaid) {
+          if (mockOrder.completionHash === mockTxHashNotOrderPayment) {
             chai
               .expect(mockOrder.status)
               .to.equal(ORDER_STATUS.COMPLETION_FAILURE);
@@ -499,7 +485,7 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
         res.body.forEach((mockOrder) => {
-          if (mockOrder.completionHash === txHashNotOrderPaid) {
+          if (mockOrder.completionHash === mockTxHashNotOrderPayment) {
             chai.expect(mockOrder.isComplete).to.be.false;
           }
         });
@@ -565,7 +551,7 @@ describe('Update orders via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
         res.body.forEach((mockOrder) => {
-          if (mockOrder.completionHash !== txHashNotOrderPaid) {
+          if (mockOrder.completionHash !== mockTxHashNotOrderPayment) {
             chai.expect(mockOrder.isComplete).to.be.true;
           }
         });
@@ -578,7 +564,7 @@ describe('Update orders via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
         res.body.forEach((mockOrder) => {
-          if (mockOrder.completionHash !== txHashNotOrderPaid) {
+          if (mockOrder.completionHash !== mockTxHashNotOrderPayment) {
             chai.expect(mockOrder.status).to.equal(ORDER_STATUS.COMPLETE);
           }
         });
@@ -591,7 +577,7 @@ describe('Update orders via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
         res.body.forEach((mockOrder) => {
-          if (mockOrder.completionHash === txHashNotOrderPaid) {
+          if (mockOrder.completionHash === mockTxHashNotOrderPayment) {
             chai
               .expect(mockOrder.status)
               .to.equal(ORDER_STATUS.COMPLETION_FAILURE);
@@ -606,7 +592,7 @@ describe('Update orders via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
         res.body.forEach((mockOrder) => {
-          if (mockOrder.completionHash === txHashNotOrderPaid) {
+          if (mockOrder.completionHash === mockTxHashNotOrderPayment) {
             chai.expect(mockOrder.isComplete).to.be.false;
           }
         });
@@ -642,49 +628,49 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.COMPLETION,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: 'anotherOfferId',
           isComplete: false,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashNotOrderPaid,
+          completionHash: mockTxHashNotOrderPayment,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: mockOffer.offerId,
           isComplete: true,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: mockOffer.offerId,
           isComplete: false,
-          completionHash: txHashOrderPaid,
+          completionHash: mockTxHashOrderPaid,
         },
       ]);
     });
@@ -748,7 +734,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.completionHash !== txHashNotOrderPaid) {
+        if (mockOrder.completionHash !== mockTxHashNotOrderPayment) {
           chai.expect(mockOrder.isComplete).to.be.true;
         }
       });
@@ -760,7 +746,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.completionHash !== txHashNotOrderPaid) {
+        if (mockOrder.completionHash !== mockTxHashNotOrderPayment) {
           chai.expect(mockOrder.status).to.equal(ORDER_STATUS.COMPLETE);
         }
       });
@@ -772,7 +758,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.completionHash === txHashNotOrderPaid) {
+        if (mockOrder.completionHash === mockTxHashNotOrderPayment) {
           chai
             .expect(mockOrder.status)
             .to.equal(ORDER_STATUS.COMPLETION_FAILURE);
@@ -786,7 +772,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.completionHash === txHashNotOrderPaid) {
+        if (mockOrder.completionHash === mockTxHashNotOrderPayment) {
           chai.expect(mockOrder.isComplete).to.be.false;
         }
       });
