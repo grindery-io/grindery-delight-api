@@ -3,7 +3,6 @@ import chaiHttp from 'chai-http';
 import app from '../index.js';
 import sinon from 'sinon';
 import {
-  GrtPoolAddressGoerli,
   blockchainGoerli,
   collectionBlockchains,
   collectionOffers,
@@ -24,10 +23,7 @@ import { OFFER_STATUS } from '../utils/offers-utils.js';
 
 chai.use(chaiHttp);
 
-let blockchainDBGoerli,
-  GrtPoolContract,
-  getOfferIdFromHashStub,
-  isSetStatusFromHashStub;
+let blockchainDBGoerli, getOfferIdFromHashStub, isSetStatusFromHashStub;
 
 // Offer creation
 const txHashNewOffer =
@@ -46,12 +42,6 @@ beforeEach(async function () {
   blockchainDBGoerli = await collectionBlockchains.findOne({
     chainId: blockchainGoerli.chainId,
   });
-
-  GrtPoolContract = new ethers.Contract(
-    GrtPoolAddressGoerli,
-    abis.poolAbi,
-    getProviderFromRpc(blockchainDBGoerli.rpc[0])
-  );
 
   // Mocking
   getOfferIdFromHashStub = sinon

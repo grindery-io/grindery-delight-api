@@ -3,7 +3,6 @@ import chaiHttp from 'chai-http';
 import app from '../index.js';
 import sinon from 'sinon';
 import {
-  GrtPoolAddressGoerli,
   blockchainBscTestnet,
   blockchainGoerli,
   collectionBlockchains,
@@ -30,7 +29,6 @@ chai.use(chaiHttp);
 
 let blockchainDBGoerli,
   blockchainDBBscTesnet,
-  GrtPoolContract,
   getOrderIdFromHashStub,
   isPaidOrderFromHashStub;
 
@@ -61,12 +59,6 @@ beforeEach(async function () {
   blockchainDBBscTesnet = await collectionBlockchains.findOne({
     chainId: blockchainBscTestnet.chainId,
   });
-
-  GrtPoolContract = new ethers.Contract(
-    GrtPoolAddressGoerli,
-    abis.poolAbi,
-    getProviderFromRpc(blockchainDBGoerli.rpc[0])
-  );
 
   // Mocking
   getOrderIdFromHashStub = sinon

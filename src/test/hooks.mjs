@@ -1,6 +1,5 @@
 import { Database } from '../db/conn.js';
 import {
-  GrtPoolAddressGoerli,
   blockchainBscTestnet,
   blockchainGoerli,
   collectionAdmins,
@@ -15,7 +14,6 @@ export const mochaHooks = {
 
     await collectionBlockchains.insertOne({
       ...blockchainGoerli,
-      usefulAddresses: { grtPoolAddress: GrtPoolAddressGoerli },
     });
 
     await collectionBlockchains.insertOne(blockchainBscTestnet);

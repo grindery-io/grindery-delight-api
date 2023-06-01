@@ -1,9 +1,5 @@
 import { Database } from '../../db/conn.js';
 
-// On-chain addresses
-export const GrtPoolAddressGoerli =
-  '0x29e2b23FF53E6702FDFd8C8EBC0d9E1cE44d241A';
-
 const dbTests = await Database.getInstance({});
 
 export const collectionAdmins = dbTests.collection('admins');
