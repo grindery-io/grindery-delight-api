@@ -223,7 +223,7 @@ export const updateTokenLiquidityWallet = {
   amount: '2121212',
 };
 
-export const blockchainGoerli = {
+export const mockBlockchainGoerli = {
   caipId: 'eip155:5',
   chainId: '5',
   icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-5.png',

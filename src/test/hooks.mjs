@@ -1,7 +1,7 @@
 import { Database } from '../db/conn.js';
 import {
   blockchainBscTestnet,
-  blockchainGoerli,
+  mockBlockchainGoerli,
   collectionAdmins,
   collectionBlockchains,
 } from './utils/variables.js';
@@ -13,7 +13,7 @@ export const mochaHooks = {
     });
 
     await collectionBlockchains.insertOne({
-      ...blockchainGoerli,
+      ...mockBlockchainGoerli,
     });
 
     await collectionBlockchains.insertOne(blockchainBscTestnet);

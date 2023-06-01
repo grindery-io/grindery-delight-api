@@ -3,7 +3,7 @@ import chaiHttp from 'chai-http';
 import app from '../index.js';
 import sinon from 'sinon';
 import {
-  blockchainGoerli,
+  mockBlockchainGoerli,
   collectionBlockchains,
   collectionOffers,
   mockOffer,
@@ -34,7 +34,7 @@ const offerId =
 
 beforeEach(async function () {
   blockchainDBGoerli = await collectionBlockchains.findOne({
-    chainId: blockchainGoerli.chainId,
+    chainId: mockBlockchainGoerli.chainId,
   });
 
   // Mocking
@@ -96,35 +96,35 @@ describe('Update offers via on-chain', async function () {
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.SUCCESS,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: 'anotherUserId',
         },
@@ -205,35 +205,35 @@ describe('Update offers via on-chain', async function () {
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.SUCCESS,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
-          exchangeChainId: blockchainGoerli.chainId,
+          exchangeChainId: mockBlockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: 'anotherUserId',
         },

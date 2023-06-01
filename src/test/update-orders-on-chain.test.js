@@ -4,7 +4,7 @@ import app from '../index.js';
 import sinon from 'sinon';
 import {
   blockchainBscTestnet,
-  blockchainGoerli,
+  mockBlockchainGoerli,
   collectionBlockchains,
   collectionOffers,
   collectionOrders,
@@ -45,7 +45,7 @@ const txHashFailedOnBSC =
 
 beforeEach(async function () {
   blockchainDBGoerli = await collectionBlockchains.findOne({
-    chainId: blockchainGoerli.chainId,
+    chainId: mockBlockchainGoerli.chainId,
   });
 
   blockchainDBBscTesnet = await collectionBlockchains.findOne({
@@ -106,35 +106,35 @@ describe('Update orders via on-chain', async function () {
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           orderId: orderId,
           userId: 'anotherUserId',
         },
@@ -203,7 +203,7 @@ describe('Update orders via on-chain', async function () {
         if (mockOrder.hash == txHashFailed) {
           chai.expect(mockOrder).to.deep.equal({
             ...mockOrder,
-            chainIdTokenDeposit: blockchainGoerli.chainId,
+            chainIdTokenDeposit: mockBlockchainGoerli.chainId,
             hash: txHashFailed,
             userId: process.env.USER_ID_TEST,
             status: ORDER_STATUS.FAILURE,
@@ -219,35 +219,35 @@ describe('Update orders via on-chain', async function () {
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
-          chainIdTokenDeposit: blockchainGoerli.chainId,
+          chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashNewOrder,
           orderId: orderId,
           userId: 'anotherUserId',
@@ -326,7 +326,7 @@ describe('Update orders via on-chain', async function () {
         if (mockOrder.hash == txHashFailed) {
           chai.expect(mockOrder).to.deep.equal({
             ...mockOrder,
-            chainIdTokenDeposit: blockchainGoerli.chainId,
+            chainIdTokenDeposit: mockBlockchainGoerli.chainId,
             hash: txHashFailed,
             userId: process.env.USER_ID_TEST,
             status: ORDER_STATUS.FAILURE,
