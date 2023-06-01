@@ -128,7 +128,7 @@ export const mockOffer = {
   amount: '',
 };
 
-export const modifiedOffer = {
+export const mockModifiedOffer = {
   chainId: '76',
   min: '10',
   max: '100',

@@ -7,7 +7,7 @@ import {
   collectionOffers,
   pathOffers_Post,
   mockOffer,
-  modifiedOffer,
+  mockModifiedOffer,
   pathOffers_Get_OfferId,
   pathOffers_Get_Search,
   pathOffers_Get_User,
@@ -1345,7 +1345,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
       chai.expect(modifyOffer).to.have.status(200);
 
       const getOffer = await chai
@@ -1360,7 +1360,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...modifiedOffer,
+        ...mockModifiedOffer,
         isActive: true,
         hash: mockOffer.hash,
         offerId: mockOffer.offerId,
@@ -1372,7 +1372,7 @@ describe('Offers route', async function () {
     it('Should modify only the chainId field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         chainId: '76',
       };
 
@@ -1380,7 +1380,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1400,14 +1400,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        ...modifiedOffer,
+        ...mockModifiedOffer,
       });
     });
 
     it('Should modify only min field of an mockOffer', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         min: '10',
       };
 
@@ -1415,7 +1415,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1435,14 +1435,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        min: modifiedOffer.min,
+        min: mockModifiedOffer.min,
       });
     });
 
     it('Should modify only max field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         max: '500',
       };
 
@@ -1450,7 +1450,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1470,14 +1470,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        max: modifiedOffer.max,
+        max: mockModifiedOffer.max,
       });
     });
 
     it('Should modify only tokenId field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         tokenId: 'new-token-id',
       };
 
@@ -1485,7 +1485,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1505,14 +1505,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        tokenId: modifiedOffer.tokenId,
+        tokenId: mockModifiedOffer.tokenId,
       });
     });
 
     it('Should modify only the token field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         token: 'modified-token',
       };
 
@@ -1520,7 +1520,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1540,14 +1540,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        token: modifiedOffer.token,
+        token: mockModifiedOffer.token,
       });
     });
 
     it('Should modify only tokenAddress field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         tokenAddress: '0x1234567890123456789012345678901234567890',
       };
 
@@ -1555,7 +1555,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1575,14 +1575,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        tokenAddress: modifiedOffer.tokenAddress,
+        tokenAddress: mockModifiedOffer.tokenAddress,
       });
     });
 
     it('Should modify the exchangeRate field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         exchangeRate: '3',
       };
 
@@ -1590,7 +1590,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1610,14 +1610,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        exchangeRate: modifiedOffer.exchangeRate,
+        exchangeRate: mockModifiedOffer.exchangeRate,
       });
     });
 
     it('Should modify the exchangeToken field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         exchangeToken: 'modified-exchange-token',
       };
 
@@ -1625,7 +1625,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1645,14 +1645,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        exchangeToken: modifiedOffer.exchangeToken,
+        exchangeToken: mockModifiedOffer.exchangeToken,
       });
     });
 
     it('Should modify the exchangeChainId field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         exchangeChainId: 'modified-exchange-chain-id',
       };
 
@@ -1660,7 +1660,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1680,14 +1680,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        exchangeChainId: modifiedOffer.exchangeChainId,
+        exchangeChainId: mockModifiedOffer.exchangeChainId,
       });
     });
 
     it('Should modify only estimatedTime field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         estimatedTime: 'modified-estimated-time',
       };
 
@@ -1695,7 +1695,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1715,14 +1715,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        estimatedTime: modifiedOffer.estimatedTime,
+        estimatedTime: mockModifiedOffer.estimatedTime,
       });
     });
 
     it('Should modify only provider field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         provider: 'new-provider',
       };
 
@@ -1730,7 +1730,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1750,14 +1750,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        provider: modifiedOffer.provider,
+        provider: mockModifiedOffer.provider,
       });
     });
 
     it('Should modify the title field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         title: 'Modified Offer Title',
       };
 
@@ -1765,7 +1765,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1785,14 +1785,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        title: modifiedOffer.title,
+        title: mockModifiedOffer.title,
       });
     });
 
     it('Should modify only the image field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         image: 'modified-image',
       };
 
@@ -1800,7 +1800,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1820,14 +1820,14 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        image: modifiedOffer.image,
+        image: mockModifiedOffer.image,
       });
     });
 
     it('Should modify the amount field', async function () {
       await createBaseOffer(mockOffer);
 
-      const modifiedOffer = {
+      const mockModifiedOffer = {
         amount: '2',
       };
 
@@ -1835,7 +1835,7 @@ describe('Offers route', async function () {
         .request(app)
         .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(modifiedOffer);
+        .send(mockModifiedOffer);
 
       chai.expect(modifyOffer).to.have.status(200);
 
@@ -1855,7 +1855,7 @@ describe('Offers route', async function () {
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
-        amount: modifiedOffer.amount,
+        amount: mockModifiedOffer.amount,
       });
     });
   });
