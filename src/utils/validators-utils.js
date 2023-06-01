@@ -1,4 +1,4 @@
-import { validationResult, body } from 'express-validator';
+import { validationResult } from 'express-validator';
 
 /**
  * This function validates the result of a request and returns an array of errors if any are found.

@@ -5,7 +5,6 @@ import {
   mockedToken,
   testNonString,
   testNonEmpty,
-  testNonBoolean,
   testUnexpectedField,
   testNonMongodbId,
 } from './utils/utils.js';
@@ -19,6 +18,8 @@ import {
   pathOffers_Get_MongoDBId,
   pathOffers_Put,
 } from './utils/variables.js';
+
+/* eslint-disable no-unused-expressions */
 
 chai.use(chaiHttp);
 

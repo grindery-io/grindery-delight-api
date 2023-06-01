@@ -1,7 +1,6 @@
 import express from 'express';
 import pkg from 'body-parser';
 import expressJSDocSwagger from 'express-jsdoc-swagger';
-import * as dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import './loadEnvironment.js';
@@ -68,7 +67,7 @@ app.set('trust proxy', 1);
 
 // Enable CORS
 app.use(function (req, res, next) {
-  //res.header("Access-Control-Allow-Origin", "*");
+  // res.header("Access-Control-Allow-Origin", "*");
   res.header('Access-Control-Allow-Origin', req.get('origin'));
   res.header(
     'Access-Control-Allow-Headers',

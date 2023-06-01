@@ -4,6 +4,8 @@ import app from '../index.js';
 import { mockedToken } from './utils/utils.js';
 import { pathAdmin_Get_IsAdmin } from './utils/variables.js';
 
+/* eslint-disable no-unused-expressions */
+
 chai.use(chaiHttp);
 
 describe('Admins route', async function () {

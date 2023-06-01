@@ -204,8 +204,8 @@ export async function isPaidOrderFromHash(rpcs, hash) {
         return txReceipt.status === 0
           ? false
           : txReceipt.logs.find(
-              (log) => iface.parseLog(log).name === 'LogOfferPaid'
-            ) !== undefined;
+            (log) => iface.parseLog(log).name === 'LogOfferPaid'
+          ) !== undefined;
       }
     } catch (e) {
       console.log('RPC connection error - ', e);

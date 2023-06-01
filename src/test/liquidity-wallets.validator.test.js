@@ -19,6 +19,8 @@ import {
   pathLiquidityWallets_Put,
 } from './utils/variables.js';
 
+/* eslint-disable no-unused-expressions */
+
 chai.use(chaiHttp);
 
 describe('Liquidity wallets route - Validators', async function () {

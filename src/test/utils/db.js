@@ -4,6 +4,8 @@ export const disconnect = async () => {
   const mongod = await MongoMemoryServer.create();
   const uri = mongod.getUri();
   console.log('uri: ' + uri);
-  const clientMemory = new MongoClient(uri);
+  /* eslint-disable no-new */
+  /* eslint-disable no-undef */
+  new MongoClient(uri);
   await mongod.stop();
 };

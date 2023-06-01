@@ -3,7 +3,7 @@ import { checkToken } from './utils/auth-utils.js';
 import jwt_decode from 'jwt-decode';
 
 function onConnection(ws, req) {
-  ws.send(`Mercari Web Socket Server!`);
+  ws.send('Mercari Web Socket Server!');
 
   const FIVE_SECONDS = 5000;
   const authTimeout = setTimeout(() => {
@@ -40,10 +40,10 @@ function onConnection(ws, req) {
 }
 
 export default (server) => {
-  let wss = new WebSocket.Server({
+  const wss = new WebSocket.Server({
     server,
   });
   wss.on('connection', onConnection);
-  console.log(`Mercari Web Socket Server is running!`);
+  console.log('Mercari Web Socket Server is running!');
   return wss;
 };

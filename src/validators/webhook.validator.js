@@ -23,7 +23,7 @@ export const updateStatusOfferValidator = [
     .notEmpty()
     .withMessage('must not be empty')
     .customSanitizer((value) => {
-      return value == 'true';
+      return value === 'true';
     }),
   body('apiKey')
     .isString()

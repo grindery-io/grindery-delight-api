@@ -17,6 +17,8 @@ import {
   pathBlockchains_Delete_UsefulAddress_MongoDBId,
 } from './utils/variables.js';
 
+/* eslint-disable no-unused-expressions */
+
 chai.use(chaiHttp);
 
 /**

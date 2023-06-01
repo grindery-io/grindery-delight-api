@@ -13,7 +13,7 @@
  * The pipeline is generated based on the input query and request
  */
 export function getPipelineOfferInOrders(req, query) {
-  let pipeline = getPipelineOfferInOrder(query);
+  const pipeline = getPipelineOfferInOrder(query);
   pipeline.push(
     {
       $sort: { date: -1 },

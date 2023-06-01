@@ -32,7 +32,7 @@ router.post('/', createStakingValidator, isRequired, async (req, res) => {
       userId: { $regex: res.locals.userId, $options: 'i' },
     }))
   ) {
-    let newDocument = req.body;
+    const newDocument = req.body;
     newDocument.date = new Date();
     newDocument.userId = res.locals.userId;
     res.status(201).send(await collection.insertOne(newDocument));
@@ -57,7 +57,7 @@ router.put('/', updateStakingValidator, isRequired, async (req, res) => {
   if (validator.length) {
     return res.status(400).send(validator);
   }
-  let result = await collection.updateOne(
+  const result = await collection.updateOne(
     {
       userId: res.locals.userId,
       chainId: req.body.chainId,

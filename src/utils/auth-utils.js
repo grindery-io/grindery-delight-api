@@ -2,9 +2,8 @@ import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 
 export const checkToken = async (token, workspaceKey) => {
-  let res;
   try {
-    res = await axios.post(
+    await axios.post(
       'https://orchestrator.grindery.org',
       {
         jsonrpc: '2.0',

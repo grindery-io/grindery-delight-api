@@ -14,11 +14,13 @@ import {
   pathViewBlockchain_Put_OrdersCompleteSeller,
   pathViewBlockchain_Put_OrdersCompleteUser,
   pathViewBlockchain_Put_OrdersUser,
+  mockOrder,
 } from './utils/variables.js';
 import { utils_orders } from '../utils/view-blockchains-utils.js';
-import { mockOrder } from './utils/variables.js';
 import { mockedToken } from './utils/utils.js';
 import { ORDER_STATUS } from '../utils/orders-utils.js';
+
+/* eslint-disable no-unused-expressions */
 
 chai.use(chaiHttp);
 
@@ -135,7 +137,7 @@ describe('Update orders via on-chain', async function () {
           ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
-          orderId: orderId,
+          orderId,
           userId: 'anotherUserId',
         },
       ]);
@@ -171,7 +173,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash == txHashNewOrder) {
+        if (mockOrder.hash === txHashNewOrder) {
           chai
             .expect(mockOrder.orderId)
             .to.equal(
@@ -188,7 +190,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash == txHashNewOrder) {
+        if (mockOrder.hash === txHashNewOrder) {
           chai.expect(mockOrder.status).to.equal(ORDER_STATUS.SUCCESS);
         }
       });
@@ -200,7 +202,7 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash == txHashFailed) {
+        if (mockOrder.hash === txHashFailed) {
           chai.expect(mockOrder).to.deep.equal({
             ...mockOrder,
             chainIdTokenDeposit: mockBlockchainGoerli.chainId,
@@ -249,7 +251,7 @@ describe('Update orders via on-chain', async function () {
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: mockBlockchainGoerli.chainId,
           hash: txHashNewOrder,
-          orderId: orderId,
+          orderId,
           userId: 'anotherUserId',
         },
       ]);
@@ -292,7 +294,7 @@ describe('Update orders via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash == txHashNewOrder) {
+        if (mockOrder.hash === txHashNewOrder) {
           chai
             .expect(mockOrder.orderId)
             .to.equal(
@@ -310,7 +312,7 @@ describe('Update orders via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash == txHashNewOrder) {
+        if (mockOrder.hash === txHashNewOrder) {
           chai.expect(mockOrder.status).to.equal(ORDER_STATUS.SUCCESS);
         }
       });
@@ -323,7 +325,7 @@ describe('Update orders via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOrder) => {
-        if (mockOrder.hash == txHashFailed) {
+        if (mockOrder.hash === txHashFailed) {
           chai.expect(mockOrder).to.deep.equal({
             ...mockOrder,
             chainIdTokenDeposit: mockBlockchainGoerli.chainId,

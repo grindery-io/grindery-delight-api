@@ -24,6 +24,8 @@ import {
   pathBlockchains_Delete_UsefulAddress_MongoDBId,
 } from './utils/variables.js';
 
+/* eslint-disable no-unused-expressions */
+
 chai.use(chaiHttp);
 
 describe('Blockchains route - Validators', async function () {
@@ -104,7 +106,7 @@ describe('Blockchains route - Validators', async function () {
     });
 
     for (const testCase of Object.keys(mockBlockchain)) {
-      if (testCase == 'caipId') {
+      if (testCase === 'caipId') {
         testNonCaipId({
           method: 'post',
           path: pathBlockchains_Post_NewBlockchain,
@@ -116,8 +118,8 @@ describe('Blockchains route - Validators', async function () {
           field: testCase,
         });
       } else if (
-        testCase == 'transactionExplorerUrl' ||
-        testCase == 'addressExplorerUrl'
+        testCase === 'transactionExplorerUrl' ||
+        testCase === 'addressExplorerUrl'
       ) {
         testNonURL({
           method: 'post',
@@ -130,9 +132,9 @@ describe('Blockchains route - Validators', async function () {
           field: testCase,
         });
       } else if (
-        testCase == 'isEvm' ||
-        testCase == 'isTestnet' ||
-        testCase == 'isActive'
+        testCase === 'isEvm' ||
+        testCase === 'isTestnet' ||
+        testCase === 'isActive'
       ) {
         testNonBoolean({
           method: 'post',
@@ -252,7 +254,7 @@ describe('Blockchains route - Validators', async function () {
     ];
 
     for (const testCase of testCases) {
-      if (testCase == 'caipId') {
+      if (testCase === 'caipId') {
         testNonCaipId({
           method: 'put',
           path: pathBlockchains_Put_MongoDBId + randomMongoDBId,
@@ -264,8 +266,8 @@ describe('Blockchains route - Validators', async function () {
           field: testCase,
         });
       } else if (
-        testCase == 'transactionExplorerUrl' ||
-        testCase == 'addressExplorerUrl'
+        testCase === 'transactionExplorerUrl' ||
+        testCase === 'addressExplorerUrl'
       ) {
         testNonURL({
           method: 'put',
@@ -278,9 +280,9 @@ describe('Blockchains route - Validators', async function () {
           field: testCase,
         });
       } else if (
-        testCase == 'isEvm' ||
-        testCase == 'isTestnet' ||
-        testCase == 'isActive'
+        testCase === 'isEvm' ||
+        testCase === 'isTestnet' ||
+        testCase === 'isActive'
       ) {
         testNonBoolean({
           method: 'put',

@@ -15,11 +15,12 @@ import {
   pathOffers_Delete_MongoDBId,
   pathOffers_Put,
   pathOffers_Get_All,
-  pathLiquidityWallets_Post_NewLiquidityWallet,
   collectionLiquidityWallet,
   pathOffers_Put_Activation,
 } from './utils/variables.js';
 import { OFFER_STATUS } from '../utils/offers-utils.js';
+
+/* eslint-disable no-unused-expressions */
 
 chai.use(chaiHttp);
 
@@ -941,7 +942,6 @@ describe('Offers route', async function () {
         offers: [
           {
             ...mockOffer,
-            date: new Date(),
             userId: process.env.USER_ID_TEST,
             status: OFFER_STATUS.PENDING,
             _id: offerFromInMemoryDB[0]._id.toString(),
@@ -954,7 +954,6 @@ describe('Offers route', async function () {
           },
           {
             ...mockOffer,
-            date: new Date(),
             userId: process.env.USER_ID_TEST,
             status: OFFER_STATUS.PENDING,
             _id: offerFromInMemoryDB[1]._id.toString(),

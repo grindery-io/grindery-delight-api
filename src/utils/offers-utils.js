@@ -14,7 +14,7 @@
  * number of documents returned based on
  */
 export function getPipelineLiquidityWalletInOffers(req, query) {
-  let pipeline = getPipelineLiquidityWalletInOffer(query);
+  const pipeline = getPipelineLiquidityWalletInOffer(query);
   pipeline.push(
     {
       $sort: { date: -1 },

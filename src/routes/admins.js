@@ -8,11 +8,9 @@ router.get('/', isRequired, async (req, res) => {
   const db = await Database.getInstance(req);
   const collection = db.collection('admins');
   res.status(200).send(
-    (await collection.findOne({
+    !!(await collection.findOne({
       userId: { $regex: res.locals.userId, $options: 'i' },
     }))
-      ? true
-      : false
   );
 });
 

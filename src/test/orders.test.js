@@ -18,6 +18,8 @@ import {
 } from './utils/variables.js';
 import { ORDER_STATUS } from '../utils/orders-utils.js';
 
+/* eslint-disable no-unused-expressions */
+
 chai.use(chaiHttp);
 
 /**
@@ -153,12 +155,12 @@ describe('Orders route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
 
-      res.body.orders.map((mockOrder) => {
+      res.body.orders.map((mockOrder) =>
         chai.expect(mockOrder.offer).to.deep.equal({
           ...offerFromInMemoryDB,
           _id: offerFromInMemoryDB._id.toString(),
-        });
-      });
+        })
+      );
     });
 
     it('Should sort by date', async function () {

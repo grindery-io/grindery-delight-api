@@ -14,6 +14,8 @@ import {
   validMongoDBId,
 } from './utils/variables.js';
 
+/* eslint-disable no-unused-expressions */
+
 chai.use(chaiHttp);
 
 /**
@@ -98,7 +100,7 @@ describe('Tokens route', async function () {
     });
 
     it('Should fail if mockToken already exists', async function () {
-      const createResponse = await createBaseToken(mockToken);
+      await createBaseToken(mockToken);
 
       const createResponse1 = await chai
         .request(app)

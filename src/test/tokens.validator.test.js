@@ -15,6 +15,8 @@ import {
   randomMongoDBId,
 } from './utils/variables.js';
 
+/* eslint-disable no-unused-expressions */
+
 chai.use(chaiHttp);
 
 describe('Tokens route - Validators', async function () {

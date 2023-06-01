@@ -1,4 +1,4 @@
-import { body, param, query, check, matchedData } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import { validateFields } from '../utils/validators-utils.js';
 
 export const createTokenValidator = [

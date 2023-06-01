@@ -5,7 +5,7 @@ export const dispatchWebSocket = (method, params) => {
   wss.clients.forEach(function each(client) {
     if (
       client.readyState === WebSocket.OPEN &&
-      client.userId == params.userId
+      client.userId === params.userId
     ) {
       client.send(
         JSON.stringify({

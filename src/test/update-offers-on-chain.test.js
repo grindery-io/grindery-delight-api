@@ -16,6 +16,8 @@ import { utils_offers } from '../utils/view-blockchains-utils.js';
 import { mockedToken } from './utils/utils.js';
 import { OFFER_STATUS } from '../utils/offers-utils.js';
 
+/* eslint-disable no-unused-expressions */
+
 chai.use(chaiHttp);
 
 let blockchainDBGoerli, getOfferIdFromHashStub, isSetStatusFromHashStub;
@@ -51,7 +53,7 @@ beforeEach(async function () {
         _hash === txHashSetStatusDeactivation
         ? {
             isSetStatus: true,
-            isActive: _hash === txHashSetStatusActivation ? true : false,
+            isActive: _hash === txHashSetStatusActivation,
           }
         : {
             isSetStatus: false,
@@ -166,7 +168,7 @@ describe('Update offers via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash == txHashNewOffer) {
+        if (mockOffer.hash === txHashNewOffer) {
           chai.expect(mockOffer.offerId).to.equal(offerId);
         }
       });
@@ -179,7 +181,7 @@ describe('Update offers via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash == txHashNewOffer) {
+        if (mockOffer.hash === txHashNewOffer) {
           chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
         }
       });
@@ -192,7 +194,7 @@ describe('Update offers via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash == txHashFailed) {
+        if (mockOffer.hash === txHashFailed) {
           chai.expect(mockOffer.status).to.equal(OFFER_STATUS.FAILURE);
         }
       });
@@ -283,7 +285,7 @@ describe('Update offers via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash == txHashNewOffer) {
+        if (mockOffer.hash === txHashNewOffer) {
           chai.expect(mockOffer.offerId).to.equal(offerId);
         }
       });
@@ -297,7 +299,7 @@ describe('Update offers via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash == txHashNewOffer) {
+        if (mockOffer.hash === txHashNewOffer) {
           chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
         }
       });
@@ -311,7 +313,7 @@ describe('Update offers via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash == txHashFailed) {
+        if (mockOffer.hash === txHashFailed) {
           chai.expect(mockOffer.status).to.equal(OFFER_STATUS.FAILURE);
         }
       });

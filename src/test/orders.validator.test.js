@@ -5,7 +5,6 @@ import {
   testNonEmpty,
   testUnexpectedField,
   testNonMongodbId,
-  mockedToken,
 } from './utils/utils.js';
 import {
   pathOrders_Post,
@@ -13,9 +12,9 @@ import {
   pathOrders_Get_OrderId,
   pathOrders_Get_MongoDBId,
   pathOrders_Put_Complete,
-  pathOrders_Put_Status,
 } from './utils/variables.js';
-import app from '../index.js';
+
+/* eslint-disable no-unused-expressions */
 
 chai.use(chaiHttp);
 
@@ -153,7 +152,6 @@ describe('Orders route - Validators', async function () {
         orderId: '123',
         unexpectedField: 'Unexpected field',
       },
-      field: {},
       field: 'unexpectedField',
       location: 'body',
     });

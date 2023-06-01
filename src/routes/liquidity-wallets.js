@@ -33,7 +33,7 @@ router.post(
         chainId: req.body.chainId,
       }))
     ) {
-      let newDocument = req.body;
+      const newDocument = req.body;
       newDocument.userId = res.locals.userId;
       newDocument.date = new Date();
       newDocument.tokens = new Map();

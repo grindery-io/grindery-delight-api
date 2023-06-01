@@ -16,7 +16,6 @@ import { ObjectId } from 'mongodb';
 import {
   OFFER_STATUS,
   getOffersWithLiquidityWallets,
-  getOneOfferWithLiquidityWallet,
   getPipelineLiquidityWalletInOffer,
   getPipelineLiquidityWalletInOffers,
 } from '../utils/offers-utils.js';
@@ -45,7 +44,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
     });
   }
 
-  let newDocument = req.body;
+  const newDocument = req.body;
   newDocument.date = new Date();
   newDocument.userId = res.locals.userId;
   newDocument.status = OFFER_STATUS.PENDING;

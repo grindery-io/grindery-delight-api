@@ -3,6 +3,8 @@ import axios from 'axios';
 import chai from 'chai';
 import app from '../../index.js';
 
+/* eslint-disable no-unused-expressions */
+
 dotenv.config();
 
 /**

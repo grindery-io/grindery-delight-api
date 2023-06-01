@@ -17,6 +17,8 @@ import {
   pathLiquidityWallets_Put,
 } from './utils/variables.js';
 
+/* eslint-disable no-unused-expressions */
+
 chai.use(chaiHttp);
 
 /**
@@ -117,8 +119,7 @@ describe('Liquidity wallets route', async function () {
 
     it('Should return an array of liquidity wallets with the proper chainId', async function () {
       const nbrLiquidityWallet = 1;
-      let wallets = [];
-      let userId = '';
+      const wallets = [];
       for (let i = 0; i < nbrLiquidityWallet; i++) {
         const createResponse = await createBaseLiquidityWallet({
           chainId: mockLiquidityWallet.chainId,
@@ -131,11 +132,9 @@ describe('Liquidity wallets route', async function () {
           })
         );
         if (i === 0) {
-          userId = (
-            await collectionLiquidityWallet.findOne({
-              _id: new ObjectId(createResponse.body.insertedId),
-            })
-          ).userId;
+          await collectionLiquidityWallet.findOne({
+            _id: new ObjectId(createResponse.body.insertedId),
+          });
         }
       }
       const res = await chai
@@ -175,7 +174,7 @@ describe('Liquidity wallets route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       const wallets = await collectionLiquidityWallet
-        .find({ userId: userId })
+        .find({ userId })
         .toArray();
       // Check that all objects in the response body have chainId and walletAddress elements that exist in wallets
       res.body.forEach((wallet) => {
@@ -203,7 +202,7 @@ describe('Liquidity wallets route', async function () {
         .request(app)
         .get(pathLiquidityWallets_Get_Single)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ chainId: mockLiquidityWallet.chainId, userId: userId });
+        .query({ chainId: mockLiquidityWallet.chainId, userId });
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
       chai.expect(res.body.userId).to.equal(userId);
@@ -229,7 +228,7 @@ describe('Liquidity wallets route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .query({
           chainId: mockLiquidityWallet.chainId,
-          userId: userId,
+          userId,
           walletAddress: mockLiquidityWallet.walletAddress,
         });
       chai.expect(res).to.have.status(200);
@@ -385,7 +384,7 @@ describe('Liquidity wallets route', async function () {
       const wallet = await collectionLiquidityWallet.findOne({
         _id: new ObjectId(createResponse.body.insertedId),
       });
-      chai.expect(wallet.tokens['USDC']).to.equal('3435');
+      chai.expect(wallet.tokens.USDC).to.equal('3435');
     });
 
     it('Should fail if liquidity wallet doesnt exist', async function () {
