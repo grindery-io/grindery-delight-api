@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb';
 import {
   collectionBlockchains,
   pathBlockchains_Post_NewBlockchain,
-  blockchain,
+  mockBlockchain,
   usefulAddress,
   pathBlockchains_Get_MongoDBId,
   pathBlockchains_Put_MongoDBId,
@@ -20,23 +20,23 @@ import {
 chai.use(chaiHttp);
 
 /**
- * This function modifies a specific field in a blockchain object and tests that the modification was
+ * This function modifies a specific field in a mockBlockchain object and tests that the modification was
  * successful.
  */
 function modifyBlockchainField({ field, value }) {
   it(`PUT /blockchains/blockchainId - ${field} - Should modify ${field}`, async function () {
-    // Create a custom blockchain object with modified field values
+    // Create a custom mockBlockchain object with modified field values
     const customBlockchain = {
-      ...blockchain,
+      ...mockBlockchain,
       isActive: false,
       isEvm: false,
       isTestnet: false,
     };
 
-    // Create a new blockchain entry in the database with the customBlockchain object
+    // Create a new mockBlockchain entry in the database with the customBlockchain object
     const createResponse = await createBaseBlockchain(customBlockchain);
 
-    // Send a PUT request to update the blockchain with the specified field and value
+    // Send a PUT request to update the mockBlockchain with the specified field and value
     const res = await chai
       .request(app)
       .put(pathBlockchains_Put_MongoDBId + createResponse.body.insertedId)
@@ -53,15 +53,15 @@ function modifyBlockchainField({ field, value }) {
       matchedCount: 1,
     });
 
-    // Fetch the updated blockchain from the database
+    // Fetch the updated mockBlockchain from the database
     const blockchainDB = await collectionBlockchains.findOne({
       _id: new ObjectId(createResponse.body.insertedId),
     });
 
-    // Delete the _id field from the fetched blockchain object for comparison
+    // Delete the _id field from the fetched mockBlockchain object for comparison
     delete blockchainDB._id;
 
-    // Assertions to check if the fetched blockchain matches the expected result
+    // Assertions to check if the fetched mockBlockchain matches the expected result
     chai
       .expect(blockchainDB)
       .to.deep.equal({ ...customBlockchain, [field]: value });
@@ -69,17 +69,17 @@ function modifyBlockchainField({ field, value }) {
 }
 
 /**
- * This function creates a new blockchain in a database using a POST request and expects a successful
+ * This function creates a new mockBlockchain in a database using a POST request and expects a successful
  * response.
- * @param blockchain - The parameter `blockchain` is an object that represents the data of a blockchain
+ * @param mockBlockchain - The parameter `mockBlockchain` is an object that represents the data of a mockBlockchain
  * that will be created. It is being passed as an argument to the `createBaseBlockchain` function.
  */
-async function createBaseBlockchain(blockchain) {
+async function createBaseBlockchain(mockBlockchain) {
   const res = await chai
     .request(app)
     .post(pathBlockchains_Post_NewBlockchain)
     .set('Authorization', `Bearer ${mockedToken}`)
-    .send(blockchain);
+    .send(mockBlockchain);
   chai.expect(res).to.have.status(200);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
   chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
@@ -87,37 +87,37 @@ async function createBaseBlockchain(blockchain) {
 }
 
 describe('Blockchains route', async function () {
-  describe('POST new blockchain', async function () {
+  describe('POST new mockBlockchain', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
         .post(pathBlockchains_Post_NewBlockchain)
-        .send(blockchain);
+        .send(mockBlockchain);
       chai.expect(createResponse).to.have.status(403);
     });
 
-    it('Should create a new blockchain', async function () {
-      await createBaseBlockchain(blockchain);
+    it('Should create a new mockBlockchain', async function () {
+      await createBaseBlockchain(mockBlockchain);
     });
 
-    it('Should create a new blockchain with the proper fields', async function () {
-      const createResponse = await createBaseBlockchain(blockchain);
+    it('Should create a new mockBlockchain with the proper fields', async function () {
+      const createResponse = await createBaseBlockchain(mockBlockchain);
       const res = await chai
         .request(app)
         .get(pathBlockchains_Get_MongoDBId + createResponse.body.insertedId)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       delete res.body._id;
-      chai.expect(res.body).to.deep.equal(blockchain);
+      chai.expect(res.body).to.deep.equal(mockBlockchain);
     });
 
-    it('Should fail if the blockchain already exists', async function () {
-      await createBaseBlockchain(blockchain);
+    it('Should fail if the mockBlockchain already exists', async function () {
+      await createBaseBlockchain(mockBlockchain);
       const createResponse1 = await chai
         .request(app)
         .post(pathBlockchains_Post_NewBlockchain)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(blockchain);
+        .send(mockBlockchain);
       chai.expect(createResponse1).to.have.status(404);
       chai
         .expect(createResponse1.body)
@@ -127,9 +127,9 @@ describe('Blockchains route', async function () {
 
   describe('GET active blockchains', async function () {
     it('Should not fail if no token is provided', async function () {
-      await createBaseBlockchain(blockchain);
+      await createBaseBlockchain(mockBlockchain);
       await createBaseBlockchain({
-        ...blockchain,
+        ...mockBlockchain,
         caipId: 'eip155:45',
         isActive: false,
       });
@@ -138,9 +138,9 @@ describe('Blockchains route', async function () {
     });
 
     it('Should return all active blockchains', async function () {
-      await createBaseBlockchain(blockchain);
+      await createBaseBlockchain(mockBlockchain);
       await createBaseBlockchain({
-        ...blockchain,
+        ...mockBlockchain,
         caipId: 'eip155:45',
         isActive: false,
       });
@@ -164,7 +164,7 @@ describe('Blockchains route', async function () {
     });
   });
 
-  describe('GET blockchain by MongoDBId', async function () {
+  describe('GET mockBlockchain by MongoDBId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -172,8 +172,8 @@ describe('Blockchains route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should return blockchain with the proper blockchainId', async function () {
-      const createResponse = await createBaseBlockchain(blockchain);
+    it('Should return mockBlockchain with the proper blockchainId', async function () {
+      const createResponse = await createBaseBlockchain(mockBlockchain);
       const res = await chai
         .request(app)
         .get(pathBlockchains_Get_MongoDBId + createResponse.body.insertedId)
@@ -184,7 +184,7 @@ describe('Blockchains route', async function () {
         .expect(res.body._id.toString())
         .to.be.equal(createResponse.body.insertedId);
     });
-    it('Should return null if no blockchain found', async function () {
+    it('Should return null if no mockBlockchain found', async function () {
       const res = await chai
         .request(app)
         .get(pathBlockchains_Get_MongoDBId + validMongoDBId)
@@ -194,7 +194,7 @@ describe('Blockchains route', async function () {
     });
   });
 
-  describe('PUT blockchain', async function () {
+  describe('PUT mockBlockchain', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -243,19 +243,19 @@ describe('Blockchains route', async function () {
     });
   });
 
-  describe('DELETE blockchain', async function () {
+  describe('DELETE mockBlockchain', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
         .delete(pathBlockchains_Delete_MongoDBId + validMongoDBId);
       chai.expect(res).to.have.status(403);
     });
-    it('Should delete one blockchain', async function () {
+    it('Should delete one mockBlockchain', async function () {
       const createResponse = await chai
         .request(app)
         .post(pathBlockchains_Post_NewBlockchain)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(blockchain);
+        .send(mockBlockchain);
 
       chai.expect(createResponse).to.have.status(200);
       chai.expect(createResponse.body).to.have.property('acknowledged', true);
@@ -287,7 +287,7 @@ describe('Blockchains route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should return 404 if blockchain is not found', async function () {
+    it('Should return 404 if mockBlockchain is not found', async function () {
       const response = await chai
         .request(app)
         .put(pathBlockchains_Put_UsefulAddress_MongoDBId + validMongoDBId)
@@ -300,7 +300,7 @@ describe('Blockchains route', async function () {
     });
 
     it('Should create a new useful address with the proper fields', async function () {
-      const createResponse = await createBaseBlockchain(blockchain);
+      const createResponse = await createBaseBlockchain(mockBlockchain);
       const newUsefulAddress = await chai
         .request(app)
         .put(
@@ -324,13 +324,13 @@ describe('Blockchains route', async function () {
       chai.expect(res).to.have.status(200);
       delete res.body._id;
       chai.expect(res.body.usefulAddresses).to.deep.equal({
-        ...blockchain.usefulAddresses,
+        ...mockBlockchain.usefulAddresses,
         [usefulAddress.contract]: usefulAddress.address,
       });
     });
 
     it('Should update a useful address with the proper fields', async function () {
-      const createResponse = await createBaseBlockchain(blockchain);
+      const createResponse = await createBaseBlockchain(mockBlockchain);
       const updateUsefulAddress = await chai
         .request(app)
         .put(
@@ -339,7 +339,7 @@ describe('Blockchains route', async function () {
         )
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
-          contract: blockchain.usefulAddresses.myUsefulAddress1,
+          contract: mockBlockchain.usefulAddresses.myUsefulAddress1,
           address: 'modifiedAddress',
         });
       chai.expect(updateUsefulAddress).to.have.status(200);
@@ -357,8 +357,8 @@ describe('Blockchains route', async function () {
       chai.expect(res).to.have.status(200);
       delete res.body._id;
       chai.expect(res.body.usefulAddresses).to.deep.equal({
-        ...blockchain.usefulAddresses,
-        [blockchain.usefulAddresses.myUsefulAddress1]: 'modifiedAddress',
+        ...mockBlockchain.usefulAddresses,
+        [mockBlockchain.usefulAddresses.myUsefulAddress1]: 'modifiedAddress',
       });
     });
   });
@@ -374,7 +374,7 @@ describe('Blockchains route', async function () {
     });
 
     it('Should return 404 if useful address is not found', async function () {
-      const createResponse = await createBaseBlockchain(blockchain);
+      const createResponse = await createBaseBlockchain(mockBlockchain);
 
       const deleteResponse = await chai
         .request(app)
@@ -390,12 +390,12 @@ describe('Blockchains route', async function () {
       });
     });
 
-    it('Should return 404 if blockchain is not found', async function () {
+    it('Should return 404 if mockBlockchain is not found', async function () {
       const deleteResponse = await chai
         .request(app)
         .delete(pathBlockchains_Delete_UsefulAddress_MongoDBId + validMongoDBId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send({ contract: blockchain.usefulAddresses.myUsefulAddress1 });
+        .send({ contract: mockBlockchain.usefulAddresses.myUsefulAddress1 });
       chai.expect(deleteResponse).to.have.status(404);
       chai.expect(deleteResponse.body).to.deep.equal({
         msg: 'No blockchain found or contract doesnt exist',
@@ -403,7 +403,7 @@ describe('Blockchains route', async function () {
     });
 
     it('Should delete useful address', async function () {
-      const createResponse = await createBaseBlockchain(blockchain);
+      const createResponse = await createBaseBlockchain(mockBlockchain);
 
       const deleteResponse = await chai
         .request(app)
@@ -412,7 +412,7 @@ describe('Blockchains route', async function () {
             createResponse.body.insertedId
         )
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send({ contract: Object.keys(blockchain.usefulAddresses)[0] });
+        .send({ contract: Object.keys(mockBlockchain.usefulAddresses)[0] });
       chai.expect(deleteResponse).to.have.status(200);
     });
   });

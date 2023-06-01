@@ -13,7 +13,7 @@ import {
 } from './utils/utils.js';
 import {
   pathBlockchains_Post_NewBlockchain,
-  blockchain,
+  mockBlockchain,
   usefulAddress,
   pathBlockchains_Get_MongoDBId,
   notAMongoDBId,
@@ -27,14 +27,14 @@ import {
 chai.use(chaiHttp);
 
 describe('Blockchains route - Validators', async function () {
-  describe('POST - new blockchain', async function () {
+  describe('POST - new mockBlockchain', async function () {
     it('Should fail if rpc is not an array', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
         .request(app)
         .post(pathBlockchains_Post_NewBlockchain)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .send({ ...blockchain, rpc: 'notAnArray' });
+        .send({ ...mockBlockchain, rpc: 'notAnArray' });
       // Assertions
       chai.expect(res).to.have.status(400);
       chai.expect(res.body).to.be.an('array');
@@ -51,7 +51,7 @@ describe('Blockchains route - Validators', async function () {
         .request(app)
         .post(pathBlockchains_Post_NewBlockchain)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .send({ ...blockchain, rpc: ['notAnURL', 123] });
+        .send({ ...mockBlockchain, rpc: ['notAnURL', 123] });
       // Assertions
       chai.expect(res).to.have.status(400);
       chai.expect(res.body).to.be.an('array');
@@ -65,7 +65,7 @@ describe('Blockchains route - Validators', async function () {
         .request(app)
         .post(pathBlockchains_Post_NewBlockchain)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .send({ ...blockchain, usefulAddresses: 'notAnObject' });
+        .send({ ...mockBlockchain, usefulAddresses: 'notAnObject' });
       // Assertions
       chai.expect(res).to.have.status(400);
       chai.expect(res.body).to.be.an('array');
@@ -84,7 +84,7 @@ describe('Blockchains route - Validators', async function () {
         .post(pathBlockchains_Post_NewBlockchain)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .send({
-          ...blockchain,
+          ...mockBlockchain,
           usefulAddresses: {
             myUsefulAddress1: 1,
             myUsefulAddress2: 'myAddress2',
@@ -103,13 +103,13 @@ describe('Blockchains route - Validators', async function () {
       ).to.be.true;
     });
 
-    for (const testCase of Object.keys(blockchain)) {
+    for (const testCase of Object.keys(mockBlockchain)) {
       if (testCase == 'caipId') {
         testNonCaipId({
           method: 'post',
           path: pathBlockchains_Post_NewBlockchain,
           body: {
-            ...blockchain,
+            ...mockBlockchain,
             [testCase]: 123,
           },
           query: {},
@@ -123,7 +123,7 @@ describe('Blockchains route - Validators', async function () {
           method: 'post',
           path: pathBlockchains_Post_NewBlockchain,
           body: {
-            ...blockchain,
+            ...mockBlockchain,
             [testCase]: 123,
           },
           query: {},
@@ -138,7 +138,7 @@ describe('Blockchains route - Validators', async function () {
           method: 'post',
           path: pathBlockchains_Post_NewBlockchain,
           body: {
-            ...blockchain,
+            ...mockBlockchain,
             [testCase]: 123,
           },
           query: {},
@@ -149,7 +149,7 @@ describe('Blockchains route - Validators', async function () {
           method: 'post',
           path: pathBlockchains_Post_NewBlockchain,
           body: {
-            ...blockchain,
+            ...mockBlockchain,
             [testCase]: 123,
           },
           query: {},
@@ -162,7 +162,7 @@ describe('Blockchains route - Validators', async function () {
           method: 'post',
           path: pathBlockchains_Post_NewBlockchain,
           body: {
-            ...blockchain,
+            ...mockBlockchain,
             [testCase]: '',
           },
           query: {},
@@ -175,7 +175,7 @@ describe('Blockchains route - Validators', async function () {
       method: 'post',
       path: pathBlockchains_Post_NewBlockchain,
       body: {
-        ...blockchain,
+        ...mockBlockchain,
         unexpectedField: 'unexpectedField',
       },
       query: {},
@@ -187,7 +187,7 @@ describe('Blockchains route - Validators', async function () {
       method: 'post',
       path: pathBlockchains_Post_NewBlockchain,
       body: {
-        ...blockchain,
+        ...mockBlockchain,
       },
       query: { unexpectedField: 'unexpectedField' },
       field: 'unexpectedField',
@@ -195,7 +195,7 @@ describe('Blockchains route - Validators', async function () {
     });
   });
 
-  describe('GET blockchain by MongoDBId', async function () {
+  describe('GET mockBlockchain by MongoDBId', async function () {
     testNonMongodbId({
       method: 'get',
       path: pathBlockchains_Get_MongoDBId + notAMongoDBId,
@@ -205,7 +205,7 @@ describe('Blockchains route - Validators', async function () {
     });
   });
 
-  describe('PUT - modify blockchain', async function () {
+  describe('PUT - modify mockBlockchain', async function () {
     it('PUT /blockchains/myMongoDBId - rpc - Should fail if rpc is not an array', async function () {
       // Make a request to create the offer with invalid data
       const res = await chai
@@ -257,7 +257,7 @@ describe('Blockchains route - Validators', async function () {
           method: 'put',
           path: pathBlockchains_Put_MongoDBId + randomMongoDBId,
           body: {
-            ...blockchain,
+            ...mockBlockchain,
             [testCase]: 123,
           },
           query: {},
@@ -271,7 +271,7 @@ describe('Blockchains route - Validators', async function () {
           method: 'put',
           path: pathBlockchains_Put_MongoDBId + randomMongoDBId,
           body: {
-            ...blockchain,
+            ...mockBlockchain,
             [testCase]: 123,
           },
           query: {},
@@ -286,7 +286,7 @@ describe('Blockchains route - Validators', async function () {
           method: 'put',
           path: pathBlockchains_Put_MongoDBId + randomMongoDBId,
           body: {
-            ...blockchain,
+            ...mockBlockchain,
             [testCase]: 123,
           },
           query: {},
@@ -297,7 +297,7 @@ describe('Blockchains route - Validators', async function () {
           method: 'put',
           path: pathBlockchains_Put_MongoDBId + randomMongoDBId,
           body: {
-            ...blockchain,
+            ...mockBlockchain,
             [testCase]: 123,
           },
           query: {},
@@ -309,7 +309,7 @@ describe('Blockchains route - Validators', async function () {
         method: 'put',
         path: pathBlockchains_Put_MongoDBId + randomMongoDBId,
         body: {
-          ...blockchain,
+          ...mockBlockchain,
           [testCase]: '',
         },
         query: {},
@@ -318,7 +318,7 @@ describe('Blockchains route - Validators', async function () {
     }
   });
 
-  describe('DELETE blockchain', async function () {
+  describe('DELETE mockBlockchain', async function () {
     testNonMongodbId({
       method: 'delete',
       path: pathBlockchains_Delete_MongoDBId + notAMongoDBId,

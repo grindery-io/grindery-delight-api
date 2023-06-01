@@ -169,7 +169,7 @@ export const searchActiveOfferValidator = {
   token: 'myToken',
 };
 
-export const blockchain = {
+export const mockBlockchain = {
   caipId: 'eip155:534',
   chainId: '534',
   icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-534.png',
