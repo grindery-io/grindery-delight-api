@@ -8,7 +8,7 @@ import {
   collectionOffers,
   pathOrders_Post,
   mockOrder,
-  offer,
+  mockOffer,
   pathOrders_Get_OrderId,
   pathOrders_Get_User,
   pathOrders_Get_MongoDBId,
@@ -21,7 +21,7 @@ import { ORDER_STATUS } from '../utils/orders-utils.js';
 chai.use(chaiHttp);
 
 /**
- * This function creates a base mockOrder or offer in a MongoDB collection and returns the response.
+ * This function creates a base mockOrder or mockOffer in a MongoDB collection and returns the response.
  * @returns the response object from the POST request made using chai.request.
  */
 async function createBaseOrderOrOffer({ path, body }) {
@@ -108,30 +108,30 @@ describe('Orders route', async function () {
   describe('GET by user', async function () {
     beforeEach(async function () {
       await collectionOffers.insertOne({
-        ...offer,
+        ...mockOffer,
       });
       await collectionOffers.insertOne({
-        ...offer,
+        ...mockOffer,
         offerId: 'anotherOfferId',
       });
 
       await collectionOrders.insertOne({
         ...mockOrder,
         orderId: 'myOrderId1',
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
         date: new Date(),
       });
       await collectionOrders.insertOne({
         ...mockOrder,
         orderId: 'myOrderId2',
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
         date: new Date(),
       });
       await collectionOrders.insertOne({
         ...mockOrder,
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: 'anotherUserId',
         date: new Date(),
       });
@@ -142,9 +142,9 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should return proper offer information in orders', async function () {
+    it('Should return proper mockOffer information in orders', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
       });
 
       const res = await chai
@@ -225,7 +225,7 @@ describe('Orders route', async function () {
 
     it('Should return only orders for the given user and proper fields', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
       });
       const orderFromInMemoryDB = await collectionOrders
         .find({
@@ -269,23 +269,26 @@ describe('Orders route', async function () {
 
   describe('GET by orderId', async function () {
     beforeEach(async function () {
-      await collectionOffers.insertOne({ ...offer });
-      await collectionOffers.insertOne({ ...offer, offerId: 'anotherOfferId' });
+      await collectionOffers.insertOne({ ...mockOffer });
+      await collectionOffers.insertOne({
+        ...mockOffer,
+        offerId: 'anotherOfferId',
+      });
 
       await collectionOrders.insertOne({
         ...mockOrder,
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
       });
       await collectionOrders.insertOne({
         ...mockOrder,
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: 'anotherUserId',
       });
       await collectionOrders.insertOne({
         ...mockOrder,
         orderId: 'anotherOrderId',
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
       });
     });
@@ -298,9 +301,9 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should get the proper offer information corresponding to offerId', async function () {
+    it('Should get the proper mockOffer information corresponding to offerId', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
       });
 
       const res = await chai
@@ -310,7 +313,7 @@ describe('Orders route', async function () {
         .query({ orderId: mockOrder.orderId });
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.offer).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         _id: offerFromInMemoryDB._id.toString(),
       });
     });
@@ -337,7 +340,7 @@ describe('Orders route', async function () {
 
     it('Should get an mockOrder corresponding to orderId', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
       });
       const orderFromInMemoryDB = await collectionOrders.findOne({
         orderId: mockOrder.orderId,
@@ -352,11 +355,11 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.deep.equal({
         ...mockOrder,
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
         _id: orderFromInMemoryDB._id.toString(),
         offer: {
-          ...offer,
+          ...mockOffer,
           _id: offerFromInMemoryDB._id.toString(),
         },
       });
@@ -377,24 +380,27 @@ describe('Orders route', async function () {
 
   describe('GET by MongoDbId', async function () {
     beforeEach(async function () {
-      await collectionOffers.insertOne({ ...offer });
+      await collectionOffers.insertOne({ ...mockOffer });
       await collectionOrders.insertOne({
         ...mockOrder,
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
       });
 
-      await collectionOffers.insertOne({ ...offer });
-      await collectionOffers.insertOne({ ...offer, offerId: 'anotherOfferId' });
+      await collectionOffers.insertOne({ ...mockOffer });
+      await collectionOffers.insertOne({
+        ...mockOffer,
+        offerId: 'anotherOfferId',
+      });
 
       await collectionOrders.insertOne({
         ...mockOrder,
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
       });
       await collectionOrders.insertOne({
         ...mockOrder,
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: 'anotherUserId',
       });
     });
@@ -449,11 +455,11 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.deep.equal({
         ...mockOrder,
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
         _id: orderFromInMemoryDB._id.toString(),
         offer: {
-          ...offer,
+          ...mockOffer,
           _id: offerFromInMemoryDB._id.toString(),
         },
       });
@@ -473,27 +479,27 @@ describe('Orders route', async function () {
   describe('GET by liquidity provider', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
-        { ...offer, isActive: true, userId: process.env.USER_ID_TEST },
+        { ...mockOffer, isActive: true, userId: process.env.USER_ID_TEST },
         {
-          ...offer,
+          ...mockOffer,
           offerId: 'myDeactivateoffer',
           isActive: false,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           isActive: true,
           offerId: 'anotherOfferId',
           userId: process.env.USER_ID_TEST,
         },
-        { ...offer, userId: 'anotherUserId' },
+        { ...mockOffer, userId: 'anotherUserId' },
       ]);
 
       await collectionOrders.insertMany([
         {
           ...mockOrder,
           orderId: 'myOrderId1',
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           userId: process.env.USER_ID_TEST,
           status: ORDER_STATUS.SUCCESS,
           date: new Date(),
@@ -509,7 +515,7 @@ describe('Orders route', async function () {
         {
           ...mockOrder,
           orderId: 'myOrderId2',
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           userId: process.env.USER_ID_TEST,
           status: ORDER_STATUS.SUCCESS,
           date: new Date(),
@@ -533,7 +539,7 @@ describe('Orders route', async function () {
         {
           ...mockOrder,
           orderId: 'myOrderId1',
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           userId: process.env.USER_ID_TEST,
           status: ORDER_STATUS.PENDING,
           date: new Date(),
@@ -541,7 +547,7 @@ describe('Orders route', async function () {
         {
           ...mockOrder,
           orderId: 'myOrderId1',
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           userId: process.env.USER_ID_TEST,
           status: ORDER_STATUS.COMPLETION,
           date: new Date(),
@@ -549,7 +555,7 @@ describe('Orders route', async function () {
         {
           ...mockOrder,
           orderId: 'myOrderId1',
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           userId: process.env.USER_ID_TEST,
           status: ORDER_STATUS.COMPLETION_FAILURE,
           date: new Date(),
@@ -557,7 +563,7 @@ describe('Orders route', async function () {
         {
           ...mockOrder,
           orderId: 'myOrderId1',
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           userId: process.env.USER_ID_TEST,
           status: ORDER_STATUS.COMPLETE,
           date: new Date(),
@@ -565,7 +571,7 @@ describe('Orders route', async function () {
         {
           ...mockOrder,
           orderId: '',
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           userId: process.env.USER_ID_TEST,
           status: ORDER_STATUS.SUCCESS,
           date: new Date(),
@@ -742,14 +748,14 @@ describe('Orders route', async function () {
       chai.expect(res.body.totalCount).to.equal(6);
     });
 
-    it('Should show only orders with proper fields and offer information', async function () {
+    it('Should show only orders with proper fields and mockOffer information', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
       });
       const orderFromInMemoryDB = await collectionOrders.findOne({
         orderId: 'myOrderId1',
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
         userId: process.env.USER_ID_TEST,
       });
 

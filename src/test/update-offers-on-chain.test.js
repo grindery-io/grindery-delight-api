@@ -6,7 +6,7 @@ import {
   blockchainGoerli,
   collectionBlockchains,
   collectionOffers,
-  offer,
+  mockOffer,
   pathBlockchain_Put_OffersActivationUser,
   pathBlockchain_Put_OffersActivationAll,
   pathBlockchain_Put_OffersAll,
@@ -94,35 +94,35 @@ describe('Update offers via on-chain', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.SUCCESS,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
@@ -154,46 +154,46 @@ describe('Update offers via on-chain', async function () {
         .put(pathBlockchain_Put_OffersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((offer) => {
-        chai.expect(offer.userId).to.equal(process.env.USER_ID_TEST);
+      res.body.forEach((mockOffer) => {
+        chai.expect(mockOffer.userId).to.equal(process.env.USER_ID_TEST);
       });
     });
 
-    it('Should modify offer - offerId', async function () {
+    it('Should modify mockOffer - offerId', async function () {
       const res = await chai
         .request(app)
         .put(pathBlockchain_Put_OffersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((offer) => {
-        if (offer.hash == txHashNewOffer) {
-          chai.expect(offer.offerId).to.equal(offerId);
+      res.body.forEach((mockOffer) => {
+        if (mockOffer.hash == txHashNewOffer) {
+          chai.expect(mockOffer.offerId).to.equal(offerId);
         }
       });
     });
 
-    it('Should modify offer status to succes if new Offer', async function () {
+    it('Should modify mockOffer status to succes if new Offer', async function () {
       const res = await chai
         .request(app)
         .put(pathBlockchain_Put_OffersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((offer) => {
-        if (offer.hash == txHashNewOffer) {
-          chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
+      res.body.forEach((mockOffer) => {
+        if (mockOffer.hash == txHashNewOffer) {
+          chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
         }
       });
     });
 
-    it('Should modify offer status to failure if no new Offer', async function () {
+    it('Should modify mockOffer status to failure if no new Offer', async function () {
       const res = await chai
         .request(app)
         .put(pathBlockchain_Put_OffersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((offer) => {
-        if (offer.hash == txHashFailed) {
-          chai.expect(offer.status).to.equal(OFFER_STATUS.FAILURE);
+      res.body.forEach((mockOffer) => {
+        if (mockOffer.hash == txHashFailed) {
+          chai.expect(mockOffer.status).to.equal(OFFER_STATUS.FAILURE);
         }
       });
     });
@@ -203,35 +203,35 @@ describe('Update offers via on-chain', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.SUCCESS,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: blockchainGoerli.chainId,
           hash: txHashNewOffer,
@@ -266,50 +266,53 @@ describe('Update offers via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       chai.expect(
-        res.body.some((offer) => offer.userId === process.env.USER_ID_TEST)
+        res.body.some(
+          (mockOffer) => mockOffer.userId === process.env.USER_ID_TEST
+        )
       ).to.be.true;
-      chai.expect(res.body.some((offer) => offer.userId === 'anotherUserId')).to
-        .be.true;
+      chai.expect(
+        res.body.some((mockOffer) => mockOffer.userId === 'anotherUserId')
+      ).to.be.true;
     });
 
-    it('Should modify offer - offerId', async function () {
+    it('Should modify mockOffer - offerId', async function () {
       const res = await chai
         .request(app)
         .put(pathBlockchain_Put_OffersAll)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
-      res.body.forEach((offer) => {
-        if (offer.hash == txHashNewOffer) {
-          chai.expect(offer.offerId).to.equal(offerId);
+      res.body.forEach((mockOffer) => {
+        if (mockOffer.hash == txHashNewOffer) {
+          chai.expect(mockOffer.offerId).to.equal(offerId);
         }
       });
     });
 
-    it('Should modify offer status to succes if new Offer', async function () {
+    it('Should modify mockOffer status to succes if new Offer', async function () {
       const res = await chai
         .request(app)
         .put(pathBlockchain_Put_OffersAll)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
-      res.body.forEach((offer) => {
-        if (offer.hash == txHashNewOffer) {
-          chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
+      res.body.forEach((mockOffer) => {
+        if (mockOffer.hash == txHashNewOffer) {
+          chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
         }
       });
     });
 
-    it('Should modify offer status to failure if no new Offer', async function () {
+    it('Should modify mockOffer status to failure if no new Offer', async function () {
       const res = await chai
         .request(app)
         .put(pathBlockchain_Put_OffersAll)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
-      res.body.forEach((offer) => {
-        if (offer.hash == txHashFailed) {
-          chai.expect(offer.status).to.equal(OFFER_STATUS.FAILURE);
+      res.body.forEach((mockOffer) => {
+        if (mockOffer.hash == txHashFailed) {
+          chai.expect(mockOffer.status).to.equal(OFFER_STATUS.FAILURE);
         }
       });
     });
@@ -319,7 +322,7 @@ describe('Update offers via on-chain', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
@@ -327,7 +330,7 @@ describe('Update offers via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.DEACTIVATION,
           isActive: true,
@@ -335,7 +338,7 @@ describe('Update offers via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
@@ -343,7 +346,7 @@ describe('Update offers via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.DEACTIVATION,
           isActive: true,
@@ -351,7 +354,7 @@ describe('Update offers via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
@@ -359,7 +362,7 @@ describe('Update offers via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: true,
@@ -368,7 +371,7 @@ describe('Update offers via on-chain', async function () {
           notToBeModified: 'notToBeModified',
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.DEACTIVATION,
           isActive: false,
@@ -377,7 +380,7 @@ describe('Update offers via on-chain', async function () {
           notToBeModified: 'notToBeModified',
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
@@ -387,7 +390,7 @@ describe('Update offers via on-chain', async function () {
           notToBeModified: 'notToBeModified',
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
@@ -452,8 +455,8 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
-          chai.expect(offer.userId).to.equal(process.env.USER_ID_TEST);
+        res.body.forEach((mockOffer) => {
+          chai.expect(mockOffer.userId).to.equal(process.env.USER_ID_TEST);
         });
       });
 
@@ -464,8 +467,8 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
-          chai.expect(offer).to.not.have.property('notToBeModified');
+        res.body.forEach((mockOffer) => {
+          chai.expect(mockOffer).to.not.have.property('notToBeModified');
         });
       });
 
@@ -486,13 +489,13 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.isActive).to.be.true;
+            chai.expect(mockOffer.isActive).to.be.true;
           }
         });
       });
@@ -514,13 +517,13 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
+            chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
           }
         });
       });
@@ -542,13 +545,13 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.isActive).to.be.false;
+            chai.expect(mockOffer.isActive).to.be.false;
           }
         });
       });
@@ -570,13 +573,15 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.status).to.equal(OFFER_STATUS.ACTIVATION_FAILURE);
+            chai
+              .expect(mockOffer.status)
+              .to.equal(OFFER_STATUS.ACTIVATION_FAILURE);
           }
         });
       });
@@ -598,13 +603,13 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.isActive).to.be.false;
+            chai.expect(mockOffer.isActive).to.be.false;
           }
         });
       });
@@ -626,13 +631,13 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
+            chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
           }
         });
       });
@@ -654,13 +659,13 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.isActive).to.be.true;
+            chai.expect(mockOffer.isActive).to.be.true;
           }
         });
       });
@@ -682,14 +687,14 @@ describe('Update offers via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
             chai
-              .expect(offer.status)
+              .expect(mockOffer.status)
               .to.equal(OFFER_STATUS.DEACTIVATION_FAILURE);
           }
         });
@@ -706,10 +711,13 @@ describe('Update offers via on-chain', async function () {
         chai.expect(res).to.have.status(200);
 
         chai.expect(
-          res.body.some((offer) => offer.userId === process.env.USER_ID_TEST)
+          res.body.some(
+            (mockOffer) => mockOffer.userId === process.env.USER_ID_TEST
+          )
         ).to.be.true;
-        chai.expect(res.body.some((offer) => offer.userId === 'anotherUserId'))
-          .to.be.true;
+        chai.expect(
+          res.body.some((mockOffer) => mockOffer.userId === 'anotherUserId')
+        ).to.be.true;
       });
 
       it('Should not modified non appropriate offers', async function () {
@@ -720,9 +728,9 @@ describe('Update offers via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
-          if (offer.userId !== 'anotherUserId') {
-            chai.expect(offer).to.not.have.property('notToBeModified');
+        res.body.forEach((mockOffer) => {
+          if (mockOffer.userId !== 'anotherUserId') {
+            chai.expect(mockOffer).to.not.have.property('notToBeModified');
           }
         });
       });
@@ -745,13 +753,13 @@ describe('Update offers via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.isActive).to.be.true;
+            chai.expect(mockOffer.isActive).to.be.true;
           }
         });
       });
@@ -774,13 +782,13 @@ describe('Update offers via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
+            chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
           }
         });
       });
@@ -803,13 +811,13 @@ describe('Update offers via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.isActive).to.be.false;
+            chai.expect(mockOffer.isActive).to.be.false;
           }
         });
       });
@@ -832,13 +840,15 @@ describe('Update offers via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.status).to.equal(OFFER_STATUS.ACTIVATION_FAILURE);
+            chai
+              .expect(mockOffer.status)
+              .to.equal(OFFER_STATUS.ACTIVATION_FAILURE);
           }
         });
       });
@@ -861,13 +871,13 @@ describe('Update offers via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.isActive).to.be.false;
+            chai.expect(mockOffer.isActive).to.be.false;
           }
         });
       });
@@ -890,13 +900,13 @@ describe('Update offers via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
+            chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
           }
         });
       });
@@ -919,13 +929,13 @@ describe('Update offers via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
-            chai.expect(offer.isActive).to.be.true;
+            chai.expect(mockOffer.isActive).to.be.true;
           }
         });
       });
@@ -948,14 +958,14 @@ describe('Update offers via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
 
-        res.body.forEach((offer) => {
+        res.body.forEach((mockOffer) => {
           if (
             modifiedOffers.some(
-              (offerModif) => offerModif._id.toString() === offer._id
+              (offerModif) => offerModif._id.toString() === mockOffer._id
             )
           ) {
             chai
-              .expect(offer.status)
+              .expect(mockOffer.status)
               .to.equal(OFFER_STATUS.DEACTIVATION_FAILURE);
           }
         });

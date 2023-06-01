@@ -109,7 +109,7 @@ export const mockOrder = {
   hash: 'myhash',
 };
 
-export const offer = {
+export const mockOffer = {
   chainId: '97',
   min: '0.02',
   max: '1',

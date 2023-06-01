@@ -11,7 +11,7 @@ import {
 } from './utils/utils.js';
 import {
   pathOffers_Post,
-  offer,
+  mockOffer,
   searchActiveOfferValidator,
   modifyOfferValidator,
   pathOffers_Get_Search,
@@ -23,14 +23,14 @@ import {
 chai.use(chaiHttp);
 
 describe('Offers route - Validators', async function () {
-  describe('POST new offer', async function () {
+  describe('POST new mockOffer', async function () {
     it('Should fail validation if min is greater than max', async function () {
-      // Make a request to create the offer with invalid data
+      // Make a request to create the mockOffer with invalid data
       const res = await chai
         .request(app)
         .post(pathOffers_Post)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .send({ ...offer, min: '30', max: '20' });
+        .send({ ...mockOffer, min: '30', max: '20' });
 
       // Assertions
       chai.expect(res).to.have.status(400);
@@ -40,12 +40,12 @@ describe('Offers route - Validators', async function () {
       chai.expect(res.body[0].msg).to.equal('min must be less than max');
     });
 
-    for (const testCase of Object.keys(offer)) {
+    for (const testCase of Object.keys(mockOffer)) {
       testNonString({
         method: 'post',
         path: pathOffers_Post,
         body: {
-          ...offer,
+          ...mockOffer,
           [testCase]: 123,
         },
         query: {},
@@ -63,7 +63,7 @@ describe('Offers route - Validators', async function () {
           method: 'post',
           path: pathOffers_Post,
           body: {
-            ...offer,
+            ...mockOffer,
             [testCase]: '',
           },
           query: {},
@@ -76,7 +76,7 @@ describe('Offers route - Validators', async function () {
       method: 'post',
       path: pathOffers_Post,
       body: {
-        ...offer,
+        ...mockOffer,
         unexpectedField: 'Unexpected field',
       },
       query: {},
@@ -88,7 +88,7 @@ describe('Offers route - Validators', async function () {
       method: 'post',
       path: pathOffers_Post,
       body: {
-        ...offer,
+        ...mockOffer,
       },
       query: { unexpectedField: 'Unexpected field' },
       field: 'unexpectedField',
@@ -116,7 +116,7 @@ describe('Offers route - Validators', async function () {
     }
   });
 
-  describe('GET offer by offerId', async function () {
+  describe('GET mockOffer by offerId', async function () {
     testNonString({
       method: 'get',
       path: pathOffers_Get_OfferId,
@@ -134,7 +134,7 @@ describe('Offers route - Validators', async function () {
     });
   });
 
-  describe('GET offer by MongoDB id', async function () {
+  describe('GET mockOffer by MongoDB id', async function () {
     testNonMongodbId({
       method: 'get',
       path: pathOffers_Get_MongoDBId,
@@ -144,7 +144,7 @@ describe('Offers route - Validators', async function () {
     });
   });
 
-  describe('PUT offer by offerId', async function () {
+  describe('PUT mockOffer by offerId', async function () {
     for (const testCase of Object.keys(modifyOfferValidator)) {
       testNonString({
         method: 'put',

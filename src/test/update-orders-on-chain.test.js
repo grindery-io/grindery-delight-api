@@ -8,7 +8,7 @@ import {
   collectionBlockchains,
   collectionOffers,
   collectionOrders,
-  offer,
+  mockOffer,
   pathViewBlockchain_Put_OrdersAll,
   pathViewBlockchain_Put_OrdersCompleteAll,
   pathViewBlockchain_Put_OrdersCompleteSeller,
@@ -339,14 +339,14 @@ describe('Update orders via on-chain', async function () {
   describe('Update orders completion via on-chain', async function () {
     beforeEach(async function () {
       await collectionOffers.insertOne({
-        ...offer,
+        ...mockOffer,
         chainId: blockchainBscTestnet.chainId,
       });
       await collectionOrders.insertMany([
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
           userId: process.env.USER_ID_TEST,
@@ -354,7 +354,7 @@ describe('Update orders via on-chain', async function () {
         {
           ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
           userId: process.env.USER_ID_TEST,
@@ -362,7 +362,7 @@ describe('Update orders via on-chain', async function () {
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
           userId: process.env.USER_ID_TEST,
@@ -370,7 +370,7 @@ describe('Update orders via on-chain', async function () {
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashNotOrderPaid,
           userId: process.env.USER_ID_TEST,
@@ -378,7 +378,7 @@ describe('Update orders via on-chain', async function () {
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: true,
           shouldNotAppear: 'shouldNotAppear',
           completionHash: txHashOrderPaid,
@@ -387,7 +387,7 @@ describe('Update orders via on-chain', async function () {
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
           userId: 'anotherUserId',
@@ -616,19 +616,19 @@ describe('Update orders via on-chain', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainBscTestnet.chainId,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           offerId: 'anotherOfferId',
           chainId: blockchainBscTestnet.chainId,
           userId: 'anotherUserId',
           shouldNotAppear: 'shouldNotAppear',
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: blockchainBscTestnet.chainId,
           userId: 'anotherUserId',
           shouldNotAppear: 'shouldNotAppear',
@@ -638,7 +638,7 @@ describe('Update orders via on-chain', async function () {
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
         },
@@ -652,35 +652,35 @@ describe('Update orders via on-chain', async function () {
         {
           ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashNotOrderPaid,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: true,
           completionHash: txHashOrderPaid,
         },
         {
           ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
         },
@@ -732,10 +732,10 @@ describe('Update orders via on-chain', async function () {
       chai.expect(res).to.have.status(200);
       await Promise.all(
         res.body.map(async (mockOrder) => {
-          const offer = await collectionOffers.findOne({
+          const mockOffer = await collectionOffers.findOne({
             offerId: mockOrder.offerId,
           });
-          chai.expect(offer.userId).to.equal(process.env.USER_ID_TEST);
+          chai.expect(mockOffer.userId).to.equal(process.env.USER_ID_TEST);
         })
       );
     });

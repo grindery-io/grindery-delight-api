@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb';
 import {
   collectionOffers,
   pathOffers_Post,
-  offer,
+  mockOffer,
   modifiedOffer,
   pathOffers_Get_OfferId,
   pathOffers_Get_Search,
@@ -24,17 +24,17 @@ import { OFFER_STATUS } from '../utils/offers-utils.js';
 chai.use(chaiHttp);
 
 /**
- * This function creates a base offer by sending a POST request to a specified path with authorization
+ * This function creates a base mockOffer by sending a POST request to a specified path with authorization
  * and expects a 200 status code and certain properties in the response.
- * @param offer - The `offer` parameter is an object that contains the data for creating a new offer.
+ * @param mockOffer - The `mockOffer` parameter is an object that contains the data for creating a new mockOffer.
  * It is being sent as the request body in the POST request to the `pathOffers_Post` endpoint.
  */
-async function createBaseOffer(offer) {
+async function createBaseOffer(mockOffer) {
   const res = await chai
     .request(app)
     .post(pathOffers_Post)
     .set('Authorization', `Bearer ${mockedToken}`)
-    .send(offer);
+    .send(mockOffer);
   chai.expect(res).to.have.status(200);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
   chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
@@ -42,31 +42,31 @@ async function createBaseOffer(offer) {
 }
 
 describe('Offers route', async function () {
-  describe('POST new offer', async function () {
+  describe('POST new mockOffer', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
         .post(pathOffers_Post)
-        .send(offer);
+        .send(mockOffer);
       chai.expect(createResponse).to.have.status(403);
     });
 
-    it('Should POST a new offer if all fields are completed and no existing offer', async function () {
-      await createBaseOffer(offer);
+    it('Should POST a new mockOffer if all fields are completed and no existing mockOffer', async function () {
+      await createBaseOffer(mockOffer);
     });
 
     it('Should POST multiple new offers with empty offerId', async function () {
-      await createBaseOffer({ ...offer, offerId: '' });
-      await createBaseOffer({ ...offer, offerId: '' });
+      await createBaseOffer({ ...mockOffer, offerId: '' });
+      await createBaseOffer({ ...mockOffer, offerId: '' });
     });
 
-    it('Should POST a new offer if all fields are completed and no existing offer (with correct fields)', async function () {
-      await createBaseOffer(offer);
+    it('Should POST a new mockOffer if all fields are completed and no existing mockOffer (with correct fields)', async function () {
+      await createBaseOffer(mockOffer);
 
       const getOffer = await chai
         .request(app)
         .get(pathOffers_Get_OfferId)
-        .query({ offerId: offer.offerId })
+        .query({ offerId: mockOffer.offerId })
         .set('Authorization', `Bearer ${mockedToken}`);
 
       // Assertions
@@ -78,7 +78,7 @@ describe('Offers route', async function () {
       delete getOffer.body.date;
 
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -86,13 +86,13 @@ describe('Offers route', async function () {
     });
 
     it('Should fail if same offerId exists', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const createDuplicateResponse = await chai
         .request(app)
         .post(pathOffers_Post)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(offer);
+        .send(mockOffer);
       chai.expect(createDuplicateResponse).to.have.status(404);
       chai
         .expect(createDuplicateResponse.body.msg)
@@ -104,7 +104,7 @@ describe('Offers route', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
           isActive: true,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -112,7 +112,7 @@ describe('Offers route', async function () {
           amount: '8',
         },
         {
-          ...offer,
+          ...mockOffer,
           offerId: 'anotherOfferId',
           isActive: true,
           date: new Date(),
@@ -121,7 +121,7 @@ describe('Offers route', async function () {
           amount: '8',
         },
         {
-          ...offer,
+          ...mockOffer,
           token: 'anotherToken',
           isActive: true,
           date: new Date(),
@@ -130,7 +130,7 @@ describe('Offers route', async function () {
           amount: '8',
         },
         {
-          ...offer,
+          ...mockOffer,
           exchangeToken: 'anotherExchangeToken',
           isActive: true,
           date: new Date(),
@@ -139,7 +139,7 @@ describe('Offers route', async function () {
           amount: '8',
         },
         {
-          ...offer,
+          ...mockOffer,
           exchangeChainId: 'anotherExchangeChainId',
           isActive: true,
           date: new Date(),
@@ -148,7 +148,7 @@ describe('Offers route', async function () {
           amount: '8',
         },
         {
-          ...offer,
+          ...mockOffer,
           isActive: true,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -156,7 +156,7 @@ describe('Offers route', async function () {
           amount: '4',
         },
         {
-          ...offer,
+          ...mockOffer,
           isActive: true,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -164,7 +164,7 @@ describe('Offers route', async function () {
           amount: '10',
         },
         {
-          ...offer,
+          ...mockOffer,
           isActive: true,
           date: new Date(),
           userId: 'anotherUserId',
@@ -172,7 +172,7 @@ describe('Offers route', async function () {
           amount: '8',
         },
         {
-          ...offer,
+          ...mockOffer,
           isActive: false,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -180,7 +180,7 @@ describe('Offers route', async function () {
           amount: '8',
         },
         {
-          ...offer,
+          ...mockOffer,
           isActive: true,
           offerId: '',
           date: new Date(),
@@ -189,7 +189,7 @@ describe('Offers route', async function () {
           amount: '8',
         },
         {
-          ...offer,
+          ...mockOffer,
           isActive: true,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -197,7 +197,7 @@ describe('Offers route', async function () {
           amount: '',
         },
         {
-          ...offer,
+          ...mockOffer,
           isActive: true,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -207,8 +207,8 @@ describe('Offers route', async function () {
       ]);
 
       await collectionLiquidityWallet.insertOne({
-        chainId: offer.chainId,
-        walletAddress: offer.provider,
+        chainId: mockOffer.chainId,
+        walletAddress: mockOffer.provider,
       });
     });
 
@@ -224,8 +224,8 @@ describe('Offers route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
 
-      res.body.offers.forEach((offer) => {
-        chai.expect(offer.amount).that.is.not.empty;
+      res.body.offers.forEach((mockOffer) => {
+        chai.expect(mockOffer.amount).that.is.not.empty;
       });
     });
 
@@ -236,8 +236,8 @@ describe('Offers route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
 
-      res.body.offers.forEach((offer) => {
-        chai.expect(offer.offerId).that.is.not.empty;
+      res.body.offers.forEach((mockOffer) => {
+        chai.expect(mockOffer.offerId).that.is.not.empty;
       });
     });
 
@@ -248,8 +248,8 @@ describe('Offers route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
 
-      res.body.offers.forEach((offer) => {
-        chai.expect(offer.status).to.equal(OFFER_STATUS.SUCCESS);
+      res.body.offers.forEach((mockOffer) => {
+        chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
       });
     });
 
@@ -260,8 +260,8 @@ describe('Offers route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
 
-      res.body.offers.forEach((offer) => {
-        chai.expect(offer.isActive).to.be.true;
+      res.body.offers.forEach((mockOffer) => {
+        chai.expect(mockOffer.isActive).to.be.true;
       });
     });
 
@@ -270,11 +270,11 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_All)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
       chai.expect(res).to.have.status(200);
 
       res.body.offers.forEach((e) => {
-        chai.expect(e.offerId).to.equal(offer.offerId);
+        chai.expect(e.offerId).to.equal(mockOffer.offerId);
       });
     });
 
@@ -283,11 +283,11 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_All)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ token: offer.token });
+        .query({ token: mockOffer.token });
       chai.expect(res).to.have.status(200);
 
       res.body.offers.forEach((e) => {
-        chai.expect(e.token).to.equal(offer.token);
+        chai.expect(e.token).to.equal(mockOffer.token);
       });
     });
 
@@ -296,11 +296,11 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_All)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ exchangeToken: offer.exchangeToken });
+        .query({ exchangeToken: mockOffer.exchangeToken });
       chai.expect(res).to.have.status(200);
 
       res.body.offers.forEach((e) => {
-        chai.expect(e.exchangeToken).to.equal(offer.exchangeToken);
+        chai.expect(e.exchangeToken).to.equal(mockOffer.exchangeToken);
       });
     });
 
@@ -309,11 +309,11 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_All)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ exchangeChainId: offer.exchangeChainId });
+        .query({ exchangeChainId: mockOffer.exchangeChainId });
       chai.expect(res).to.have.status(200);
 
       res.body.offers.forEach((e) => {
-        chai.expect(e.exchangeChainId).to.equal(offer.exchangeChainId);
+        chai.expect(e.exchangeChainId).to.equal(mockOffer.exchangeChainId);
       });
     });
 
@@ -430,7 +430,7 @@ describe('Offers route', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
           status: OFFER_STATUS.SUCCESS,
@@ -440,7 +440,7 @@ describe('Offers route', async function () {
           shouldBeInResult: true,
         },
         {
-          ...offer,
+          ...mockOffer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
           status: OFFER_STATUS.SUCCESS,
@@ -450,7 +450,7 @@ describe('Offers route', async function () {
           shouldBeInResult: true,
         },
         {
-          ...offer,
+          ...mockOffer,
           exchangeChainId: 'anotherExchangeChainId',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -460,7 +460,7 @@ describe('Offers route', async function () {
           exchangeRate: '2',
         },
         {
-          ...offer,
+          ...mockOffer,
           exchangeToken: 'anotherExchangeToken',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -470,7 +470,7 @@ describe('Offers route', async function () {
           exchangeRate: '2',
         },
         {
-          ...offer,
+          ...mockOffer,
           chainId: 'anotherChainId',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -480,7 +480,7 @@ describe('Offers route', async function () {
           exchangeRate: '2',
         },
         {
-          ...offer,
+          ...mockOffer,
           token: 'anotherToken',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -490,7 +490,7 @@ describe('Offers route', async function () {
           exchangeRate: '2',
         },
         {
-          ...offer,
+          ...mockOffer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
           status: OFFER_STATUS.PENDING,
@@ -499,7 +499,7 @@ describe('Offers route', async function () {
           exchangeRate: '2',
         },
         {
-          ...offer,
+          ...mockOffer,
           offerId: '',
           date: new Date(),
           userId: process.env.USER_ID_TEST,
@@ -511,8 +511,8 @@ describe('Offers route', async function () {
       ]);
 
       await collectionLiquidityWallet.insertOne({
-        chainId: offer.chainId,
-        walletAddress: offer.provider,
+        chainId: mockOffer.chainId,
+        walletAddress: mockOffer.provider,
       });
     });
 
@@ -533,10 +533,10 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
         });
 
@@ -544,8 +544,8 @@ describe('Offers route', async function () {
       chai.expect(Array.isArray(res.body.offers)).to.be.true;
       chai.expect(res.body.offers).to.not.be.empty;
 
-      for (const offer of res.body.offers) {
-        chai.expect(offer.isActive).to.be.true;
+      for (const mockOffer of res.body.offers) {
+        chai.expect(mockOffer.isActive).to.be.true;
       }
     });
 
@@ -555,17 +555,19 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
         });
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.offers).to.not.be.empty;
 
-      for (const offer of res.body.offers) {
-        chai.expect(offer.exchangeChainId).to.equal(offer.exchangeChainId);
+      for (const mockOffer of res.body.offers) {
+        chai
+          .expect(mockOffer.exchangeChainId)
+          .to.equal(mockOffer.exchangeChainId);
       }
     });
 
@@ -575,18 +577,18 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
         });
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.offers).to.not.be.empty;
 
-      for (const offer of res.body.offers) {
-        chai.expect(offer.exchangeToken).to.equal(offer.exchangeToken);
+      for (const mockOffer of res.body.offers) {
+        chai.expect(mockOffer.exchangeToken).to.equal(mockOffer.exchangeToken);
       }
     });
 
@@ -596,18 +598,18 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
         });
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.offers).to.not.be.empty;
 
-      for (const offer of res.body.offers) {
-        chai.expect(offer.chainId).to.equal(offer.chainId);
+      for (const mockOffer of res.body.offers) {
+        chai.expect(mockOffer.chainId).to.equal(mockOffer.chainId);
       }
     });
 
@@ -617,27 +619,27 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
         });
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.offers).to.not.be.empty;
 
-      for (const offer of res.body.offers) {
-        chai.expect(offer.token).to.equal(offer.token);
+      for (const mockOffer of res.body.offers) {
+        chai.expect(mockOffer.token).to.equal(mockOffer.token);
       }
     });
 
     it('Should return only offers with min less than depositAmount/exchangeRate', async function () {
       const query = {
-        exchangeChainId: offer.exchangeChainId,
-        exchangeToken: offer.exchangeToken,
-        chainId: offer.chainId,
-        token: offer.token,
+        exchangeChainId: mockOffer.exchangeChainId,
+        exchangeToken: mockOffer.exchangeToken,
+        chainId: mockOffer.chainId,
+        token: mockOffer.token,
         depositAmount: '1',
       };
 
@@ -650,18 +652,18 @@ describe('Offers route', async function () {
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.offers).to.not.be.empty;
 
-      for (const offer of res.body.offers) {
-        const rateAmount = query.depositAmount / offer.exchangeRate;
-        chai.expect(Number(offer.min)).to.be.at.most(rateAmount);
+      for (const mockOffer of res.body.offers) {
+        const rateAmount = query.depositAmount / mockOffer.exchangeRate;
+        chai.expect(Number(mockOffer.min)).to.be.at.most(rateAmount);
       }
     });
 
     it('Should return only offers with max greater than depositAmount/exchangeRate', async function () {
       const query = {
-        exchangeChainId: offer.exchangeChainId,
-        exchangeToken: offer.exchangeToken,
-        chainId: offer.chainId,
-        token: offer.token,
+        exchangeChainId: mockOffer.exchangeChainId,
+        exchangeToken: mockOffer.exchangeToken,
+        chainId: mockOffer.chainId,
+        token: mockOffer.token,
         depositAmount: '1',
       };
 
@@ -674,9 +676,9 @@ describe('Offers route', async function () {
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.offers).to.not.be.empty;
 
-      for (const offer of res.body.offers) {
-        const rateAmount = query.depositAmount / offer.exchangeRate;
-        chai.expect(Number(offer.max)).to.be.at.least(rateAmount);
+      for (const mockOffer of res.body.offers) {
+        const rateAmount = query.depositAmount / mockOffer.exchangeRate;
+        chai.expect(Number(mockOffer.max)).to.be.at.least(rateAmount);
       }
     });
 
@@ -686,10 +688,10 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
         });
 
@@ -699,10 +701,10 @@ describe('Offers route', async function () {
       const liquidityWalletFromInMemoryDB =
         await collectionLiquidityWallet.findOne({});
 
-      for (const offer of res.body.offers) {
-        chai.expect(offer.liquidityWallet).to.deep.equal({
-          chainId: offer.chainId,
-          walletAddress: offer.provider,
+      for (const mockOffer of res.body.offers) {
+        chai.expect(mockOffer.liquidityWallet).to.deep.equal({
+          chainId: mockOffer.chainId,
+          walletAddress: mockOffer.provider,
           _id: liquidityWalletFromInMemoryDB._id.toString(),
         });
       }
@@ -714,10 +716,10 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
           limit: 1,
         });
@@ -731,10 +733,10 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
           limit: 1,
         });
@@ -756,10 +758,10 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
           offset: 1,
         });
@@ -783,10 +785,10 @@ describe('Offers route', async function () {
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
-          exchangeChainId: offer.exchangeChainId,
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeChainId: mockOffer.exchangeChainId,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
         });
       chai.expect(res).to.have.status(200);
@@ -797,16 +799,16 @@ describe('Offers route', async function () {
       }
     });
 
-    it('Should return an empty array if no offer match', async function () {
+    it('Should return an empty array if no mockOffer match', async function () {
       const res = await chai
         .request(app)
         .get(pathOffers_Get_Search)
         .set({ Authorization: `Bearer ${mockedToken}` })
         .query({
           exchangeChainId: '232323232323232323',
-          exchangeToken: offer.exchangeToken,
-          chainId: offer.chainId,
-          token: offer.token,
+          exchangeToken: mockOffer.exchangeToken,
+          chainId: mockOffer.chainId,
+          token: mockOffer.token,
           depositAmount: '1',
         });
 
@@ -819,19 +821,19 @@ describe('Offers route', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
           status: OFFER_STATUS.PENDING,
         },
         {
-          ...offer,
+          ...mockOffer,
           date: new Date(),
           userId: process.env.USER_ID_TEST,
           status: OFFER_STATUS.PENDING,
         },
         {
-          ...offer,
+          ...mockOffer,
           date: new Date(),
           userId: 'anotherUser',
           status: OFFER_STATUS.PENDING,
@@ -839,8 +841,8 @@ describe('Offers route', async function () {
       ]);
 
       await collectionLiquidityWallet.insertOne({
-        chainId: offer.chainId,
-        walletAddress: offer.provider,
+        chainId: mockOffer.chainId,
+        walletAddress: mockOffer.provider,
       });
     });
 
@@ -856,8 +858,8 @@ describe('Offers route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
 
-      for (const offer of res.body.offers) {
-        chai.expect(offer.userId).to.equal(process.env.USER_ID_TEST);
+      for (const mockOffer of res.body.offers) {
+        chai.expect(mockOffer.userId).to.equal(process.env.USER_ID_TEST);
       }
     });
 
@@ -938,28 +940,28 @@ describe('Offers route', async function () {
       chai.expect(res.body).to.deep.equal({
         offers: [
           {
-            ...offer,
+            ...mockOffer,
             date: new Date(),
             userId: process.env.USER_ID_TEST,
             status: OFFER_STATUS.PENDING,
             _id: offerFromInMemoryDB[0]._id.toString(),
             date: offerFromInMemoryDB[0].date.toISOString(),
             liquidityWallet: {
-              chainId: offer.chainId,
-              walletAddress: offer.provider,
+              chainId: mockOffer.chainId,
+              walletAddress: mockOffer.provider,
               _id: liquidityWalletFromInMemoryDB._id.toString(),
             },
           },
           {
-            ...offer,
+            ...mockOffer,
             date: new Date(),
             userId: process.env.USER_ID_TEST,
             status: OFFER_STATUS.PENDING,
             _id: offerFromInMemoryDB[1]._id.toString(),
             date: offerFromInMemoryDB[1].date.toISOString(),
             liquidityWallet: {
-              chainId: offer.chainId,
-              walletAddress: offer.provider,
+              chainId: mockOffer.chainId,
+              walletAddress: mockOffer.provider,
               _id: liquidityWalletFromInMemoryDB._id.toString(),
             },
           },
@@ -969,21 +971,21 @@ describe('Offers route', async function () {
     });
   });
 
-  describe('GET offer by offerId', async function () {
+  describe('GET mockOffer by offerId', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
         },
         {
-          ...offer,
+          ...mockOffer,
           offerId: 'anotherOfferId',
         },
       ]);
 
       await collectionLiquidityWallet.insertOne({
-        chainId: offer.chainId,
-        walletAddress: offer.provider,
+        chainId: mockOffer.chainId,
+        walletAddress: mockOffer.provider,
       });
     });
 
@@ -991,30 +993,30 @@ describe('Offers route', async function () {
       const res = await chai
         .request(app)
         .get(pathOffers_Get_OfferId)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should return the offer with the proper offerId', async function () {
+    it('Should return the mockOffer with the proper offerId', async function () {
       const res = await chai
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
-      chai.expect(res.body.offerId).to.equal(offer.offerId);
+      chai.expect(res.body.offerId).to.equal(mockOffer.offerId);
     });
 
-    it('Should return the offer with the proper fields', async function () {
+    it('Should return the mockOffer with the proper fields', async function () {
       await collectionLiquidityWallet.insertOne({
-        chainId: offer.chainId,
-        walletAddress: offer.provider,
+        chainId: mockOffer.chainId,
+        walletAddress: mockOffer.provider,
       });
 
       const offerFromInMemoryDB = await collectionOffers.findOne({
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
       });
       const liquidityWalletFromInMemoryDB =
         await collectionLiquidityWallet.findOne({});
@@ -1023,16 +1025,16 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set({ Authorization: `Bearer ${mockedToken}` })
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.be.an('object');
       chai.expect(res.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         _id: offerFromInMemoryDB._id.toString(),
         liquidityWallet: {
-          chainId: offer.chainId,
-          walletAddress: offer.provider,
+          chainId: mockOffer.chainId,
+          walletAddress: mockOffer.provider,
           _id: liquidityWalletFromInMemoryDB._id.toString(),
         },
       });
@@ -1050,22 +1052,22 @@ describe('Offers route', async function () {
     });
   });
 
-  describe('GET offer by MongoDB id', async function () {
+  describe('GET mockOffer by MongoDB id', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           userId: 'anotherUserId',
         },
       ]);
 
       await collectionLiquidityWallet.insertOne({
-        chainId: offer.chainId,
-        walletAddress: offer.provider,
+        chainId: mockOffer.chainId,
+        walletAddress: mockOffer.provider,
       });
     });
 
@@ -1077,7 +1079,7 @@ describe('Offers route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should return the offer with the proper userId', async function () {
+    it('Should return the mockOffer with the proper userId', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({
         userId: process.env.USER_ID_TEST,
       });
@@ -1091,7 +1093,7 @@ describe('Offers route', async function () {
       chai.expect(res.body.userId).to.equal(process.env.USER_ID_TEST);
     });
 
-    it('Should return the offer with the proper fields', async function () {
+    it('Should return the mockOffer with the proper fields', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({
         userId: process.env.USER_ID_TEST,
       });
@@ -1106,12 +1108,12 @@ describe('Offers route', async function () {
 
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         userId: process.env.USER_ID_TEST,
         _id: offerFromInMemoryDB._id.toString(),
         liquidityWallet: {
-          chainId: offer.chainId,
-          walletAddress: offer.provider,
+          chainId: mockOffer.chainId,
+          walletAddress: mockOffer.provider,
           _id: liquidityWalletFromInMemoryDB._id.toString(),
         },
       });
@@ -1129,7 +1131,7 @@ describe('Offers route', async function () {
     });
   });
 
-  describe('DELETE offer by offerId', async function () {
+  describe('DELETE mockOffer by offerId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
@@ -1137,12 +1139,12 @@ describe('Offers route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should delete one offer', async function () {
-      await createBaseOffer(offer);
+    it('Should delete one mockOffer', async function () {
+      await createBaseOffer(mockOffer);
 
       const deleteResponse = await chai
         .request(app)
-        .delete(pathOffers_Put + offer.offerId)
+        .delete(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`);
 
       chai.expect(deleteResponse).to.have.status(200);
@@ -1150,12 +1152,12 @@ describe('Offers route', async function () {
       chai.expect(deleteResponse.body.deletedCount).to.equal(1);
     });
 
-    it('Should delete the appropriate offer', async function () {
+    it('Should delete the appropriate mockOffer', async function () {
       const createResponse = await chai
         .request(app)
         .post(pathOffers_Post)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(offer);
+        .send(mockOffer);
       chai.expect(createResponse).to.have.status(200);
 
       chai.expect(
@@ -1166,7 +1168,7 @@ describe('Offers route', async function () {
 
       const deleteResponse = await chai
         .request(app)
-        .delete(pathOffers_Put + offer.offerId)
+        .delete(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`);
 
       chai.expect(deleteResponse).to.have.status(200);
@@ -1178,7 +1180,7 @@ describe('Offers route', async function () {
       ).to.be.null;
     });
 
-    it('Should return 404 with message if no offer found', async function () {
+    it('Should return 404 with message if no mockOffer found', async function () {
       const res = await chai
         .request(app)
         .delete(pathOffers_Delete_MongoDBId + 'myOfferId')
@@ -1188,20 +1190,20 @@ describe('Offers route', async function () {
     });
   });
 
-  describe('PUT offer by offerId', async function () {
+  describe('PUT mockOffer by offerId', async function () {
     beforeEach(async function () {
       await collectionOffers.insertMany([
         {
-          ...offer,
+          ...mockOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           offerId: 'anotherOfferId',
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...offer,
+          ...mockOffer,
           userId: 'anotherUserId',
         },
       ]);
@@ -1215,7 +1217,7 @@ describe('Offers route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should return 404 if no offer found', async function () {
+    it('Should return 404 if no mockOffer found', async function () {
       const res = await chai
         .request(app)
         .put(pathOffers_Put_Activation)
@@ -1229,13 +1231,13 @@ describe('Offers route', async function () {
       chai.expect(res.body).to.deep.equal({ msg: 'No offer found' });
     });
 
-    it('Should update offer only for current userId and proper offerId', async function () {
+    it('Should update mockOffer only for current userId and proper offerId', async function () {
       const res = await chai
         .request(app)
         .put(pathOffers_Put_Activation)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           activating: true,
           hash: 'myHashForActivation',
         });
@@ -1249,14 +1251,14 @@ describe('Offers route', async function () {
         .put(pathOffers_Put_Activation)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           activating: true,
           hash: 'myHashForActivation',
         });
       chai.expect(res).to.have.status(200);
 
       const modifOffer = await collectionOffers.findOne({
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
       });
       chai.expect(modifOffer.activationHash).to.equal('myHashForActivation');
     });
@@ -1267,14 +1269,14 @@ describe('Offers route', async function () {
         .put(pathOffers_Put_Activation)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           activating: true,
           hash: 'myHashForActivation',
         });
       chai.expect(res).to.have.status(200);
 
       const modifOffer = await collectionOffers.findOne({
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
       });
       chai.expect(modifOffer.status).to.equal(OFFER_STATUS.ACTIVATION);
     });
@@ -1285,29 +1287,29 @@ describe('Offers route', async function () {
         .put(pathOffers_Put_Activation)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
-          offerId: offer.offerId,
+          offerId: mockOffer.offerId,
           activating: false,
           hash: 'myHashForActivation',
         });
       chai.expect(res).to.have.status(200);
 
       const modifOffer = await collectionOffers.findOne({
-        offerId: offer.offerId,
+        offerId: mockOffer.offerId,
       });
       chai.expect(modifOffer.status).to.equal(OFFER_STATUS.DEACTIVATION);
     });
   });
 
-  describe('PUT offer by offerId', async function () {
+  describe('PUT mockOffer by offerId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .send({ chainId: '232323' });
       chai.expect(modifyOffer).to.have.status(403);
     });
 
-    it('Should return 404 if offer doesnt exist', async function () {
+    it('Should return 404 if mockOffer doesnt exist', async function () {
       const modifyOffer = await chai
         .request(app)
         .put(pathOffers_Delete_MongoDBId + 'myOfferId')
@@ -1317,12 +1319,12 @@ describe('Offers route', async function () {
       chai.expect(modifyOffer.body).to.deep.equal({ msg: 'No offer found' });
     });
 
-    it('Should modify only one offer', async function () {
-      await createBaseOffer(offer);
+    it('Should modify only one mockOffer', async function () {
+      await createBaseOffer(mockOffer);
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ chainId: '232323' });
 
@@ -1336,12 +1338,12 @@ describe('Offers route', async function () {
       });
     });
 
-    it('Should modify all offer fields', async function () {
-      await createBaseOffer(offer);
+    it('Should modify all mockOffer fields', async function () {
+      await createBaseOffer(mockOffer);
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
       chai.expect(modifyOffer).to.have.status(200);
@@ -1350,7 +1352,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1360,15 +1362,15 @@ describe('Offers route', async function () {
       chai.expect(getOffer.body).to.deep.equal({
         ...modifiedOffer,
         isActive: true,
-        hash: offer.hash,
-        offerId: offer.offerId,
+        hash: mockOffer.hash,
+        offerId: mockOffer.offerId,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
       });
     });
 
     it('Should modify only the chainId field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         chainId: '76',
@@ -1376,7 +1378,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1386,7 +1388,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1394,7 +1396,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1402,8 +1404,8 @@ describe('Offers route', async function () {
       });
     });
 
-    it('Should modify only min field of an offer', async function () {
-      await createBaseOffer(offer);
+    it('Should modify only min field of an mockOffer', async function () {
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         min: '10',
@@ -1411,7 +1413,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1421,7 +1423,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1429,7 +1431,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1438,7 +1440,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify only max field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         max: '500',
@@ -1446,7 +1448,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1456,7 +1458,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1464,7 +1466,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1473,7 +1475,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify only tokenId field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         tokenId: 'new-token-id',
@@ -1481,7 +1483,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1491,7 +1493,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1499,7 +1501,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1508,7 +1510,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify only the token field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         token: 'modified-token',
@@ -1516,7 +1518,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1526,7 +1528,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1534,7 +1536,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1543,7 +1545,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify only tokenAddress field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         tokenAddress: '0x1234567890123456789012345678901234567890',
@@ -1551,7 +1553,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1561,7 +1563,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1569,7 +1571,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1578,7 +1580,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify the exchangeRate field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         exchangeRate: '3',
@@ -1586,7 +1588,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1596,7 +1598,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1604,7 +1606,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1613,7 +1615,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify the exchangeToken field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         exchangeToken: 'modified-exchange-token',
@@ -1621,7 +1623,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1631,7 +1633,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1639,7 +1641,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1648,7 +1650,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify the exchangeChainId field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         exchangeChainId: 'modified-exchange-chain-id',
@@ -1656,7 +1658,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1666,7 +1668,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1674,7 +1676,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1683,7 +1685,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify only estimatedTime field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         estimatedTime: 'modified-estimated-time',
@@ -1691,7 +1693,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1701,7 +1703,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1709,7 +1711,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1718,7 +1720,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify only provider field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         provider: 'new-provider',
@@ -1726,7 +1728,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1736,7 +1738,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1744,7 +1746,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1753,7 +1755,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify the title field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         title: 'Modified Offer Title',
@@ -1761,7 +1763,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1771,7 +1773,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1779,7 +1781,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1788,7 +1790,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify only the image field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         image: 'modified-image',
@@ -1796,7 +1798,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1806,7 +1808,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1814,7 +1816,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
@@ -1823,7 +1825,7 @@ describe('Offers route', async function () {
     });
 
     it('Should modify the amount field', async function () {
-      await createBaseOffer(offer);
+      await createBaseOffer(mockOffer);
 
       const modifiedOffer = {
         amount: '2',
@@ -1831,7 +1833,7 @@ describe('Offers route', async function () {
 
       const modifyOffer = await chai
         .request(app)
-        .put(pathOffers_Put + offer.offerId)
+        .put(pathOffers_Put + mockOffer.offerId)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(modifiedOffer);
 
@@ -1841,7 +1843,7 @@ describe('Offers route', async function () {
         .request(app)
         .get(pathOffers_Get_OfferId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ offerId: offer.offerId });
+        .query({ offerId: mockOffer.offerId });
 
       delete getOffer.body._id;
       delete getOffer.body.date;
@@ -1849,7 +1851,7 @@ describe('Offers route', async function () {
 
       chai.expect(getOffer).to.have.status(200);
       chai.expect(getOffer.body).to.deep.equal({
-        ...offer,
+        ...mockOffer,
         isActive: true,
         status: OFFER_STATUS.PENDING,
         liquidityWallet: null,
