@@ -132,12 +132,12 @@ export async function getOrderIdFromHash(rpcs, hash) {
       if (txReceipt !== null) {
         const poolIface = new ethers.utils.Interface((await getAbis()).poolAbi);
         const log = txReceipt.logs.find(
-          (log) => poolIface.parseLog(log).name === 'LogTrade'
+          (log) => poolIface.parseLog(log).name === 'LogNewTrade'
         );
 
         return txReceipt.status === 0 || log === undefined
           ? ''
-          : poolIface.parseLog(log).args._idTrade;
+          : poolIface.parseLog(log).args._tradeId;
       }
     } catch (e) {
       console.log('RPC connection error - ', e);
@@ -170,7 +170,7 @@ export async function getOfferIdFromHash(rpcs, hash) {
 
         return txReceipt.status === 0 || log === undefined
           ? ''
-          : poolIface.parseLog(log).args._idOffer;
+          : poolIface.parseLog(log).args._offerId;
       }
     } catch (e) {
       console.log('RPC connection error - ', e);
@@ -204,8 +204,8 @@ export async function isPaidOrderFromHash(rpcs, hash) {
         return txReceipt.status === 0
           ? false
           : txReceipt.logs.find(
-            (log) => iface.parseLog(log).name === 'LogOfferPaid'
-          ) !== undefined;
+              (log) => iface.parseLog(log).name === 'LogTradePaid'
+            ) !== undefined;
       }
     } catch (e) {
       console.log('RPC connection error - ', e);
@@ -278,9 +278,9 @@ export function getProviderFromRpc(rpc) {
 export const getAbis = async () => {
   const results = await Promise.all(
     [
-      'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/GrtPool.json',
+      'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/GrtPoolV2.json',
       'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/ERC20Sample.json',
-      'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/GrtLiquidityWallet.json',
+      'https://raw.githubusercontent.com/grindery-io/Depay-Reality/main/abis/GrtLiquidityWalletV2.json',
     ].map(async (url) => {
       const result = await axios.get(url).catch(() => {
         return null;
