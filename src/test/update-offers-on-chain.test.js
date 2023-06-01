@@ -12,12 +12,7 @@ import {
   pathBlockchain_Put_OffersAll,
   pathBlockchain_Put_OffersUser,
 } from './utils/variables.js';
-import {
-  getAbis,
-  getProviderFromRpc,
-  utils_offers,
-} from '../utils/view-blockchains-utils.js';
-import { ethers } from 'ethers';
+import { utils_offers } from '../utils/view-blockchains-utils.js';
 import { mockedToken } from './utils/utils.js';
 import { OFFER_STATUS } from '../utils/offers-utils.js';
 
@@ -36,7 +31,6 @@ const txHashSetStatusDeactivation =
   '0x5e01b250b748c6db3344d70d9f3b20aa1f88f6e1d33ed0ff60360d6dfe2fef89';
 const offerId =
   '0x92db381c118cbbc9b30b39d3bf5c234a49ad01eec17b327250d0812f08d307f9';
-const abis = await getAbis();
 
 beforeEach(async function () {
   blockchainDBGoerli = await collectionBlockchains.findOne({

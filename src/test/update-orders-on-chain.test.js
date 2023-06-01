@@ -15,12 +15,7 @@ import {
   pathViewBlockchain_Put_OrdersCompleteUser,
   pathViewBlockchain_Put_OrdersUser,
 } from './utils/variables.js';
-import {
-  getAbis,
-  getProviderFromRpc,
-  utils_orders,
-} from '../utils/view-blockchains-utils.js';
-import { ethers } from 'ethers';
+import { utils_orders } from '../utils/view-blockchains-utils.js';
 import { order } from './utils/variables.js';
 import { mockedToken } from './utils/utils.js';
 import { ORDER_STATUS } from '../utils/orders-utils.js';
@@ -39,9 +34,6 @@ const txHashFailed =
   '0x2290b921525f7e42dfc318e5c69527eae1ac1baa435222e3c773be84101b610d';
 const orderId =
   '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec';
-const offerId =
-  '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec';
-const abis = await getAbis();
 
 // Order payment
 const txHashOrderPaid =
