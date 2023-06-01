@@ -23,16 +23,11 @@ chai.use(chaiHttp);
 let blockchainDBGoerli, getOfferIdFromHashStub, isSetStatusFromHashStub;
 
 // Offer creation
-const txHashNewOffer =
-  '0xfe1f2afc7884bd16bf2acd2c9d3daa4c2e8b2e9911c68efd7d6a365074cb69fa';
-const txHashFailed =
-  '0x2290b921525f7e42dfc318e5c69527eae1ac1baa435222e3c773be84101b610d';
-const txHashSetStatusActivation =
-  '0x45af22dcc2eac8ef2097c5a983ee30cb9ef1aae49321d3f4e291e195280921ee';
-const txHashSetStatusDeactivation =
-  '0x5e01b250b748c6db3344d70d9f3b20aa1f88f6e1d33ed0ff60360d6dfe2fef89';
-const offerId =
-  '0x92db381c118cbbc9b30b39d3bf5c234a49ad01eec17b327250d0812f08d307f9';
+const mockTxHashNewOffer = 'mockTxHashNewOffer';
+const mockTxHashFailed = 'mockTxHashFailed';
+const mockTxHashSetStatusActivation = 'mockTxHashSetStatusActivation';
+const mockTxHashSetStatusDeactivation = 'mockTxHashSetStatusDeactivation';
+const mockOfferId = 'mockOfferId';
 
 beforeEach(async function () {
   blockchainDBGoerli = await collectionBlockchains.findOne({
@@ -43,17 +38,17 @@ beforeEach(async function () {
   getOfferIdFromHashStub = sinon
     .stub(utils_offers, 'getOfferIdFromHash')
     .callsFake(async function (_rpc, _hash) {
-      return _hash === txHashNewOffer ? offerId : '';
+      return _hash === mockTxHashNewOffer ? mockOfferId : '';
     });
 
   isSetStatusFromHashStub = sinon
     .stub(utils_offers, 'isSetStatusFromHash')
     .callsFake(async function (_rpc, _hash) {
-      return _hash === txHashSetStatusActivation ||
-        _hash === txHashSetStatusDeactivation
+      return _hash === mockTxHashSetStatusActivation ||
+        _hash === mockTxHashSetStatusDeactivation
         ? {
             isSetStatus: true,
-            isActive: _hash === txHashSetStatusActivation,
+            isActive: _hash === mockTxHashSetStatusActivation,
           }
         : {
             isSetStatus: false,
@@ -68,16 +63,16 @@ afterEach(async function () {
 });
 
 describe('Update offers via on-chain', async function () {
-  describe('Get offerId', async function () {
-    it('getOfferIdFromHash should return the proper offerId', async function () {
+  describe('Get mockOfferId', async function () {
+    it('getOfferIdFromHash should return the proper mockOfferId', async function () {
       chai
         .expect(
           await utils_offers.getOfferIdFromHash(
             blockchainDBGoerli.rpc[0],
-            txHashNewOffer
+            mockTxHashNewOffer
           )
         )
-        .to.equal(offerId);
+        .to.equal(mockOfferId);
     });
 
     it('getOfferIdFromHash should return empty string if transaction failed', async function () {
@@ -85,7 +80,7 @@ describe('Update offers via on-chain', async function () {
         .expect(
           await utils_offers.getOfferIdFromHash(
             blockchainDBGoerli.rpc[0],
-            txHashFailed
+            mockTxHashFailed
           )
         )
         .to.equal('');
@@ -99,35 +94,35 @@ describe('Update offers via on-chain', async function () {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashNewOffer,
+          hash: mockTxHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashNewOffer,
+          hash: mockTxHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.SUCCESS,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashNewOffer,
+          hash: mockTxHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashFailed,
+          hash: mockTxHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashNewOffer,
+          hash: mockTxHashNewOffer,
           userId: 'anotherUserId',
         },
       ]);
@@ -147,7 +142,7 @@ describe('Update offers via on-chain', async function () {
       const unmodifiedOfferAfter = await collectionOffers.findOne({
         _id: unmodifiedOffer._id,
       });
-      chai.expect(unmodifiedOfferAfter.offerId).to.not.equal(offerId);
+      chai.expect(unmodifiedOfferAfter.offerId).to.not.equal(mockOfferId);
     });
 
     it('Should only modify offers for the current userId', async function () {
@@ -161,15 +156,15 @@ describe('Update offers via on-chain', async function () {
       });
     });
 
-    it('Should modify mockOffer - offerId', async function () {
+    it('Should modify mockOffer - mockOfferId', async function () {
       const res = await chai
         .request(app)
         .put(pathBlockchain_Put_OffersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash === txHashNewOffer) {
-          chai.expect(mockOffer.offerId).to.equal(offerId);
+        if (mockOffer.hash === mockTxHashNewOffer) {
+          chai.expect(mockOffer.offerId).to.equal(mockOfferId);
         }
       });
     });
@@ -181,7 +176,7 @@ describe('Update offers via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash === txHashNewOffer) {
+        if (mockOffer.hash === mockTxHashNewOffer) {
           chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
         }
       });
@@ -194,7 +189,7 @@ describe('Update offers via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash === txHashFailed) {
+        if (mockOffer.hash === mockTxHashFailed) {
           chai.expect(mockOffer.status).to.equal(OFFER_STATUS.FAILURE);
         }
       });
@@ -208,35 +203,35 @@ describe('Update offers via on-chain', async function () {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashNewOffer,
+          hash: mockTxHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashNewOffer,
+          hash: mockTxHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.SUCCESS,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashNewOffer,
+          hash: mockTxHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashFailed,
+          hash: mockTxHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
           ...mockOffer,
           status: OFFER_STATUS.PENDING,
           exchangeChainId: mockBlockchainGoerli.chainId,
-          hash: txHashNewOffer,
+          hash: mockTxHashNewOffer,
           userId: 'anotherUserId',
         },
       ]);
@@ -257,7 +252,7 @@ describe('Update offers via on-chain', async function () {
       const unmodifiedOfferAfter = await collectionOffers.findOne({
         _id: unmodifiedOffer._id,
       });
-      chai.expect(unmodifiedOfferAfter.offerId).to.not.equal(offerId);
+      chai.expect(unmodifiedOfferAfter.offerId).to.not.equal(mockOfferId);
     });
 
     it('Should only modify all offers', async function () {
@@ -277,7 +272,7 @@ describe('Update offers via on-chain', async function () {
       ).to.be.true;
     });
 
-    it('Should modify mockOffer - offerId', async function () {
+    it('Should modify mockOffer - mockOfferId', async function () {
       const res = await chai
         .request(app)
         .put(pathBlockchain_Put_OffersAll)
@@ -285,8 +280,8 @@ describe('Update offers via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash === txHashNewOffer) {
-          chai.expect(mockOffer.offerId).to.equal(offerId);
+        if (mockOffer.hash === mockTxHashNewOffer) {
+          chai.expect(mockOffer.offerId).to.equal(mockOfferId);
         }
       });
     });
@@ -299,7 +294,7 @@ describe('Update offers via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash === txHashNewOffer) {
+        if (mockOffer.hash === mockTxHashNewOffer) {
           chai.expect(mockOffer.status).to.equal(OFFER_STATUS.SUCCESS);
         }
       });
@@ -313,7 +308,7 @@ describe('Update offers via on-chain', async function () {
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
       res.body.forEach((mockOffer) => {
-        if (mockOffer.hash === txHashFailed) {
+        if (mockOffer.hash === mockTxHashFailed) {
           chai.expect(mockOffer.status).to.equal(OFFER_STATUS.FAILURE);
         }
       });
@@ -328,7 +323,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
-          activationHash: txHashSetStatusActivation,
+          activationHash: mockTxHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -336,7 +331,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.DEACTIVATION,
           isActive: true,
-          activationHash: txHashSetStatusDeactivation,
+          activationHash: mockTxHashSetStatusDeactivation,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -344,7 +339,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
-          activationHash: txHashFailed,
+          activationHash: mockTxHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -352,7 +347,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.DEACTIVATION,
           isActive: true,
-          activationHash: txHashFailed,
+          activationHash: mockTxHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -360,7 +355,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
-          activationHash: txHashNewOffer,
+          activationHash: mockTxHashNewOffer,
           userId: process.env.USER_ID_TEST,
         },
         {
@@ -368,7 +363,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: true,
-          activationHash: txHashSetStatusActivation,
+          activationHash: mockTxHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
           notToBeModified: 'notToBeModified',
         },
@@ -377,7 +372,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.DEACTIVATION,
           isActive: false,
-          activationHash: txHashSetStatusActivation,
+          activationHash: mockTxHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
           notToBeModified: 'notToBeModified',
         },
@@ -387,7 +382,7 @@ describe('Update offers via on-chain', async function () {
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
           offerId: '',
-          activationHash: txHashSetStatusActivation,
+          activationHash: mockTxHashSetStatusActivation,
           userId: process.env.USER_ID_TEST,
           notToBeModified: 'notToBeModified',
         },
@@ -396,7 +391,7 @@ describe('Update offers via on-chain', async function () {
           chainId: blockchainDBGoerli.chainId,
           status: OFFER_STATUS.ACTIVATION,
           isActive: false,
-          activationHash: txHashFailed,
+          activationHash: mockTxHashFailed,
           userId: 'anotherUserId',
           notToBeModified: 'notToBeModified',
         },
@@ -409,7 +404,7 @@ describe('Update offers via on-chain', async function () {
           .expect(
             await utils_offers.isSetStatusFromHash(
               blockchainDBGoerli.rpc[0],
-              txHashSetStatusActivation
+              mockTxHashSetStatusActivation
             )
           )
           .to.deep.equal({ isSetStatus: true, isActive: true });
@@ -420,7 +415,7 @@ describe('Update offers via on-chain', async function () {
           .expect(
             await utils_offers.isSetStatusFromHash(
               blockchainDBGoerli.rpc[0],
-              txHashSetStatusDeactivation
+              mockTxHashSetStatusDeactivation
             )
           )
           .to.deep.equal({ isSetStatus: true, isActive: false });
@@ -431,7 +426,7 @@ describe('Update offers via on-chain', async function () {
           .expect(
             await utils_offers.isSetStatusFromHash(
               blockchainDBGoerli.rpc[0],
-              txHashNewOffer
+              mockTxHashNewOffer
             )
           )
           .to.deep.equal({ isSetStatus: false, isActive: undefined });
@@ -442,7 +437,7 @@ describe('Update offers via on-chain', async function () {
           .expect(
             await utils_offers.isSetStatusFromHash(
               blockchainDBGoerli.rpc[0],
-              txHashFailed
+              mockTxHashFailed
             )
           )
           .to.deep.equal({ isSetStatus: false, isActive: undefined });
@@ -479,7 +474,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashSetStatusActivation,
+            activationHash: mockTxHashSetStatusActivation,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -507,7 +502,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashSetStatusActivation,
+            activationHash: mockTxHashSetStatusActivation,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -535,7 +530,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashFailed,
+            activationHash: mockTxHashFailed,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -563,7 +558,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashFailed,
+            activationHash: mockTxHashFailed,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -593,7 +588,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashSetStatusDeactivation,
+            activationHash: mockTxHashSetStatusDeactivation,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -621,7 +616,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashSetStatusDeactivation,
+            activationHash: mockTxHashSetStatusDeactivation,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -649,7 +644,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashFailed,
+            activationHash: mockTxHashFailed,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -677,7 +672,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashFailed,
+            activationHash: mockTxHashFailed,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -742,7 +737,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashSetStatusActivation,
+            activationHash: mockTxHashSetStatusActivation,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -771,7 +766,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashSetStatusActivation,
+            activationHash: mockTxHashSetStatusActivation,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -800,7 +795,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashFailed,
+            activationHash: mockTxHashFailed,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -829,7 +824,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashFailed,
+            activationHash: mockTxHashFailed,
             isActive: false,
             status: OFFER_STATUS.ACTIVATION,
           })
@@ -860,7 +855,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashSetStatusDeactivation,
+            activationHash: mockTxHashSetStatusDeactivation,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -889,7 +884,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashSetStatusDeactivation,
+            activationHash: mockTxHashSetStatusDeactivation,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -918,7 +913,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashFailed,
+            activationHash: mockTxHashFailed,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
@@ -947,7 +942,7 @@ describe('Update offers via on-chain', async function () {
           .find({
             userId: process.env.USER_ID_TEST,
             offerId: { $exists: true, $ne: '' },
-            activationHash: txHashFailed,
+            activationHash: mockTxHashFailed,
             isActive: true,
             status: OFFER_STATUS.DEACTIVATION,
           })
