@@ -16,7 +16,7 @@ import {
   pathViewBlockchain_Put_OrdersUser,
 } from './utils/variables.js';
 import { utils_orders } from '../utils/view-blockchains-utils.js';
-import { order } from './utils/variables.js';
+import { mockOrder } from './utils/variables.js';
 import { mockedToken } from './utils/utils.js';
 import { ORDER_STATUS } from '../utils/orders-utils.js';
 
@@ -104,35 +104,35 @@ describe('Update orders via on-chain', async function () {
     beforeEach(async function () {
       await collectionOrders.insertMany([
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           orderId: orderId,
@@ -160,20 +160,20 @@ describe('Update orders via on-chain', async function () {
         .put(pathViewBlockchain_Put_OrdersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        chai.expect(order.userId).to.equal(process.env.USER_ID_TEST);
+      res.body.forEach((mockOrder) => {
+        chai.expect(mockOrder.userId).to.equal(process.env.USER_ID_TEST);
       });
     });
-    it('Should modify order - orderId', async function () {
+    it('Should modify mockOrder - orderId', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.hash == txHashNewOrder) {
           chai
-            .expect(order.orderId)
+            .expect(mockOrder.orderId)
             .to.equal(
               '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec'
             );
@@ -181,28 +181,28 @@ describe('Update orders via on-chain', async function () {
       });
     });
 
-    it('Should modify order - status', async function () {
+    it('Should modify mockOrder - status', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai.expect(order.status).to.equal(ORDER_STATUS.SUCCESS);
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.hash == txHashNewOrder) {
+          chai.expect(mockOrder.status).to.equal(ORDER_STATUS.SUCCESS);
         }
       });
     });
-    it('Should only modify status if order creation failed', async function () {
+    it('Should only modify status if mockOrder creation failed', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersUser)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashFailed) {
-          chai.expect(order).to.deep.equal({
-            ...order,
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.hash == txHashFailed) {
+          chai.expect(mockOrder).to.deep.equal({
+            ...mockOrder,
             chainIdTokenDeposit: blockchainGoerli.chainId,
             hash: txHashFailed,
             userId: process.env.USER_ID_TEST,
@@ -217,35 +217,35 @@ describe('Update orders via on-chain', async function () {
     beforeEach(async function () {
       await collectionOrders.insertMany([
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           hash: txHashNewOrder,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           hash: txHashFailed,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.PENDING,
           chainIdTokenDeposit: blockchainGoerli.chainId,
           hash: txHashNewOrder,
@@ -266,10 +266,10 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
+      res.body.forEach((mockOrder) => {
         chai.expect(
           unmodifiedOrder.every(
-            (unModifOrder) => unModifOrder._id.toString() !== order._id
+            (unModifOrder) => unModifOrder._id.toString() !== mockOrder._id
           )
         ).to.be.true;
       });
@@ -284,17 +284,17 @@ describe('Update orders via on-chain', async function () {
       chai.expect(res.body.length).to.equal(4);
     });
 
-    it('Should modify order - orderId', async function () {
+    it('Should modify mockOrder - orderId', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersAll)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.hash == txHashNewOrder) {
           chai
-            .expect(order.orderId)
+            .expect(mockOrder.orderId)
             .to.equal(
               '0x7eed0db68dde2d383b9450597aa4a76fa97360cb705f21e5166d8f034c1f42ec'
             );
@@ -302,30 +302,30 @@ describe('Update orders via on-chain', async function () {
       });
     });
 
-    it('Should modify order - status', async function () {
+    it('Should modify mockOrder - status', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersAll)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashNewOrder) {
-          chai.expect(order.status).to.equal(ORDER_STATUS.SUCCESS);
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.hash == txHashNewOrder) {
+          chai.expect(mockOrder.status).to.equal(ORDER_STATUS.SUCCESS);
         }
       });
     });
-    it('Should only modify status if order creation failed', async function () {
+    it('Should only modify status if mockOrder creation failed', async function () {
       const res = await chai
         .request(app)
         .put(pathViewBlockchain_Put_OrdersAll)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({ apiKey: process.env.API_KEY });
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.hash == txHashFailed) {
-          chai.expect(order).to.deep.equal({
-            ...order,
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.hash == txHashFailed) {
+          chai.expect(mockOrder).to.deep.equal({
+            ...mockOrder,
             chainIdTokenDeposit: blockchainGoerli.chainId,
             hash: txHashFailed,
             userId: process.env.USER_ID_TEST,
@@ -344,7 +344,7 @@ describe('Update orders via on-chain', async function () {
       });
       await collectionOrders.insertMany([
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
@@ -352,7 +352,7 @@ describe('Update orders via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
           offerId: offer.offerId,
           isComplete: false,
@@ -360,7 +360,7 @@ describe('Update orders via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
@@ -368,7 +368,7 @@ describe('Update orders via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
@@ -376,7 +376,7 @@ describe('Update orders via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: true,
@@ -385,7 +385,7 @@ describe('Update orders via on-chain', async function () {
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
@@ -438,8 +438,8 @@ describe('Update orders via on-chain', async function () {
           .put(pathViewBlockchain_Put_OrdersCompleteUser)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          chai.expect(order.shouldNotAppear).to.be.undefined;
+        res.body.forEach((mockOrder) => {
+          chai.expect(mockOrder.shouldNotAppear).to.be.undefined;
         });
       });
       it('Should update orders for the current userId', async function () {
@@ -448,8 +448,8 @@ describe('Update orders via on-chain', async function () {
           .put(pathViewBlockchain_Put_OrdersCompleteUser)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          chai.expect(order.userId).to.equal(process.env.USER_ID_TEST);
+        res.body.forEach((mockOrder) => {
+          chai.expect(mockOrder.userId).to.equal(process.env.USER_ID_TEST);
         });
       });
       it('Should update isComplete to true for successfull transaction hash', async function () {
@@ -458,9 +458,9 @@ describe('Update orders via on-chain', async function () {
           .put(pathViewBlockchain_Put_OrdersCompleteUser)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          if (order.completionHash !== txHashNotOrderPaid) {
-            chai.expect(order.isComplete).to.be.true;
+        res.body.forEach((mockOrder) => {
+          if (mockOrder.completionHash !== txHashNotOrderPaid) {
+            chai.expect(mockOrder.isComplete).to.be.true;
           }
         });
       });
@@ -470,9 +470,9 @@ describe('Update orders via on-chain', async function () {
           .put(pathViewBlockchain_Put_OrdersCompleteUser)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          if (order.completionHash !== txHashNotOrderPaid) {
-            chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETE);
+        res.body.forEach((mockOrder) => {
+          if (mockOrder.completionHash !== txHashNotOrderPaid) {
+            chai.expect(mockOrder.status).to.equal(ORDER_STATUS.COMPLETE);
           }
         });
       });
@@ -482,9 +482,11 @@ describe('Update orders via on-chain', async function () {
           .put(pathViewBlockchain_Put_OrdersCompleteUser)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          if (order.completionHash === txHashNotOrderPaid) {
-            chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETION_FAILURE);
+        res.body.forEach((mockOrder) => {
+          if (mockOrder.completionHash === txHashNotOrderPaid) {
+            chai
+              .expect(mockOrder.status)
+              .to.equal(ORDER_STATUS.COMPLETION_FAILURE);
           }
         });
       });
@@ -494,9 +496,9 @@ describe('Update orders via on-chain', async function () {
           .put(pathViewBlockchain_Put_OrdersCompleteUser)
           .set('Authorization', `Bearer ${mockedToken}`);
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          if (order.completionHash === txHashNotOrderPaid) {
-            chai.expect(order.isComplete).to.be.false;
+        res.body.forEach((mockOrder) => {
+          if (mockOrder.completionHash === txHashNotOrderPaid) {
+            chai.expect(mockOrder.isComplete).to.be.false;
           }
         });
       });
@@ -509,8 +511,8 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          chai.expect(order.shouldNotAppear).to.be.undefined;
+        res.body.forEach((mockOrder) => {
+          chai.expect(mockOrder.shouldNotAppear).to.be.undefined;
         });
       });
 
@@ -533,8 +535,8 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          chai.expect(order.shouldNotAppear).to.be.undefined;
+        res.body.forEach((mockOrder) => {
+          chai.expect(mockOrder.shouldNotAppear).to.be.undefined;
         });
       });
       it('Should update orders all userId', async function () {
@@ -545,10 +547,13 @@ describe('Update orders via on-chain', async function () {
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
         chai.expect(
-          res.body.some((order) => order.userId === process.env.USER_ID_TEST)
+          res.body.some(
+            (mockOrder) => mockOrder.userId === process.env.USER_ID_TEST
+          )
         ).to.be.true;
-        chai.expect(res.body.some((order) => order.userId === 'anotherUserId'))
-          .to.be.true;
+        chai.expect(
+          res.body.some((mockOrder) => mockOrder.userId === 'anotherUserId')
+        ).to.be.true;
       });
       it('Should update isComplete to true for successfull transaction hash if LogOfferPaid appears', async function () {
         const res = await chai
@@ -557,9 +562,9 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          if (order.completionHash !== txHashNotOrderPaid) {
-            chai.expect(order.isComplete).to.be.true;
+        res.body.forEach((mockOrder) => {
+          if (mockOrder.completionHash !== txHashNotOrderPaid) {
+            chai.expect(mockOrder.isComplete).to.be.true;
           }
         });
       });
@@ -570,9 +575,9 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          if (order.completionHash !== txHashNotOrderPaid) {
-            chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETE);
+        res.body.forEach((mockOrder) => {
+          if (mockOrder.completionHash !== txHashNotOrderPaid) {
+            chai.expect(mockOrder.status).to.equal(ORDER_STATUS.COMPLETE);
           }
         });
       });
@@ -583,9 +588,11 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          if (order.completionHash === txHashNotOrderPaid) {
-            chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETION_FAILURE);
+        res.body.forEach((mockOrder) => {
+          if (mockOrder.completionHash === txHashNotOrderPaid) {
+            chai
+              .expect(mockOrder.status)
+              .to.equal(ORDER_STATUS.COMPLETION_FAILURE);
           }
         });
       });
@@ -596,9 +603,9 @@ describe('Update orders via on-chain', async function () {
           .set('Authorization', `Bearer ${mockedToken}`)
           .send({ apiKey: process.env.API_KEY });
         chai.expect(res).to.have.status(200);
-        res.body.forEach((order) => {
-          if (order.completionHash === txHashNotOrderPaid) {
-            chai.expect(order.isComplete).to.be.false;
+        res.body.forEach((mockOrder) => {
+          if (mockOrder.completionHash === txHashNotOrderPaid) {
+            chai.expect(mockOrder.isComplete).to.be.false;
           }
         });
       });
@@ -629,49 +636,49 @@ describe('Update orders via on-chain', async function () {
       ]);
       await collectionOrders.insertMany([
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: 'anotherOfferId',
           isComplete: false,
           completionHash: txHashOrderPaid,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
           offerId: offer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
           completionHash: txHashOrderPaid,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
           completionHash: txHashNotOrderPaid,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: true,
           completionHash: txHashOrderPaid,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.COMPLETION,
           offerId: offer.offerId,
           isComplete: false,
@@ -690,10 +697,10 @@ describe('Update orders via on-chain', async function () {
         .put(pathViewBlockchain_Put_OrdersCompleteSeller)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
+      res.body.forEach((mockOrder) => {
         chai.expect(
           unmodifiedOrder.every(
-            (unModifOrder) => unModifOrder._id.toString() !== order._id
+            (unModifOrder) => unModifOrder._id.toString() !== mockOrder._id
           )
         ).to.be.true;
       });
@@ -709,10 +716,10 @@ describe('Update orders via on-chain', async function () {
         .put(pathViewBlockchain_Put_OrdersCompleteSeller)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
+      res.body.forEach((mockOrder) => {
         chai.expect(
           unmodifiedOrder.every(
-            (unModifOrder) => unModifOrder._id.toString() !== order._id
+            (unModifOrder) => unModifOrder._id.toString() !== mockOrder._id
           )
         ).to.be.true;
       });
@@ -724,9 +731,9 @@ describe('Update orders via on-chain', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
       await Promise.all(
-        res.body.map(async (order) => {
+        res.body.map(async (mockOrder) => {
           const offer = await collectionOffers.findOne({
-            offerId: order.offerId,
+            offerId: mockOrder.offerId,
           });
           chai.expect(offer.userId).to.equal(process.env.USER_ID_TEST);
         })
@@ -738,9 +745,9 @@ describe('Update orders via on-chain', async function () {
         .put(pathViewBlockchain_Put_OrdersCompleteSeller)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.completionHash !== txHashNotOrderPaid) {
-          chai.expect(order.isComplete).to.be.true;
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.completionHash !== txHashNotOrderPaid) {
+          chai.expect(mockOrder.isComplete).to.be.true;
         }
       });
     });
@@ -750,9 +757,9 @@ describe('Update orders via on-chain', async function () {
         .put(pathViewBlockchain_Put_OrdersCompleteSeller)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.completionHash !== txHashNotOrderPaid) {
-          chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETE);
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.completionHash !== txHashNotOrderPaid) {
+          chai.expect(mockOrder.status).to.equal(ORDER_STATUS.COMPLETE);
         }
       });
     });
@@ -762,9 +769,11 @@ describe('Update orders via on-chain', async function () {
         .put(pathViewBlockchain_Put_OrdersCompleteSeller)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.completionHash === txHashNotOrderPaid) {
-          chai.expect(order.status).to.equal(ORDER_STATUS.COMPLETION_FAILURE);
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.completionHash === txHashNotOrderPaid) {
+          chai
+            .expect(mockOrder.status)
+            .to.equal(ORDER_STATUS.COMPLETION_FAILURE);
         }
       });
     });
@@ -774,9 +783,9 @@ describe('Update orders via on-chain', async function () {
         .put(pathViewBlockchain_Put_OrdersCompleteSeller)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
-      res.body.forEach((order) => {
-        if (order.completionHash === txHashNotOrderPaid) {
-          chai.expect(order.isComplete).to.be.false;
+      res.body.forEach((mockOrder) => {
+        if (mockOrder.completionHash === txHashNotOrderPaid) {
+          chai.expect(mockOrder.isComplete).to.be.false;
         }
       });
     });

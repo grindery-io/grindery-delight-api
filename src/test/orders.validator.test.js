@@ -9,7 +9,7 @@ import {
 } from './utils/utils.js';
 import {
   pathOrders_Post,
-  order,
+  mockOrder,
   pathOrders_Get_OrderId,
   pathOrders_Get_MongoDBId,
   pathOrders_Put_Complete,
@@ -20,14 +20,14 @@ import app from '../index.js';
 chai.use(chaiHttp);
 
 describe('Orders route - Validators', async function () {
-  describe('POST new order', async function () {
-    for (const testCase of Object.keys(order)) {
+  describe('POST new mockOrder', async function () {
+    for (const testCase of Object.keys(mockOrder)) {
       if (testCase !== 'status') {
         testNonString({
           method: 'post',
           path: pathOrders_Post,
           body: {
-            ...order,
+            ...mockOrder,
             [testCase]: 123,
           },
           query: {},
@@ -40,7 +40,7 @@ describe('Orders route - Validators', async function () {
           method: 'post',
           path: pathOrders_Post,
           body: {
-            ...order,
+            ...mockOrder,
             [testCase]: '',
           },
           query: {},
@@ -53,7 +53,7 @@ describe('Orders route - Validators', async function () {
       method: 'post',
       path: pathOrders_Post,
       body: {
-        ...order,
+        ...mockOrder,
         unexpectedField: 'Unexpected field',
       },
       query: {},
@@ -65,7 +65,7 @@ describe('Orders route - Validators', async function () {
       method: 'post',
       path: pathOrders_Post,
       body: {
-        ...order,
+        ...mockOrder,
       },
       query: { unexpectedField: 'Unexpected field' },
       field: 'unexpectedField',
@@ -101,7 +101,7 @@ describe('Orders route - Validators', async function () {
     });
   });
 
-  describe('PUT order as complete', async function () {
+  describe('PUT mockOrder as complete', async function () {
     testNonString({
       method: 'put',
       path: pathOrders_Put_Complete,

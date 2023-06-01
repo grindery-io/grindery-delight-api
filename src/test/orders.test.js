@@ -7,7 +7,7 @@ import {
   collectionOrders,
   collectionOffers,
   pathOrders_Post,
-  order,
+  mockOrder,
   offer,
   pathOrders_Get_OrderId,
   pathOrders_Get_User,
@@ -21,7 +21,7 @@ import { ORDER_STATUS } from '../utils/orders-utils.js';
 chai.use(chaiHttp);
 
 /**
- * This function creates a base order or offer in a MongoDB collection and returns the response.
+ * This function creates a base mockOrder or offer in a MongoDB collection and returns the response.
  * @returns the response object from the POST request made using chai.request.
  */
 async function createBaseOrderOrOffer({ path, body }) {
@@ -37,43 +37,43 @@ async function createBaseOrderOrOffer({ path, body }) {
 }
 
 describe('Orders route', async function () {
-  describe('POST new order', async function () {
+  describe('POST new mockOrder', async function () {
     it('Should return 403 if no token is provided', async function () {
       const createResponse = await chai
         .request(app)
         .post(pathOrders_Post)
-        .send(order);
+        .send(mockOrder);
       chai.expect(createResponse).to.have.status(403);
     });
 
-    it('Should POST a new order', async function () {
+    it('Should POST a new mockOrder', async function () {
       await createBaseOrderOrOffer({
         path: pathOrders_Post,
-        body: order,
+        body: mockOrder,
       });
     });
 
     it('Should POST multiple new orders with empty orderId', async function () {
       await createBaseOrderOrOffer({
         path: pathOrders_Post,
-        body: { ...order, orderId: '' },
+        body: { ...mockOrder, orderId: '' },
       });
 
       await createBaseOrderOrOffer({
         path: pathOrders_Post,
-        body: { ...order, orderId: '' },
+        body: { ...mockOrder, orderId: '' },
       });
     });
 
-    it('Should POST a new order with relevant fields', async function () {
+    it('Should POST a new mockOrder with relevant fields', async function () {
       await createBaseOrderOrOffer({
         path: pathOrders_Post,
-        body: order,
+        body: mockOrder,
       });
       const getOrder = await chai
         .request(app)
         .get(pathOrders_Get_OrderId)
-        .query({ orderId: order.orderId })
+        .query({ orderId: mockOrder.orderId })
         .set('Authorization', `Bearer ${mockedToken}`);
       // Assertions
       chai.expect(getOrder).to.have.status(200);
@@ -82,7 +82,7 @@ describe('Orders route', async function () {
       delete getOrder.body.userId;
       delete getOrder.body.date;
       chai.expect(getOrder.body).to.deep.equal({
-        ...order,
+        ...mockOrder,
         isComplete: false,
         status: ORDER_STATUS.PENDING,
         offer: null,
@@ -91,13 +91,13 @@ describe('Orders route', async function () {
     it('Should fail if same orderId exists', async function () {
       await createBaseOrderOrOffer({
         path: pathOrders_Post,
-        body: order,
+        body: mockOrder,
       });
       const createDuplicateResponse = await chai
         .request(app)
         .post(pathOrders_Post)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .send(order);
+        .send(mockOrder);
       chai.expect(createDuplicateResponse).to.have.status(404);
       chai
         .expect(createDuplicateResponse.body.msg)
@@ -116,21 +116,21 @@ describe('Orders route', async function () {
       });
 
       await collectionOrders.insertOne({
-        ...order,
+        ...mockOrder,
         orderId: 'myOrderId1',
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
         date: new Date(),
       });
       await collectionOrders.insertOne({
-        ...order,
+        ...mockOrder,
         orderId: 'myOrderId2',
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
         date: new Date(),
       });
       await collectionOrders.insertOne({
-        ...order,
+        ...mockOrder,
         offerId: offer.offerId,
         userId: 'anotherUserId',
         date: new Date(),
@@ -153,8 +153,8 @@ describe('Orders route', async function () {
         .set({ Authorization: `Bearer ${mockedToken}` });
       chai.expect(res).to.have.status(200);
 
-      res.body.orders.map((order) => {
-        chai.expect(order.offer).to.deep.equal({
+      res.body.orders.map((mockOrder) => {
+        chai.expect(mockOrder.offer).to.deep.equal({
           ...offerFromInMemoryDB,
           _id: offerFromInMemoryDB._id.toString(),
         });
@@ -273,17 +273,17 @@ describe('Orders route', async function () {
       await collectionOffers.insertOne({ ...offer, offerId: 'anotherOfferId' });
 
       await collectionOrders.insertOne({
-        ...order,
+        ...mockOrder,
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
       });
       await collectionOrders.insertOne({
-        ...order,
+        ...mockOrder,
         offerId: offer.offerId,
         userId: 'anotherUserId',
       });
       await collectionOrders.insertOne({
-        ...order,
+        ...mockOrder,
         orderId: 'anotherOrderId',
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
@@ -294,7 +294,7 @@ describe('Orders route', async function () {
       const res = await chai
         .request(app)
         .get(pathOrders_Get_OrderId)
-        .query({ orderId: order.orderId });
+        .query({ orderId: mockOrder.orderId });
       chai.expect(res).to.have.status(403);
     });
 
@@ -307,7 +307,7 @@ describe('Orders route', async function () {
         .request(app)
         .get(pathOrders_Get_OrderId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ orderId: order.orderId });
+        .query({ orderId: mockOrder.orderId });
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.offer).to.deep.equal({
         ...offer,
@@ -320,9 +320,9 @@ describe('Orders route', async function () {
         .request(app)
         .get(pathOrders_Get_OrderId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ orderId: order.orderId });
+        .query({ orderId: mockOrder.orderId });
       chai.expect(res).to.have.status(200);
-      chai.expect(res.body.orderId).to.equal(order.orderId);
+      chai.expect(res.body.orderId).to.equal(mockOrder.orderId);
     });
 
     it('Should get the proper userId', async function () {
@@ -330,17 +330,17 @@ describe('Orders route', async function () {
         .request(app)
         .get(pathOrders_Get_OrderId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ orderId: order.orderId });
+        .query({ orderId: mockOrder.orderId });
       chai.expect(res).to.have.status(200);
       chai.expect(res.body.userId).to.equal(process.env.USER_ID_TEST);
     });
 
-    it('Should get an order corresponding to orderId', async function () {
+    it('Should get an mockOrder corresponding to orderId', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({
         offerId: offer.offerId,
       });
       const orderFromInMemoryDB = await collectionOrders.findOne({
-        orderId: order.orderId,
+        orderId: mockOrder.orderId,
         userId: process.env.USER_ID_TEST,
       });
 
@@ -348,10 +348,10 @@ describe('Orders route', async function () {
         .request(app)
         .get(pathOrders_Get_OrderId)
         .set('Authorization', `Bearer ${mockedToken}`)
-        .query({ orderId: order.orderId });
+        .query({ orderId: mockOrder.orderId });
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.deep.equal({
-        ...order,
+        ...mockOrder,
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
         _id: orderFromInMemoryDB._id.toString(),
@@ -362,7 +362,7 @@ describe('Orders route', async function () {
       });
     });
 
-    it('Should return an empty string if no order exists', async function () {
+    it('Should return an empty string if no mockOrder exists', async function () {
       const res = await chai
         .request(app)
         .get(pathOrders_Get_OrderId)
@@ -379,7 +379,7 @@ describe('Orders route', async function () {
     beforeEach(async function () {
       await collectionOffers.insertOne({ ...offer });
       await collectionOrders.insertOne({
-        ...order,
+        ...mockOrder,
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
       });
@@ -388,12 +388,12 @@ describe('Orders route', async function () {
       await collectionOffers.insertOne({ ...offer, offerId: 'anotherOfferId' });
 
       await collectionOrders.insertOne({
-        ...order,
+        ...mockOrder,
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
       });
       await collectionOrders.insertOne({
-        ...order,
+        ...mockOrder,
         offerId: offer.offerId,
         userId: 'anotherUserId',
       });
@@ -407,7 +407,7 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should return the order with the proper MongoDB id', async function () {
+    it('Should return the mockOrder with the proper MongoDB id', async function () {
       const orderFromInMemoryDB = await collectionOrders.findOne({
         userId: process.env.USER_ID_TEST,
       });
@@ -421,7 +421,7 @@ describe('Orders route', async function () {
       chai.expect(res.body._id).to.equal(orderFromInMemoryDB._id.toString());
     });
 
-    it('Should return the order with the proper userId', async function () {
+    it('Should return the mockOrder with the proper userId', async function () {
       const orderFromInMemoryDB = await collectionOrders.findOne({
         userId: process.env.USER_ID_TEST,
       });
@@ -435,7 +435,7 @@ describe('Orders route', async function () {
       chai.expect(res.body.userId).to.equal(process.env.USER_ID_TEST);
     });
 
-    it('Should return the order with all the proper fields', async function () {
+    it('Should return the mockOrder with all the proper fields', async function () {
       const offerFromInMemoryDB = await collectionOffers.findOne({});
       const orderFromInMemoryDB = await collectionOrders.findOne({
         userId: process.env.USER_ID_TEST,
@@ -448,7 +448,7 @@ describe('Orders route', async function () {
         .query({ id: orderFromInMemoryDB._id.toString() });
       chai.expect(res).to.have.status(200);
       chai.expect(res.body).to.deep.equal({
-        ...order,
+        ...mockOrder,
         offerId: offer.offerId,
         userId: process.env.USER_ID_TEST,
         _id: orderFromInMemoryDB._id.toString(),
@@ -491,7 +491,7 @@ describe('Orders route', async function () {
 
       await collectionOrders.insertMany([
         {
-          ...order,
+          ...mockOrder,
           orderId: 'myOrderId1',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
@@ -499,7 +499,7 @@ describe('Orders route', async function () {
           date: new Date(),
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: 'myOrderId1',
           offerId: 'myDeactivateoffer',
           userId: process.env.USER_ID_TEST,
@@ -507,7 +507,7 @@ describe('Orders route', async function () {
           date: new Date(),
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: 'myOrderId2',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
@@ -515,7 +515,7 @@ describe('Orders route', async function () {
           date: new Date(),
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: 'myOrderId3',
           offerId: 'offerId1',
           userId: process.env.USER_ID_TEST,
@@ -523,7 +523,7 @@ describe('Orders route', async function () {
           date: new Date(),
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: 'myOrderId4',
           offerId: 'offerId2',
           userId: 'anotherUserId',
@@ -531,7 +531,7 @@ describe('Orders route', async function () {
           date: new Date(),
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: 'myOrderId1',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
@@ -539,7 +539,7 @@ describe('Orders route', async function () {
           date: new Date(),
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: 'myOrderId1',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
@@ -547,7 +547,7 @@ describe('Orders route', async function () {
           date: new Date(),
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: 'myOrderId1',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
@@ -555,7 +555,7 @@ describe('Orders route', async function () {
           date: new Date(),
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: 'myOrderId1',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
@@ -563,7 +563,7 @@ describe('Orders route', async function () {
           date: new Date(),
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: '',
           offerId: offer.offerId,
           userId: process.env.USER_ID_TEST,
@@ -599,10 +599,10 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
-      res.body.orders.forEach((order) => {
+      res.body.orders.forEach((mockOrder) => {
         chai.expect(
           unmodifiedOrder.every(
-            (unModifOrder) => unModifOrder._id.toString() !== order._id
+            (unModifOrder) => unModifOrder._id.toString() !== mockOrder._id
           )
         ).to.be.true;
       });
@@ -621,10 +621,10 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
-      res.body.orders.forEach((order) => {
+      res.body.orders.forEach((mockOrder) => {
         chai.expect(
           unmodifiedOrder.every(
-            (unModifOrder) => unModifOrder._id.toString() !== order._id
+            (unModifOrder) => unModifOrder._id.toString() !== mockOrder._id
           )
         ).to.be.true;
       });
@@ -638,9 +638,9 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(200);
 
       await Promise.all(
-        res.body.orders.map(async (order) => {
+        res.body.orders.map(async (mockOrder) => {
           const offerFromInMemoryDB = await collectionOffers.findOne({
-            offerId: order.offerId,
+            offerId: mockOrder.offerId,
           });
           chai.expect(offerFromInMemoryDB).to.be.an('object');
           chai.expect(offerFromInMemoryDB).to.have.property('_id');
@@ -656,10 +656,10 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(200);
 
       chai.expect(
-        res.body.orders.some((order) => order.offer.isActive === true)
+        res.body.orders.some((mockOrder) => mockOrder.offer.isActive === true)
       ).to.be.true;
       chai.expect(
-        res.body.orders.some((order) => order.offer.isActive === false)
+        res.body.orders.some((mockOrder) => mockOrder.offer.isActive === false)
       ).to.be.true;
     });
 
@@ -671,8 +671,8 @@ describe('Orders route', async function () {
         .query({ isActiveOffers: true });
       chai.expect(res).to.have.status(200);
 
-      res.body.orders.forEach((order) => {
-        chai.expect(order.offer.isActive).to.be.true;
+      res.body.orders.forEach((mockOrder) => {
+        chai.expect(mockOrder.offer.isActive).to.be.true;
       });
     });
 
@@ -684,8 +684,8 @@ describe('Orders route', async function () {
         .query({ isActiveOffers: false });
       chai.expect(res).to.have.status(200);
 
-      res.body.orders.forEach((order) => {
-        chai.expect(order.offer.isActive).to.be.false;
+      res.body.orders.forEach((mockOrder) => {
+        chai.expect(mockOrder.offer.isActive).to.be.false;
       });
     });
 
@@ -696,8 +696,8 @@ describe('Orders route', async function () {
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(res).to.have.status(200);
 
-      res.body.orders.forEach((order) => {
-        chai.expect(order.offer.userId).to.equal(process.env.USER_ID_TEST);
+      res.body.orders.forEach((mockOrder) => {
+        chai.expect(mockOrder.offer.userId).to.equal(process.env.USER_ID_TEST);
       });
     });
 
@@ -772,30 +772,30 @@ describe('Orders route', async function () {
     });
   });
 
-  describe('DELETE order by orderId', async function () {
+  describe('DELETE mockOrder by orderId', async function () {
     it('Should return 403 if no token is provided', async function () {
       const res = await chai
         .request(app)
         .delete(pathOrders_Delete_OrderId + 'myOrderId');
       chai.expect(res).to.have.status(403);
     });
-    it('Should delete one order', async function () {
+    it('Should delete one mockOrder', async function () {
       await createBaseOrderOrOffer({
         path: pathOrders_Post,
-        body: order,
+        body: mockOrder,
       });
       const deleteResponse = await chai
         .request(app)
-        .delete(pathOrders_Delete_OrderId + order.orderId)
+        .delete(pathOrders_Delete_OrderId + mockOrder.orderId)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
       chai.expect(deleteResponse.body.acknowledged).to.be.true;
       chai.expect(deleteResponse.body.deletedCount).to.equal(1);
     });
-    it('Should delete the appropriate order', async function () {
+    it('Should delete the appropriate mockOrder', async function () {
       const createResponse = await createBaseOrderOrOffer({
         path: pathOrders_Post,
-        body: order,
+        body: mockOrder,
       });
       chai.expect(
         await collectionOrders.findOne({
@@ -804,7 +804,7 @@ describe('Orders route', async function () {
       ).to.not.be.empty;
       const deleteResponse = await chai
         .request(app)
-        .delete(pathOrders_Delete_OrderId + order.orderId)
+        .delete(pathOrders_Delete_OrderId + mockOrder.orderId)
         .set('Authorization', `Bearer ${mockedToken}`);
       chai.expect(deleteResponse).to.have.status(200);
       chai.expect(
@@ -813,7 +813,7 @@ describe('Orders route', async function () {
         })
       ).to.be.null;
     });
-    it('Should return 404 with message if no order found', async function () {
+    it('Should return 404 with message if no mockOrder found', async function () {
       const res = await chai
         .request(app)
         .delete(pathOrders_Delete_OrderId + 'myOrderId')
@@ -822,29 +822,29 @@ describe('Orders route', async function () {
       chai.expect(res.body).to.deep.equal({ msg: 'No order found' });
     });
   });
-  describe('PUT order as complete', async function () {
+  describe('PUT mockOrder as complete', async function () {
     beforeEach(async function () {
       await collectionOrders.insertMany([
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
           userId: process.env.USER_ID_TEST,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.SUCCESS,
           userId: 'anotherUserId',
           shouldNotBeModified: true,
         },
         {
-          ...order,
+          ...mockOrder,
           orderId: 'anotherOrderId',
           status: ORDER_STATUS.SUCCESS,
           userId: process.env.USER_ID_TEST,
           shouldNotBeModified: true,
         },
         {
-          ...order,
+          ...mockOrder,
           status: ORDER_STATUS.FAILURE,
           userId: process.env.USER_ID_TEST,
           shouldNotBeModified: true,
@@ -860,9 +860,9 @@ describe('Orders route', async function () {
       chai.expect(res).to.have.status(403);
     });
 
-    it('Should modify one order if the order was previously not completed', async function () {
+    it('Should modify one mockOrder if the mockOrder was previously not completed', async function () {
       const orderBeforeModified = await collectionOrders.findOne({
-        orderId: order.orderId,
+        orderId: mockOrder.orderId,
         userId: process.env.USER_ID_TEST,
         status: ORDER_STATUS.SUCCESS,
       });
@@ -872,7 +872,7 @@ describe('Orders route', async function () {
         .put(pathOrders_Put_Complete)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send({
-          orderId: order.orderId,
+          orderId: mockOrder.orderId,
           completionHash: 'myCompletionHash',
         });
       chai.expect(res).to.have.status(200);
@@ -894,7 +894,7 @@ describe('Orders route', async function () {
         .to.equal('myCompletionHash');
     });
 
-    it('Should fail if no order exists', async function () {
+    it('Should fail if no mockOrder exists', async function () {
       const res = await chai
         .request(app)
         .put(pathOrders_Put_Complete)

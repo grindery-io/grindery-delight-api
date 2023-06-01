@@ -98,7 +98,7 @@ export const pathBlockchain_Put_OffersActivationUser =
 export const pathBlockchain_Put_OffersActivationAll =
   '/unit-test/offers-onchain/update-offer-activation-all';
 
-export const order = {
+export const mockOrder = {
   amountTokenDeposit: '0.34',
   addressTokenDeposit: '0x0',
   chainIdTokenDeposit: '13434',
