@@ -34,7 +34,7 @@ router.put(
     });
 
     if (!offer) {
-      res.status(404).send({
+      return res.status(404).send({
         msg: 'Not offer found.',
       });
     }
@@ -75,7 +75,7 @@ router.put(
     });
 
     if (!offer) {
-      res.status(404).send({
+      return res.status(404).send({
         msg: 'No offer found',
       });
     }
@@ -117,7 +117,7 @@ router.put(
     });
 
     if (!order) {
-      res.status(404).send({
+      return res.status(404).send({
         msg: 'No order found',
       });
     }
@@ -158,7 +158,7 @@ router.put(
     });
 
     if (!order) {
-      res.status(404).send({
+      return res.status(404).send({
         msg: 'No order found',
       });
     }
@@ -177,7 +177,7 @@ router.put(
     });
 
     if (!offer) {
-      res.status(404).send({
+      return res.status(404).send({
         msg: 'No offer found',
       });
     }

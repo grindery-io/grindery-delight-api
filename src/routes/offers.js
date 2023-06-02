@@ -39,7 +39,7 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
     })) &&
     req.body.offerId !== ''
   ) {
-    res.status(404).send({
+    return res.status(404).send({
       msg: 'This offer already exists.',
     });
   }
@@ -253,6 +253,7 @@ router.delete(
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
     const offer = await collection.findOne({
       offerId: req.params.offerId,
       userId: { $regex: res.locals.userId, $options: 'i' },
@@ -287,7 +288,7 @@ router.put(
     });
 
     if (!offer) {
-      res.status(404).send({
+      return res.status(404).send({
         msg: 'No offer found',
       });
     }
