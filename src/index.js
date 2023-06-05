@@ -79,7 +79,7 @@ app.use(function (req, res, next) {
     'HEAD,OPTIONS,GET,POST,PUT,PATCH,DELETE'
   );
 
-  if (req.method === 'OPTIONS') {
+  if (req.method == 'OPTIONS') {
     // Return OK response for CORS preflight
     res.json({ message: 'Ok' });
   } else {
