@@ -11,41 +11,42 @@ import {
   getWalletByIdValidator,
 } from '../validators/liquidity-wallets.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
+import { eventEmitter, eventHandlers } from '../utils/event-handlers-utils.js';
 
 const router = express.Router();
 
 /* This is a route that is used to create a wallet. */
-router.post(
-  '/',
-  createLiquidityWalletValidator,
-  isRequired,
-  async (req, res) => {
-    const validator = validateResult(req, res);
-    const db = await Database.getInstance(req);
-    const collection = db.collection('liquidity-wallets');
+router.post('/', createLiquidityWalletValidator, async (req, res) => {
+  const validator = validateResult(req, res);
+  const db = await Database.getInstance(req);
+  const collection = db.collection('liquidity-wallets');
 
-    if (validator.length) {
-      return res.status(400).send(validator);
-    }
-    if (
-      !(await collection.findOne({
-        walletAddress: req.body.walletAddress,
-        chainId: req.body.chainId,
-      }))
-    ) {
-      const newDocument = req.body;
-      newDocument.userId = res.locals.userId;
-      newDocument.date = new Date();
-      newDocument.tokens = new Map();
-      newDocument.reputation = '10';
-      res.status(201).send(await collection.insertOne(newDocument));
-    } else {
-      res.status(404).send({
-        msg: 'This wallet already exists on this chain.',
-      });
-    }
+  if (validator.length) {
+    return res.status(400).send(validator);
   }
-);
+  if (
+    !(await collection.findOne({
+      walletAddress: req.body.walletAddress,
+      chainId: req.body.chainId,
+    }))
+  ) {
+    const newDocument = req.body;
+    newDocument.userId = res.locals.userId;
+    newDocument.date = new Date();
+    newDocument.tokens = new Map();
+    newDocument.reputation = '10';
+    const liquidityWallet = await collection.insertOne(newDocument);
+    eventEmitter.emit(
+      eventHandlers.LIQUIDITY_WALLET_CREATED,
+      liquidityWallet.insertedId
+    );
+    res.status(201).send(liquidityWallet);
+  } else {
+    res.status(404).send({
+      msg: 'This wallet already exists on this chain.',
+    });
+  }
+});
 
 /* Updating the wallet. */
 router.put(
