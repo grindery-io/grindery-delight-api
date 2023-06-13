@@ -1,6 +1,6 @@
 import express from 'express';
 import { Database } from '../db/conn.js';
-import isRequired from '../utils/auth-utils.js';
+import { isRequired } from '../utils/auth-utils.js';
 import {
   createOrderValidator,
   getOrderByIdValidator,

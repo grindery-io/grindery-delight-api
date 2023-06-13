@@ -28,7 +28,7 @@ export const checkToken = async (token, workspaceKey) => {
   }
 };
 
-const isRequired = async (req, res, next) => {
+export const isRequired = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(403).json({ message: 'No credentials sent' });
@@ -71,4 +71,8 @@ export const authenticateApiKey = (req, res, next) => {
   next();
 };
 
-export default isRequired;
+export const isAdmin = async (db, userId) => {
+  return await db.collection('admins').findOne({
+    userId: { $regex: userId, $options: 'i' },
+  });
+};

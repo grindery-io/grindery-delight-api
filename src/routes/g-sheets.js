@@ -1,5 +1,5 @@
 import express from 'express';
-import isRequired from '../utils/auth-utils.js';
+import { isRequired } from '../utils/auth-utils.js';
 import { createUserInfoValidator } from '../validators/g-sheets.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import { google } from 'googleapis';

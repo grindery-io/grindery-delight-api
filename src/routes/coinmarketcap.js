@@ -1,5 +1,5 @@
 import express from 'express';
-import isRequired from '../utils/auth-utils.js';
+import { isRequired } from '../utils/auth-utils.js';
 import { coinMarketCapGetQuoteValidator } from '../validators/coinmarketcap.validator.js';
 import { validateResult } from '../utils/validators-utils.js';
 import axios from 'axios';

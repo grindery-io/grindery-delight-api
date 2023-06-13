@@ -1,6 +1,6 @@
 import express from 'express';
 import { Database } from '../db/conn.js';
-import isRequired from '../utils/auth-utils.js';
+import { isAdmin, isRequired } from '../utils/auth-utils.js';
 import { ObjectId } from 'mongodb';
 import {
   createBlockchainValidator,
@@ -22,23 +22,18 @@ returns a 201 status code. */
 router.post('/', createBlockchainValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   const db = await Database.getInstance(req);
-  const collectionAdmin = db.collection('admins');
   const collection = db.collection('blockchains');
-  if (
-    validator.length ||
-    !(await collectionAdmin.findOne({
-      userId: { $regex: res.locals.userId, $options: 'i' },
-    }))
-  ) {
+  if (validator.length || !isAdmin(db, res.locals.userId)) {
     return res.status(400).send(validator);
   }
-  if (!(await collection.findOne({ caipId: req.body.caipId }))) {
-    res.send(await collection.insertOne(req.body)).status(201);
-  } else {
+
+  if (await collection.findOne({ caipId: req.body.caipId })) {
     res.status(404).send({
       msg: 'This blockchain already exists.',
     });
   }
+
+  res.send(await collection.insertOne(req.body)).status(201);
 });
 
 /* This is a get request to the blockchain route. It is using the getBlockchainByIdValidator to
@@ -100,13 +95,9 @@ router.put(
   async (req, res) => {
     const validator = validateResult(req, res);
     const db = await Database.getInstance(req);
-    const collectionAdmin = db.collection('admins');
     const collection = db.collection('blockchains');
 
-    const user = await collectionAdmin.findOne({
-      userId: { $regex: res.locals.userId, $options: 'i' },
-    });
-    if (validator.length || !user) {
+    if (validator.length || !isAdmin(db, res.locals.userId)) {
       return res.status(400).send(validator);
     }
 
@@ -153,27 +144,22 @@ router.delete(
   async (req, res) => {
     const validator = validateResult(req, res);
     const db = await Database.getInstance(req);
-    const collectionAdmin = db.collection('admins');
     const collection = db.collection('blockchains');
 
-    if (
-      validator.length ||
-      !(await collectionAdmin.findOne({
-        userId: { $regex: res.locals.userId, $options: 'i' },
-      }))
-    ) {
+    if (validator.length || !isAdmin(db, res.locals.userId)) {
       return res.status(400).send(validator);
     }
     const blockchain = await collection.findOne({
       _id: new ObjectId(req.params.blockchainId),
     });
-    if (blockchain) {
-      res.status(200).send(await collection.deleteOne(blockchain));
-    } else {
+
+    if (!blockchain) {
       res.status(404).send({
         msg: 'No blockchain found',
       });
     }
+
+    res.status(200).send(await collection.deleteOne(blockchain));
   }
 );
 
@@ -189,15 +175,9 @@ router.put(
   async (req, res) => {
     const validator = validateResult(req, res);
     const db = await Database.getInstance(req);
-    const collectionAdmin = db.collection('admins');
     const collection = db.collection('blockchains');
 
-    if (
-      validator.length ||
-      !(await collectionAdmin.findOne({
-        userId: { $regex: res.locals.userId, $options: 'i' },
-      }))
-    ) {
+    if (validator.length || !isAdmin(db, res.locals.userId)) {
       return res.status(400).send(validator);
     }
 
@@ -231,15 +211,9 @@ router.delete(
   async (req, res) => {
     const validator = validateResult(req, res);
     const db = await Database.getInstance(req);
-    const collectionAdmin = db.collection('admins');
     const collection = db.collection('blockchains');
 
-    if (
-      validator.length ||
-      !(await collectionAdmin.findOne({
-        userId: { $regex: res.locals.userId, $options: 'i' },
-      }))
-    ) {
+    if (validator.length || !isAdmin(db, res.locals.userId)) {
       return res.status(400).send(validator);
     }
 

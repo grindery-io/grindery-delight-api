@@ -1,5 +1,5 @@
 import express from 'express';
-import isRequired, { authenticateApiKey } from '../utils/auth-utils.js';
+import { isRequired, authenticateApiKey } from '../utils/auth-utils.js';
 import { Database } from '../db/conn.js';
 import {
   updateCompletionOrder,

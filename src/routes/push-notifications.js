@@ -1,5 +1,5 @@
 import express from 'express';
-import isRequired from '../utils/auth-utils.js';
+import { isRequired } from '../utils/auth-utils.js';
 import { Database } from '../db/conn.js';
 import { validateResult } from '../utils/validators-utils.js';
 import {
