@@ -35,11 +35,8 @@ router.post('/', createLiquidityWalletValidator, async (req, res) => {
     newDocument.date = new Date();
     newDocument.tokens = new Map();
     newDocument.reputation = '10';
-    const liquidityWallet = await collection.insertOne(newDocument);
-    eventEmitter.emit(
-      eventHandlers.LIQUIDITY_WALLET_CREATED,
-      liquidityWallet.insertedId
-    );
+    // const liquidityWallet = await collection.insertOne(newDocument);
+    eventEmitter.emit(eventHandlers.LIQUIDITY_WALLET_CREATED, 11);
     res.status(201).send(liquidityWallet);
   } else {
     res.status(404).send({
