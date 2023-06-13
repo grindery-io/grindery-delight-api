@@ -90,12 +90,10 @@ export function getPipelineLiquidityWalletInOffer(query) {
  * offer in the input array, using the `collectionLiquidityWallet` collection from the database.
  */
 export async function getOffersWithLiquidityWallets(db, offers) {
-  const collectionLiquidityWallet = db.collection('liquidity-wallets');
-
   return await Promise.all(
     offers.map(async (offer) => {
       return await getOneOfferWithLiquidityWallet(
-        collectionLiquidityWallet,
+        db.collection('liquidity-wallets'),
         offer
       );
     })

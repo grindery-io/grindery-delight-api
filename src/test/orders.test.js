@@ -32,7 +32,7 @@ async function createBaseOrderOrOffer({ path, body }) {
     .post(path)
     .set('Authorization', `Bearer ${mockedToken}`)
     .send(body);
-  chai.expect(res).to.have.status(200);
+  chai.expect(res).to.have.status(201);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
   chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
   return res;

@@ -254,13 +254,14 @@ router.delete(
       offerId: req.params.offerId,
       userId: { $regex: res.locals.userId, $options: 'i' },
     });
-    if (offer) {
-      res.status(200).send(await collection.deleteOne(offer));
-    } else {
+
+    if (!offer) {
       res.status(404).send({
         msg: 'No offer found',
       });
     }
+
+    res.status(200).send(await collection.deleteOne(offer));
   }
 );
 

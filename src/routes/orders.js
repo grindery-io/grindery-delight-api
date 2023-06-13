@@ -31,22 +31,25 @@ router.post('/', createOrderValidator, isRequired, async (req, res) => {
   const collection = db.collection('orders');
 
   if (
+    req.body.orderId &&
     (await collection.findOne({
       orderId: req.body.orderId,
-    })) &&
-    req.body.orderId !== ''
+    }))
   ) {
     return res.status(404).send({
       msg: 'This order already exists.',
     });
   }
 
-  const newDocument = req.body;
-  newDocument.date = new Date();
-  newDocument.userId = res.locals.userId;
-  newDocument.isComplete = false;
-  newDocument.status = ORDER_STATUS.PENDING;
-  res.send(await collection.insertOne(newDocument)).status(201);
+  res.status(201).send(
+    await collection.insertOne({
+      ...req.body,
+      userId: res.locals.userId,
+      date: new Date(),
+      isComplete: false,
+      status: ORDER_STATUS.PENDING,
+    })
+  );
 });
 
 router.get(
@@ -208,17 +211,19 @@ router.delete(
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
     const order = await collection.findOne({
       orderId: req.params.orderId,
       userId: { $regex: res.locals.userId, $options: 'i' },
     });
-    if (order) {
-      res.status(200).send(await collection.deleteOne(order));
-    } else {
+
+    if (!order) {
       res.status(404).send({
         msg: 'No order found',
       });
     }
+
+    res.status(200).send(await collection.deleteOne(order));
   }
 );
 
