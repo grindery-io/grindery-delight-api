@@ -33,31 +33,27 @@ router.post('/', createOfferValidator, isRequired, async (req, res) => {
   const collection = db.collection('offers');
 
   if (
+    req.body.offerId &&
     (await collection.findOne({
       offerId: req.body.offerId,
       userId: { $regex: res.locals.userId, $options: 'i' },
-    })) &&
-    req.body.offerId !== ''
+    }))
   ) {
     return res.status(404).send({
       msg: 'This offer already exists.',
     });
   }
 
-  const newDocument = req.body;
-  newDocument.date = new Date();
-  newDocument.userId = res.locals.userId;
-  newDocument.status = OFFER_STATUS.PENDING;
-  newDocument.isActive = true;
-  res.send(await collection.insertOne(newDocument)).status(201);
+  res.status(201).send(
+    await collection.insertOne({
+      ...req.body,
+      userId: res.locals.userId,
+      date: new Date(),
+      status: OFFER_STATUS.PENDING,
+      isActive: true,
+    })
+  );
 });
-
-// const query = {
-//   isActive: true,
-//   amount: { $exists: true, $ne: '' },
-//   status: OFFER_STATUS.SUCCESS,
-//   offerId: { $exists: true, $ne: '' },
-// };
 
 /* This is a GET request that returns all offers. */
 router.get('/', getOffersPaginationValidator, async (req, res) => {

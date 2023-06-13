@@ -36,7 +36,7 @@ async function createBaseOffer(mockOffer) {
     .post(pathOffers_Post)
     .set('Authorization', `Bearer ${mockedToken}`)
     .send(mockOffer);
-  chai.expect(res).to.have.status(200);
+  chai.expect(res).to.have.status(201);
   chai.expect(res.body).to.have.property('acknowledged').that.is.true;
   chai.expect(res.body).to.have.property('insertedId').that.is.not.empty;
   return res;
@@ -1157,7 +1157,7 @@ describe('Offers route', async function () {
         .post(pathOffers_Post)
         .set('Authorization', `Bearer ${mockedToken}`)
         .send(mockOffer);
-      chai.expect(createResponse).to.have.status(200);
+      chai.expect(createResponse).to.have.status(201);
 
       chai.expect(
         await collectionOffers.findOne({
