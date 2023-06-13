@@ -23,8 +23,14 @@ router.post('/', createBlockchainValidator, isRequired, async (req, res) => {
   const validator = validateResult(req, res);
   const db = await Database.getInstance(req);
   const collection = db.collection('blockchains');
-  if (validator.length || !isAdmin(db, res.locals.userId)) {
+  if (validator.length) {
     return res.status(400).send(validator);
+  }
+
+  if (!isAdmin(db, res.locals.userId)) {
+    res.status(404).send({
+      msg: 'User is not admin',
+    });
   }
 
   if (await collection.findOne({ caipId: req.body.caipId })) {
@@ -74,6 +80,7 @@ router.get(
     if (validator.length) {
       return res.status(400).send(validator);
     }
+
     res.status(200).send(
       await collection.findOne({
         _id: new ObjectId(req.params.blockchainId),
@@ -97,13 +104,20 @@ router.put(
     const db = await Database.getInstance(req);
     const collection = db.collection('blockchains');
 
-    if (validator.length || !isAdmin(db, res.locals.userId)) {
+    if (validator.length) {
       return res.status(400).send(validator);
+    }
+
+    if (!isAdmin(db, res.locals.userId)) {
+      res.status(404).send({
+        msg: 'User is not admin',
+      });
     }
 
     const blockchain = await collection.findOne({
       _id: new ObjectId(req.params.blockchainId),
     });
+
     if (!blockchain) {
       return res.status(404).send({ msg: 'No blockchain found' });
     }
@@ -146,9 +160,16 @@ router.delete(
     const db = await Database.getInstance(req);
     const collection = db.collection('blockchains');
 
-    if (validator.length || !isAdmin(db, res.locals.userId)) {
+    if (validator.length) {
       return res.status(400).send(validator);
     }
+
+    if (!isAdmin(db, res.locals.userId)) {
+      res.status(404).send({
+        msg: 'User is not admin',
+      });
+    }
+
     const blockchain = await collection.findOne({
       _id: new ObjectId(req.params.blockchainId),
     });
@@ -177,8 +198,14 @@ router.put(
     const db = await Database.getInstance(req);
     const collection = db.collection('blockchains');
 
-    if (validator.length || !isAdmin(db, res.locals.userId)) {
+    if (validator.length) {
       return res.status(400).send(validator);
+    }
+
+    if (!isAdmin(db, res.locals.userId)) {
+      res.status(404).send({
+        msg: 'User is not admin',
+      });
     }
 
     const blockchain = await collection.findOne({
@@ -213,8 +240,14 @@ router.delete(
     const db = await Database.getInstance(req);
     const collection = db.collection('blockchains');
 
-    if (validator.length || !isAdmin(db, res.locals.userId)) {
+    if (validator.length) {
       return res.status(400).send(validator);
+    }
+
+    if (!isAdmin(db, res.locals.userId)) {
+      res.status(404).send({
+        msg: 'User is not admin',
+      });
     }
 
     const blockchain = await collection.findOne({
