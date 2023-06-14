@@ -15,7 +15,6 @@ import { validateResult } from '../utils/validators-utils.js';
 import { ObjectId } from 'mongodb';
 import {
   OFFER_STATUS,
-  getOffersWithLiquidityWallets,
   getPipelineLiquidityWalletInOffer,
   getPipelineLiquidityWalletInOffers,
 } from '../utils/offers-utils.js';
@@ -138,37 +137,53 @@ router.get('/search', getOffersValidator, async (req, res) => {
 
   const db = await Database.getInstance(req);
 
-  const offersWithFilters = (
-    await db
-      .collection('offers')
-      .find({
-        isActive: true,
-        exchangeChainId: req.query.exchangeChainId,
-        exchangeToken: req.query.exchangeToken,
-        chainId: req.query.chainId,
-        token: req.query.token,
-        status: OFFER_STATUS.SUCCESS,
-        offerId: { $exists: true, $ne: '' },
-      })
-      .sort({ date: -1 })
-      .toArray()
-  ).filter((offer) => {
-    const rateAmount = req.query.depositAmount / offer.exchangeRate;
-    return offer.min <= rateAmount && offer.max >= rateAmount;
-  });
+  const query = {
+    isActive: true,
+    exchangeChainId: req.query.exchangeChainId,
+    exchangeToken: req.query.exchangeToken,
+    chainId: req.query.chainId,
+    token: req.query.token,
+    status: OFFER_STATUS.SUCCESS,
+    offerId: { $exists: true, $ne: '' },
+    $expr: {
+      $and: [
+        {
+          $lte: [
+            { $convert: { input: '$min', to: 'decimal' } },
+            {
+              $divide: [
+                parseFloat(req.query.depositAmount),
+                { $convert: { input: '$exchangeRate', to: 'decimal' } },
+              ],
+            },
+          ],
+        },
+        {
+          $gte: [
+            { $convert: { input: '$max', to: 'decimal' } },
+            {
+              $divide: [
+                parseFloat(req.query.depositAmount),
+                { $convert: { input: '$exchangeRate', to: 'decimal' } },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  };
 
-  const skip = +req.query.offset || 0;
-  const limit = +req.query.limit || offersWithFilters.length;
-
-  res
-    .send({
-      offers: await getOffersWithLiquidityWallets(
-        db,
-        offersWithFilters.slice(skip, skip + limit)
-      ),
-      totalCount: offersWithFilters.length,
-    })
-    .status(200);
+  try {
+    res.status(200).send({
+      offers: await db
+        .collection('offers')
+        .aggregate(getPipelineLiquidityWalletInOffers(req, query))
+        .toArray(),
+      totalCount: await db.collection('offers').countDocuments(query),
+    });
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 /* This is a GET request that returns all offers for a specific user. */

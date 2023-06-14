@@ -78,54 +78,6 @@ export function getPipelineLiquidityWalletInOffer(query) {
   ];
 }
 
-/**
- * This function retrieves offers with their corresponding liquidity wallets from a database.
- * @param db - The `db` parameter is likely a database object or connection that is used to interact
- * with a database. It is used in this function to retrieve a collection of liquidity wallets from the
- * database.
- * @param offers - An array of offer objects.
- * @returns The function `getOffersWithLiquidityWallets` returns a Promise that resolves to an array of
- * offers, where each offer has additional information about its associated liquidity wallet. The
- * additional information is obtained by calling the `getOneOfferWithLiquidityWallet` function for each
- * offer in the input array, using the `collectionLiquidityWallet` collection from the database.
- */
-export async function getOffersWithLiquidityWallets(db, offers) {
-  return await Promise.all(
-    offers.map(async (offer) => {
-      return await getOneOfferWithLiquidityWallet(
-        db.collection('liquidity-wallets'),
-        offer
-      );
-    })
-  );
-}
-
-/**
- * This function returns an offer object with its corresponding liquidity wallet object from a
- * collection, based on the offer's chain ID and provider wallet address.
- * @param collectionLiquidityWallet - It is a collection or database table that contains liquidity
- * wallet information for different chains and wallet addresses.
- * @param offer - The `offer` parameter is an object that represents an offer made by a provider on a
- * specific blockchain network. It likely contains properties such as `chainId`, `provider`, and other
- * relevant information about the offer.
- * @returns This function returns an object that contains the offer and its associated liquidity
- * wallet. If the offer is null, then the function returns null.
- */
-export async function getOneOfferWithLiquidityWallet(
-  collectionLiquidityWallet,
-  offer
-) {
-  return offer
-    ? {
-        ...offer,
-        liquidityWallet: await collectionLiquidityWallet.findOne({
-          chainId: offer.chainId,
-          walletAddress: offer.provider,
-        }),
-      }
-    : null;
-}
-
 export const OFFER_STATUS = {
   PENDING: 'pending',
   SUCCESS: 'success', // the offer has been created
