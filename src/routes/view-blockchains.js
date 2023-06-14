@@ -33,6 +33,7 @@ router.get(
 
     const provider = getProviderFromRpc(chain.rpc[0]);
     res
+      .status(200)
       .send(
         req.query.tokenAddress === '0x0'
           ? (await provider.getBalance(req.query.address)).toString()
@@ -43,8 +44,7 @@ router.get(
                 provider
               ).balanceOf(req.query.address)
             ).toString()
-      )
-      .status(200);
+      );
   }
 );
 
@@ -65,14 +65,14 @@ router.get(
     });
 
     res
+      .status(200)
       .send(
         await new ethers.Contract(
           process.env.EVM_HUB_ADDRESS,
           GrinderyNexusHub,
           getProviderFromRpc(chain.rpc[0])
         ).getUserDroneAddress(res.locals.userId.split(':').pop())
-      )
-      .status(200);
+      );
   }
 );
 
