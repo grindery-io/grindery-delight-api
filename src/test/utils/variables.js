@@ -145,7 +145,7 @@ export const mockModifiedOffer = {
   amount: '50',
 };
 
-export const modifyOfferValidator = {
+export const mockModifyOfferValidator = {
   chainId: '97',
   min: '0.02',
   max: '1',
@@ -162,7 +162,7 @@ export const modifyOfferValidator = {
   offerId: 'myNewOfferId',
 };
 
-export const searchActiveOfferValidator = {
+export const mockSearchActiveOfferValidator = {
   exchangeChainId: 'myExchangeChainId',
   exchangeToken: 'myExchangeToken',
   chainId: 'myChainId',

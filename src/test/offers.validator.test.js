@@ -11,8 +11,8 @@ import {
 import {
   pathOffers_Post,
   mockOffer,
-  searchActiveOfferValidator,
-  modifyOfferValidator,
+  mockSearchActiveOfferValidator,
+  mockModifyOfferValidator,
   pathOffers_Get_Search,
   pathOffers_Get_OfferId,
   pathOffers_Get_MongoDBId,
@@ -98,12 +98,12 @@ describe('Offers route - Validators', async function () {
   });
 
   describe('GET all active offers with filters', async function () {
-    for (const testCase of Object.keys(searchActiveOfferValidator)) {
+    for (const testCase of Object.keys(mockSearchActiveOfferValidator)) {
       testNonString({
         method: 'get',
         path: pathOffers_Get_Search,
         body: {},
-        query: { ...searchActiveOfferValidator, [testCase]: [123, 123] },
+        query: { ...mockSearchActiveOfferValidator, [testCase]: [123, 123] },
         field: testCase,
       });
 
@@ -111,7 +111,7 @@ describe('Offers route - Validators', async function () {
         method: 'get',
         path: pathOffers_Get_Search,
         body: {},
-        query: { ...searchActiveOfferValidator, [testCase]: '' },
+        query: { ...mockSearchActiveOfferValidator, [testCase]: '' },
         field: testCase,
       });
     }
@@ -146,7 +146,7 @@ describe('Offers route - Validators', async function () {
   });
 
   describe('PUT mockOffer by offerId', async function () {
-    for (const testCase of Object.keys(modifyOfferValidator)) {
+    for (const testCase of Object.keys(mockModifyOfferValidator)) {
       testNonString({
         method: 'put',
         path: pathOffers_Put + 'myOfferId',
