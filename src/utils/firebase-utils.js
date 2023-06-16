@@ -57,16 +57,24 @@ const firebaseCredentials = {
 const firebase = new fcm(admin.credential.cert(firebaseCredentials));
 
 const messageBuilder = (method, params) => {
-  const id = params.id.slice(0, 6) + '...' + params.id.slice(-4);
-  let status = 'placed';
-  if (method === 'success') {
-    status = 'created';
+  let status;
+
+  switch (method) {
+    case 'success':
+      status = 'created';
+      break;
+    case 'activationDeactivation':
+      status = 'activated/deactivated';
+      break;
+    case 'complete':
+      status = 'completed';
+      break;
+    default:
+      status = 'placed';
+      break;
   }
-  if (method === 'activationDeactivation') {
-    status = 'activated/deactivated';
-  }
-  if (method === 'complete') {
-    status = 'completed';
-  }
-  return `Your ${params.type} ${id} has been ${status}. Click to view in the Mercari dApp.`;
+
+  return `Your ${params.type} ${
+    params.id.slice(0, 6) + '...' + params.id.slice(-4)
+  } has been ${status}. Click to view in the Mercari dApp.`;
 };
