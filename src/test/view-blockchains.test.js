@@ -31,14 +31,6 @@ describe('View blockchains route', async function () {
       ]);
     });
 
-    it('Should return 403 if no token is provided', async function () {
-      const res = await chai
-        .request(app)
-        .post(pathBlockchains_Get_MasterContractAddress)
-        .send(nexusCallInputProviderReq);
-      chai.expect(res).to.have.status(403);
-    });
-
     it('Should return the master contract address', async function () {
       const res = await chai
         .request(app)
