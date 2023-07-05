@@ -17,6 +17,10 @@ export const notAMongoDBId = 'notAMongoDBId';
 // Admins paths
 export const pathAdmin_Get_IsAdmin = '/unit-test/admins';
 
+// View Blockchains paths
+export const pathBlockchains_Get_MasterContractAddress =
+  '/unit-test/view-blockchains/master-contract-address';
+
 // Blockchains paths
 export const pathBlockchains_Post_NewBlockchain = '/unit-test/blockchains';
 export const pathBlockchains_Get_MongoDBId = '/unit-test/blockchains/';
