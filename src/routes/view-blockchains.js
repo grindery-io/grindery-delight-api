@@ -76,7 +76,7 @@ router.get(
   }
 );
 
-router.post('/master-contract-address', isRequired, async (req, res) => {
+router.post('/master-contract-address', async (req, res) => {
   const db = await Database.getInstance(req);
   const collection = db.collection('blockchains');
 
