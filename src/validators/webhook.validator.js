@@ -179,37 +179,7 @@ export const updateOrderValidator = [
 ];
 
 export const updateOfferOrderPaidValidator = [
-  body('_grinderyChainId')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
   body('_grinderyTransactionHash')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('_offerId')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('_tradeId')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('_token')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('_to')
-    .isString()
-    .withMessage('must be string value')
-    .notEmpty()
-    .withMessage('must not be empty'),
-  body('_amount')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -220,20 +190,7 @@ export const updateOfferOrderPaidValidator = [
     .notEmpty()
     .withMessage('must not be empty'),
   body().custom((value, { req }) => {
-    validateFields(
-      req.body,
-      [
-        '_grinderyChainId',
-        '_grinderyTransactionHash',
-        '_offerId',
-        '_tradeId',
-        '_token',
-        '_to',
-        '_amount',
-        'apiKey',
-      ],
-      'body'
-    );
+    validateFields(req.body, ['_grinderyTransactionHash', 'apiKey'], 'body');
     return true;
   }),
   query().custom((value, { req }) => {
