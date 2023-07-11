@@ -184,13 +184,18 @@ export const updateOfferOrderPaidValidator = [
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
+  body('_tradeId')
+    .isString()
+    .withMessage('must be string value')
+    .notEmpty()
+    .withMessage('must not be empty'),
   body('apiKey')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
     .withMessage('must not be empty'),
   body().custom((value, { req }) => {
-    validateFields(req.body, ['_completionHash', 'apiKey'], 'body');
+    validateFields(req.body, ['_completionHash', 'apiKey', '_tradeId'], 'body');
     return true;
   }),
   query().custom((value, { req }) => {
