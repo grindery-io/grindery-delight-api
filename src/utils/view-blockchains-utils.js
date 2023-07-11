@@ -46,10 +46,12 @@ export async function updateCompletionOrder(db, order) {
     .findOne({ offerId: order.offerId });
   const chain = await db.collection('blockchains').findOne({ chainId });
 
-  order.isComplete = await utils_orders.isPaidOrderFromHash(
+  const is_paid_order_from_hash = await utils_orders.isPaidOrderFromHash(
     chain.rpc,
     order.completionHash
   );
+
+  order.isComplete = is_paid_order_from_hash || order.isComplete;
   order.status = order.isComplete
     ? ORDER_STATUS.COMPLETE
     : ORDER_STATUS.COMPLETION_FAILURE;
