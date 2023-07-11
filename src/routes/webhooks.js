@@ -154,7 +154,7 @@ router.put(
     const collection = db.collection('orders');
 
     const order = await collection.findOne({
-      completionHash: req.body._completionHash,
+      orderId: req.body._tradeId,
     });
 
     if (!order) {
@@ -167,6 +167,7 @@ router.put(
       $set: {
         isComplete: true,
         status: ORDER_STATUS.COMPLETE,
+        completionHash: req.body._completionHash,
       },
     });
 
