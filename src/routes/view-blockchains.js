@@ -80,9 +80,37 @@ router.post('/master-contract-address', async (req, res) => {
   const db = await Database.getInstance(req);
   const collection = db.collection('blockchains');
 
+  if (!req.body.params?.fieldData?._grinderyChain) {
+    res.status(200).send({
+      inputFields: [
+        {
+          key: '_grinderyChain',
+          required: true,
+          type: 'string',
+          label: 'Blockchain',
+        },
+      ],
+    });
+  }
+
   const blockchain = await collection.findOne({
     caipId: req.body.params?.fieldData?._grinderyChain,
   });
+
+  if (!blockchain) {
+    res.status(404).send({
+      msg: 'This blockchain doesnt exist.',
+    });
+  }
+
+  if (
+    !blockchain.usefulAddresses ||
+    !blockchain.usefulAddresses.grtPoolAddress
+  ) {
+    res.status(404).send({
+      msg: 'Master contract address is not found for the required blockchain.',
+    });
+  }
 
   res.status(200).send({
     inputFields: [
@@ -99,9 +127,7 @@ router.post('/master-contract-address', async (req, res) => {
         required: true,
         placeholder: 'Mercari master contract address',
         computed: true,
-        default: blockchain
-          ? blockchain.usefulAddresses.grtPoolAddress
-          : '0x0000000000000000000000000000000000000000',
+        default: blockchain.usefulAddresses.grtPoolAddress,
       },
     ],
   });
