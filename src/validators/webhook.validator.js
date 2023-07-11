@@ -179,7 +179,7 @@ export const updateOrderValidator = [
 ];
 
 export const updateOfferOrderPaidValidator = [
-  body('_grinderyTransactionHash')
+  body('_completionHash')
     .isString()
     .withMessage('must be string value')
     .notEmpty()
@@ -190,7 +190,7 @@ export const updateOfferOrderPaidValidator = [
     .notEmpty()
     .withMessage('must not be empty'),
   body().custom((value, { req }) => {
-    validateFields(req.body, ['_grinderyTransactionHash', 'apiKey'], 'body');
+    validateFields(req.body, ['_completionHash', 'apiKey'], 'body');
     return true;
   }),
   query().custom((value, { req }) => {
