@@ -88,13 +88,7 @@ router.post('/master-contract-address', async (req, res) => {
           required: true,
           type: 'string',
           label: 'Blockchain',
-          choices: [
-            {
-              value: 'eip155:5',
-              label: 'Goerli',
-              sample: 'Goerli',
-            },
-          ],
+          default: 'eip155:8001',
         },
       ],
     });
