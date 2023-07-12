@@ -88,6 +88,7 @@ router.post('/master-contract-address', async (req, res) => {
           required: true,
           type: 'string',
           label: 'Blockchain',
+          default: 'eip155:5',
         },
       ],
     });
