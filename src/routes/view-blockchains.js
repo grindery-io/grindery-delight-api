@@ -120,6 +120,13 @@ router.post('/master-contract-address', async (req, res) => {
         required: true,
         type: 'string',
         label: 'Blockchain',
+        choices: [
+          {
+            value: 'Goerli2',
+            label: 'Goerli2',
+            sample: 'Goerli2',
+          },
+        ],
       },
       {
         key: '_mercariMasterContractAddress',
