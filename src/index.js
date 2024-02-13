@@ -15,7 +15,7 @@ const options = {
   info: {
     version: '1.0.1',
     title: 'Grindery Delight API',
-    description: 'API for Grindery Delight App: https://delight.grindery.io',
+    description: 'API for Grindery Delight App: https://delight.grindery.com',
     license: {
       name: 'MIT',
     },
@@ -29,7 +29,7 @@ const options = {
   },
   servers: [
     {
-      url: 'https://delight-api.grindery.org',
+      url: 'https://delight-api.grindery.com',
       description: 'Production server',
     },
   ],

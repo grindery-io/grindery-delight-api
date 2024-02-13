@@ -18,7 +18,7 @@ dotenv.config();
 async function getAccessToken() {
   try {
     const res = await axios.post(
-      'https://orchestrator.grindery.org/oauth/token',
+      'https://orchestrator.grindery.com/oauth/token',
       {
         grant_type: 'refresh_token',
         refresh_token: process.env.GRINDERY_NEXUS_REFRESH_TOKEN,
