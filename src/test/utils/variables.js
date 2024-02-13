@@ -176,7 +176,7 @@ export const mockSearchActiveOfferValidator = {
 export const mockBlockchain = {
   caipId: 'eip155:534',
   chainId: '534',
-  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-534.png',
+  icon: 'https://www.grindery.com/hubfs/delight-assets/icons/blockchains/eip155-534.png',
   isActive: true,
   isEvm: true,
   isTestnet: true,
@@ -203,7 +203,7 @@ export const mockUsefulAddress = {
 export const mockToken = {
   coinmarketcapId: '4543',
   symbol: 'mySymbol',
-  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/tokens/bnb.png',
+  icon: 'https://www.grindery.com/hubfs/delight-assets/icons/tokens/bnb.png',
   chainId: '544',
   address: '0x0',
   isNative: false,
@@ -230,7 +230,7 @@ export const mockUpdateTokenLiquidityWallet = {
 export const mockBlockchainGoerli = {
   caipId: 'eip155:5',
   chainId: '5',
-  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-5.png',
+  icon: 'https://www.grindery.com/hubfs/delight-assets/icons/blockchains/eip155-5.png',
   isActive: true,
   isEvm: true,
   isTestnet: true,
@@ -247,7 +247,7 @@ export const mockBlockchainGoerli = {
 export const mockBlockchainBscTestnet = {
   caipId: 'eip155:97',
   chainId: '97',
-  icon: 'https://www.grindery.io/hubfs/delight-assets/icons/blockchains/eip155-97.svg',
+  icon: 'https://www.grindery.com/hubfs/delight-assets/icons/blockchains/eip155-97.svg',
   isActive: true,
   isEvm: true,
   isTestnet: true,

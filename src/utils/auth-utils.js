@@ -4,7 +4,7 @@ import jwt_decode from 'jwt-decode';
 export const checkToken = async (token, workspaceKey) => {
   try {
     await axios.post(
-      'https://orchestrator.grindery.org',
+      'https://orchestrator.grindery.com',
       {
         jsonrpc: '2.0',
         method: 'or_listWorkflows',
